@@ -13,7 +13,7 @@ const Footer = () => {
             store, we offer a wide range of genuine medicines, health
             supplements, and wellness products—all available at your fingertips.
           </p>
-        </div>
+        </div>                
       </div>
 
       {/* Bottom Section */}
