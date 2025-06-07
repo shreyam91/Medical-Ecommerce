@@ -1,10 +1,10 @@
 import React from 'react'
 
-import { NavbarMain } from '../components/Navbar'
+import Breadcrumb from '../components/Breadcrumb'
 const Home = () => {
   return (
     <>
-      <NavbarMain/>
+    <Breadcrumb/>
     </>
   )
 }
