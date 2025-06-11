@@ -12,11 +12,15 @@ import {
 import { useState, useEffect } from "react";
 import { MdAddShoppingCart } from "react-icons/md";
 import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
+import { Link } from "react-router-dom";
 
 export function NavbarMain() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("");
+
+  // Example: Replace this with your actual cart item count
+const cartItemCount = 3;
 
   const navigationLinks = [
     { name: "Home", link: "/" },
@@ -64,6 +68,7 @@ export function NavbarMain() {
               <NavbarLogo />
               <div className="flex-1 flex justify-center">
                 <div className="flex items-center gap-4 w-full max-w-2xl">
+
                   <select
                     className="border rounded px-3 py-2 text-sm dark:bg-neutral-800 dark:text-white"
                     value={selectedLocation}
@@ -73,7 +78,7 @@ export function NavbarMain() {
                       Deliver to
                     </option>
                     {locations.map((loc, idx) => (
-                      <option key={idx} value={`${loc.city},${loc.state}`}>
+                      <option key={idx} value={`${loc.city},${loc.state},${loc.pincode}`}>
                         {loc.city}
                       </option>
                     ))}
@@ -88,12 +93,14 @@ export function NavbarMain() {
               </div>
 
               <div className="flex items-center gap-4">
-                <NavbarButton variant="secondary">
-                  <div className="flex items-center gap-2">
-                    <MdAddShoppingCart />
-                    <span>5</span>
-                  </div>
-                </NavbarButton>
+                <Link to="/cart">
+  <NavbarButton variant="secondary">
+    <div className="flex items-center gap-2">
+      <MdAddShoppingCart />
+      <span>{cartItemCount}</span>
+    </div>
+  </NavbarButton>
+</Link>
                 <NavbarButton variant="secondary">Login</NavbarButton>
               </div>
             </div>

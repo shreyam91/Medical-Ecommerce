@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import GlobalLoader from './components/GlobalLoader';
 import './index.css';
 import { NavbarMain } from './components/Navbar';
+import { CartProvider } from "./context/CartContext";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -33,10 +34,12 @@ function App() {
 
   return (
     <>
+    <CartProvider>
     <NavbarMain/>
       <GlobalLoader />
       <AppRoutes />
       <Footer />
+      </CartProvider>
     </>
   );
 }
