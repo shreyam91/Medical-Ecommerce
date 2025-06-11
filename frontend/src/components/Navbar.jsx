@@ -13,14 +13,16 @@ import { useState, useEffect } from "react";
 import { MdAddShoppingCart } from "react-icons/md";
 import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
 import { Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 export function NavbarMain() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const { cartItems } = useCart();
 
-  // Example: Replace this with your actual cart item count
-const cartItemCount = 3;
+  // Calculate total items in cart
+  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const navigationLinks = [
     { name: "Home", link: "/" },
@@ -94,13 +96,13 @@ const cartItemCount = 3;
 
               <div className="flex items-center gap-4">
                 <Link to="/cart">
-  <NavbarButton variant="secondary">
-    <div className="flex items-center gap-2">
-      <MdAddShoppingCart />
-      <span>{cartItemCount}</span>
-    </div>
-  </NavbarButton>
-</Link>
+                  <NavbarButton variant="secondary">
+                    <div className="flex items-center gap-2">
+                      <MdAddShoppingCart />
+                      <span>{cartItemCount}</span>
+                    </div>
+                  </NavbarButton>
+                </Link>
                 <NavbarButton variant="secondary">Login</NavbarButton>
               </div>
             </div>
@@ -152,19 +154,21 @@ const cartItemCount = 3;
                 </div>
 
                 <div className="flex flex-col gap-4 px-4 py-4">
-                  <NavbarButton
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      console.log("Cart clicked (mobile)");
-                    }}
-                    variant="primary"
-                    className="w-full"
-                  >
-                    <div className="flex items-center gap-2">
-                      <MdAddShoppingCart />
-                      <span>5</span>
-                    </div>
-                  </NavbarButton>
+                  <Link to="/cart">
+                    <NavbarButton
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        console.log("Cart clicked (mobile)");
+                      }}
+                      variant="primary"
+                      className="w-full"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdAddShoppingCart />
+                        <span>{cartItemCount}</span>
+                      </div>
+                    </NavbarButton>
+                  </Link>
                   <NavbarButton
                     onClick={() => {
                       setIsMobileMenuOpen(false);

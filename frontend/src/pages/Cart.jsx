@@ -1,29 +1,11 @@
 import React, { useState } from "react";
-import { getDiscountForCode, availableDiscounts } from "../components/discounts"; 
-// const { cartItems, updateQuantity, removeItem } = useCart();
-
-const initialCartItems = [
-  {
-    id: 1,
-    name: "Herbal Toothpaste",
-    price: 120,
-    quantity: 2,
-    imageUrl: "https://source.unsplash.com/100x100/?toothpaste",
-  },
-  {
-    id: 2,
-    name: "Ashwagandha Capsules",
-    price: 350,
-    quantity: 1,
-    imageUrl: "https://source.unsplash.com/100x100/?herbs",
-  },
-];
+import { getDiscountForCode, availableDiscounts } from "../components/discounts";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Cart() {
-  
-  const [cartItems, setCartItems] = useState(initialCartItems);
-  const [showCheckout, setShowCheckout] = useState(false);
-
+  const navigate = useNavigate();
+  const { cartItems, updateQuantity, removeItem } = useCart();
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState({ code: "", discount: 0, description: "" });
 
@@ -51,30 +33,13 @@ export default function Cart() {
     return total - total * appliedPromo.discount;
   };
 
-
-
-  const updateQuantity = (id, delta) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
+  const handleCheckout = () => {
+    // Store the applied promo in localStorage before navigating
+    if (appliedPromo.code) {
+      localStorage.setItem('appliedPromo', JSON.stringify(appliedPromo));
+    }
+    navigate("/checkout");
   };
-
-  const removeItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // const getTotal = () => {
-  //   return cartItems.reduce(
-  //     (total, item) => total + item.price * item.quantity,
-  //     0
-  //   );
-  // };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -138,106 +103,83 @@ export default function Cart() {
           </div>
 
           {/* Promo code input */}
-      <div className="mt-6 max-w-sm">
-        <label className="block mb-2 font-medium">Enter Promo Code</label>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
-            className="border p-2 rounded w-full"
-            placeholder="Enter code"
-          />
-          <button
-            onClick={() => applyPromo(promoCode)}
-            className="bg-green-600 text-white px-4 rounded hover:bg-green-700"
-          >
-            Apply
-          </button>
-        </div>
+          <div className="mt-6 max-w-sm">
+            <label className="block mb-2 font-medium">Enter Promo Code</label>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                className="border p-2 rounded w-full"
+                placeholder="Enter code"
+                disabled={appliedPromo.code !== ""}
+              />
+              <button
+                onClick={() => applyPromo(promoCode)}
+                className={`px-4 rounded ${
+                  appliedPromo.code
+                    ? "bg-green-700 text-white"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                }`}
+                disabled={appliedPromo.code !== ""}
+              >
+                {appliedPromo.code ? "Applied" : "Apply"}
+              </button>
+            </div>
 
-        {/* List available promo codes */}
-        <div>
-          <h3 className="font-semibold mb-2">Available Promo Codes:</h3>
-          <ul className="space-y-2">
-            {availableDiscounts.map(({ code, description }) => (
-              <li key={code} className="flex justify-between items-center border p-2 rounded">
-                <span>
-                  <strong>{code}</strong>: {description}
-                </span>
-                <button
-                  onClick={() => {
-                    setPromoCode(code);
-                    applyPromo(code);
-                  }}
-                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                >
-                  Apply
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* Total price with discount */}
-      <div className="mt-8 flex justify-between items-center text-xl font-bold">
-        {appliedPromo.discount > 0 ? (
-          <div>
-            <p>
-              Total:{" "}
-              <span className="line-through text-gray-500 mr-2">₹{getTotal().toFixed(2)}</span>
-              <span className="text-green-700">₹{getDiscountedTotal().toFixed(2)}</span>
-            </p>
-            <p className="text-green-600 mt-1">
-              Promo <strong>{appliedPromo.code}</strong> applied ({appliedPromo.description})
-            </p>
+            {/* List available promo codes */}
+            <div>
+              <h3 className="font-semibold mb-2">Available Promo Codes:</h3>
+              <ul className="space-y-2">
+                {availableDiscounts.map(({ code, description }) => (
+                  <li key={code} className="flex justify-between items-center border p-2 rounded">
+                    <span>
+                      <strong>{code}</strong>: {description}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setPromoCode(code);
+                        applyPromo(code);
+                      }}
+                      className={`px-3 py-1 rounded ${
+                        appliedPromo.code === code
+                          ? "bg-green-700 text-white"
+                          : "bg-green-500 text-white hover:bg-green-600"
+                      }`}
+                      disabled={appliedPromo.code !== ""}
+                    >
+                      {appliedPromo.code === code ? "Applied" : "Apply"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        ) : (
-          <p>Total: ₹{getTotal().toFixed(2)}</p>
-        )}
+
+          {/* Total price with discount */}
+          <div className="mt-8 flex justify-between items-center text-xl font-bold">
+            {appliedPromo.discount > 0 ? (
+              <div>
+                <p>
+                  Total:{" "}
+                  <span className="line-through text-gray-500 mr-2">₹{getTotal().toFixed(2)}</span>
+                  <span className="text-green-700">₹{getDiscountedTotal().toFixed(2)}</span>
+                </p>
+                <p className="text-green-600 mt-1">
+                  Promo <strong>{appliedPromo.code}</strong> applied ({appliedPromo.description})
+                </p>
+              </div>
+            ) : (
+              <p>Total: ₹{getTotal().toFixed(2)}</p>
+            )}
 
             <button
-  className="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700"
-  onClick={() => setShowCheckout(true)}
->
-  Proceed to Checkout
-</button>
-
+              className="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700"
+              onClick={handleCheckout}
+            >
+              Proceed to Checkout
+            </button>
           </div>
-
-          {showCheckout && (
-  <form className="mt-8 space-y-4 max-w-xl border p-6 rounded shadow">
-    <h2 className="text-xl font-bold mb-2">Checkout</h2>
-
-    <input
-      type="text"
-      placeholder="Full Name"
-      className="w-full border p-2 rounded"
-      required
-    />
-    <input
-      type="email"
-      placeholder="Email Address"
-      className="w-full border p-2 rounded"
-      required
-    />
-    <textarea
-      placeholder="Shipping Address"
-      className="w-full border p-2 rounded"
-      rows={3}
-      required
-    />
-
-    <button
-      type="submit"
-      className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800"
-    >
-      Place Order
-    </button>
-  </form>
-)}
-
         </>
       )}
     </div>
