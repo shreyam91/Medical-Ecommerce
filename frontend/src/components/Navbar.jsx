@@ -14,8 +14,9 @@ import { MdAddShoppingCart } from "react-icons/md";
 import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { BiSolidOffer } from "react-icons/bi";
 
-export function NavbarMain() {
+export default function NavbarMain() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -95,15 +96,24 @@ export function NavbarMain() {
               </div>
 
               <div className="flex items-center gap-4">
+
+                <Link to= "/offers">
+                <NavbarButton variant="secondary" >
+                    <div className="flex items-center gap-2 text-xl">
+                      <BiSolidOffer />
+                    </div>
+                </NavbarButton>
+                </Link>
+
                 <Link to="/cart">
                   <NavbarButton variant="secondary">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-l">
                       <MdAddShoppingCart />
                       <span>{cartItemCount}</span>
                     </div>
                   </NavbarButton>
                 </Link>
-                <NavbarButton variant="secondary">Login</NavbarButton>
+                <NavbarButton variant="secondary" className="text-l">Login / Register</NavbarButton>
               </div>
             </div>
 

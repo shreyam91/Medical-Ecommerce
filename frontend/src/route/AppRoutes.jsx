@@ -17,6 +17,7 @@ import FAQ from '../pages/FAQ';
 import Testimonials from '../pages/Testimonials';
 import Blog from '../pages/Blog';
 import BlogPost from '../pages/BlogPost';
+import Offers from '../pages/Offers';
 const AppRoutes = () => {
   return (
     <Routes>
@@ -38,6 +39,7 @@ const AppRoutes = () => {
       <Route path="/testimonial" element={<Testimonials/>} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:id" element={<BlogPost />} />
+      <Route path="/offers" element={<Offers />} />
 
       {/* Protected Routes (require login) */}
       {/* <Route path="/profile" element={
