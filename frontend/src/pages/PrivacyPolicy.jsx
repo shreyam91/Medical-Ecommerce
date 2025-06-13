@@ -49,10 +49,10 @@ const PrivacyPolicy = () => {
           </p>
           <p className='text-black text-xl underline'>Why We Use Cookies:</p>
           <ol className='text-gray-500'>
-            <li><span className='text-black font-medium'>A. To Improve Website Functionality: </span>Cookies help ensure that key features such as navigation, login, and shopping carts work properly.</li>
-            <li><span className='text-black font-medium'>B. To Personalize Your Experience:</span>We may use cookies to remember your preferences, language settings, or previously viewed content.</li>
-            <li><span className='text-black font-medium'>C. To Analyze Website Performance:</span>We use tools like Google Analytics to understand how visitors interact with our site, which helps us make data-driven improvements.</li>
-            <li><span className='text-black font-medium'>D. To Support Marketing Efforts:</span>With your consent, we may use cookies to deliver relevant advertisements and measure the effectiveness of our marketing campaigns.</li>
+            <li><span className='text-black font-bold'>A. To Improve Website Functionality: </span>Cookies help ensure that key features such as navigation, login, and shopping carts work properly.</li>
+            <li><span className='text-black font-bold'>B. To Personalize Your Experience:</span>We may use cookies to remember your preferences, language settings, or previously viewed content.</li>
+            <li><span className='text-black font-bold'>C. To Analyze Website Performance:</span>We use tools like Google Analytics to understand how visitors interact with our site, which helps us make data-driven improvements.</li>
+            <li><span className='text-black font-bold'>D. To Support Marketing Efforts:</span>With your consent, we may use cookies to deliver relevant advertisements and measure the effectiveness of our marketing campaigns.</li>
           </ol>
         </section>
 
@@ -76,7 +76,7 @@ const PrivacyPolicy = () => {
             We are committed to protecting your privacy and ensuring transparency about how your personal information is handled. As a user, you have certain rights regarding your personal data, which may vary depending on your location and applicable privacy laws (such as the GDPR or CCPA). These rights include, but may not be limited to:
           </p>
           <ol className='text-gray-500'>
-          <li><span className='text-black font-medium'>A. Right to Deletion: </span> You may request that we delete your personal data from our records, subject to certain legal or contractual obligations that may require us to retain some information.</li>
+          <li><span className='text-black font-bold'>A. Right to Deletion: </span> You may request that we delete your personal data from our records, subject to certain legal or contractual obligations that may require us to retain some information.</li>
           </ol>
         </section>
 
