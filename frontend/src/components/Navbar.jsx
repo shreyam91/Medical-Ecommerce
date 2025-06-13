@@ -113,7 +113,9 @@ export default function NavbarMain() {
                     </div>
                   </NavbarButton>
                 </Link>
+                <Link to='/login'>
                 <NavbarButton variant="secondary" className="text-l">Login / Register</NavbarButton>
+                </Link>
               </div>
             </div>
 
@@ -179,6 +181,7 @@ export default function NavbarMain() {
                       </div>
                     </NavbarButton>
                   </Link>
+                  <Link to='/login'>
                   <NavbarButton
                     onClick={() => {
                       setIsMobileMenuOpen(false);
@@ -189,6 +192,7 @@ export default function NavbarMain() {
                   >
                     Login
                   </NavbarButton>
+                  </Link>
                 </div>
               </MobileNavMenu>
             </MobileNav>

@@ -33,7 +33,7 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-black">
+              <a href="/contact" className="hover:text-black">
                 Contact
               </a>
             </li>
@@ -60,8 +60,8 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="/refund-policy" className="hover:text-black">
-                Refund Policy
+              <a href="/return-and-refund-policy" className="hover:text-black">
+                Return & Refund Policy
               </a>
             </li>
             <li>
@@ -122,7 +122,7 @@ const Footer = () => {
 
       {/* Bottom note */}
       <div className="text-center text-gray-400 text-xs mt-10">
-        &copy; {new Date().getFullYear()} My Website. All rights reserved.
+        &copy; {new Date().getFullYear()} Herbal MG. All rights reserved. All medicines are dispensed in compliance with the Drugs and Cosmetics Act, 1940 and Drugs and Cosmetics Rules, 1945.
         <br />
         Developed by{" "}
         <a
