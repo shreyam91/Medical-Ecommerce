@@ -29,7 +29,7 @@ const Footer = () => {
             </li>
             <li>
               <a href="/testimonial" className="hover:text-black">
-                Customer Speak
+                Words from Our Customers
               </a>
             </li>
             <li>
