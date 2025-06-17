@@ -1,13 +1,14 @@
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Dashboard from './app/dashboard/dashboard'
 
-
-function App() {
-
+const App = () => {
   return (
-    <>
-    <h1 className="text-3xl font-bold text-red-500 text-center">
-      Admin Panel
-    </h1>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+      </Routes>
+    </Router>
   )
 }
 
