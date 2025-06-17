@@ -44,25 +44,16 @@ const data = {
       icon: LayoutDashboardIcon,
     },
     {
-      title: "Lifecycle",
+      title: "Products",
       url: "#",
       icon: ListIcon,
     },
     {
-      title: "Analytics",
+      title: "Medicines",
       url: "#",
       icon: BarChartIcon,
     },
-    {
-      title: "Projects",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: UsersIcon,
-    },
+    
   ],
   navClouds: [
     {
@@ -129,14 +120,14 @@ const data = {
       icon: SearchIcon,
     },
   ],
-  documents: [
+  customer: [
     {
-      name: "Data Library",
+      name: "Customer",
       url: "#",
       icon: DatabaseIcon,
     },
     {
-      name: "Reports",
+      name: "Sales",
       url: "#",
       icon: ClipboardListIcon,
     },
@@ -157,9 +148,8 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+              <a href="/">
+                <span className="text-base font-semibold">HerbalMG</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -167,11 +157,11 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavDocuments items={data.customer} />
+        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {/* <NavUser user={data.user} /> */}
       </SidebarFooter>
     </Sidebar>)
   );

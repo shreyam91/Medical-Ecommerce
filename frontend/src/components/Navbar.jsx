@@ -18,9 +18,11 @@ import { BiSolidOffer } from "react-icons/bi";
 
 export default function NavbarMain() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [locations, setLocations] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState("");
+
   const { cartItems } = useCart();
+
+//   const [locations, setLocations] = useState<string>([]);
+// const [selectedPincode, setSelectedPincode] = useState<string>("");
 
   // Calculate total items in cart
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -32,30 +34,34 @@ export default function NavbarMain() {
     { name: "Contact", link: "#contact" },
   ];
 
-  useEffect(() => {
-    console.log("Fetching locations from data.json...");
-    fetch("src/data.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const unique = [];
-        const map = new Map();
-        data.Pincodes.forEach((item) => {
-          const key = `${item.City}-${item.State}`;
-          if (!map.has(key)) {
-            map.set(key, true);
-            unique.push({ city: item.City, state: item.State });
-          }
-        });
-        console.log("Unique locations loaded:", unique);
-        setLocations(unique);
-      })
-      .catch((err) => console.error("Failed to load locations:", err));
-  }, []);
+//   useEffect(() => {
+//   // 1. Load all unique pincodes
+//   fetch("http://localhost:3001/api/pincodes")
+//     .then((res) => res.json())
+//     .then((pincodes) => {
+//       setLocations(pincodes); // Dropdown options
+//     })
+//     .catch((err) => console.error("Failed to load pincodes:", err));
 
-  const handleLocationChange = (e) => {
-    setSelectedLocation(e.target.value);
-    console.log("Selected location:", e.target.value);
-  };
+//   // 2. Detect user's pincode from backend
+//   fetch("http://localhost:3001/api/detect-location")
+//     .then((res) => res.json())
+//     .then((data) => {
+//       if (data.pincode) {
+//         setSelectedPincode(data.pincode); // Auto-select this
+//       }
+//     })
+//     .catch((err) => console.warn("Location detection failed:", err));
+// }, []);
+
+
+
+
+ const handleLocationChange = (e) => {
+  setSelectedPincode(e.target.value);
+  console.log("Selected pincode:", e.target.value);
+};
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -72,20 +78,16 @@ export default function NavbarMain() {
               <div className="flex-1 flex justify-center">
                 <div className="flex items-center gap-4 w-full max-w-2xl">
 
-                  <select
-                    className="border rounded px-3 py-2 text-sm dark:bg-neutral-800 dark:text-white"
-                    value={selectedLocation}
-                    onChange={handleLocationChange}
-                  >
-                    <option value="" disabled>
-                      Deliver to
-                    </option>
-                    {locations.map((loc, idx) => (
-                      <option key={idx} value={`${loc.city},${loc.state},${loc.pincode}`}>
-                        {loc.city}
-                      </option>
-                    ))}
-                  </select>
+                 {/* <select value={selectedPincode} onChange={handleLocationChange}>
+  <option value="">Select Pincode</option>
+  {locations.map((pincode, idx) => (
+    <option key={idx} value={pincode}>
+      {pincode}
+    </option>
+  ))}
+</select> */}
+
+
 
                   <input
                     type="text"
@@ -114,7 +116,7 @@ export default function NavbarMain() {
                   </NavbarButton>
                 </Link>
                 <Link to='/login'>
-                <NavbarButton variant="secondary" className="text-l">Login / Register</NavbarButton>
+                <NavbarButton variant="secondary" className="text-l">Login</NavbarButton>
                 </Link>
               </div>
             </div>
