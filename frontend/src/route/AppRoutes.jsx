@@ -19,6 +19,7 @@ import Blog from '../pages/Blog';
 import BlogPost from '../pages/BlogPost';
 import Offers from '../pages/Offers';
 import Contact from '../pages/Contact';
+import UserProfile from '../pages/UserProfile';
 const AppRoutes = () => {
   return (
     <Routes>
@@ -42,6 +43,8 @@ const AppRoutes = () => {
       <Route path="/blog/:id" element={<BlogPost />} />
       <Route path="/offers" element={<Offers />} />
       <Route path="/contact" element={<Contact/>} />
+
+      <Route path="/profile" element={<UserProfile/>} />
 
       {/* Protected Routes (require login) */}
       {/* <Route path="/profile" element={

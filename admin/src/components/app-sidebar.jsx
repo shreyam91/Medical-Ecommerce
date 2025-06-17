@@ -53,6 +53,26 @@ const data = {
       url: "#",
       icon: BarChartIcon,
     },
+    {
+      title: "Blogs",
+      url: "#",
+      icon: BarChartIcon,
+    },{
+      title: "Discount",
+      url: "#",
+      icon: BarChartIcon,
+      // Manage coupons, discounts, sales campaigns
+    },{
+      title: "Content Management",   
+      url: "#",
+      icon: BarChartIcon,
+      // Manage banners, announcements, blog posts (if any)
+    },{
+      title: "Inventory Management",   
+      url: "#",
+      icon: BarChartIcon,
+      // Stock levels monitoring , Low stock alerts, Batch/expiry tracking (important for medical products)
+    },
     
   ],
   navClouds: [

@@ -94,8 +94,8 @@ const About = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Section */}
-      <div className="bg-gray-300 text-black py-12 px-6 text-center font-serif rounded-2xl">
-        <h1 className="text-4xl font-bold">Welcome to HerbalMG</h1>
+      <div className=" text-black py-12 px-6 text-center">
+        <h1 className="text-4xl font-bold text-blue-700">Welcome to HerbalMG</h1>
         <p className="mt-2 text-lg">Your trusted source for natural wellness</p>
       </div>
 

@@ -12,14 +12,35 @@ import {
 import { useState, useEffect } from "react";
 import { MdAddShoppingCart } from "react-icons/md";
 import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { BiSolidOffer } from "react-icons/bi";
+import { useRef } from "react";
 
 export default function NavbarMain() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { cartItems } = useCart();
+
+  const [user, setUser] = useState({
+  isLoggedIn: true, // toggle to false to simulate logout
+  name: "John Doe",
+});
+
+const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
 
 //   const [locations, setLocations] = useState<string>([]);
 // const [selectedPincode, setSelectedPincode] = useState<string>("");
@@ -115,9 +136,46 @@ export default function NavbarMain() {
                     </div>
                   </NavbarButton>
                 </Link>
-                <Link to='/login'>
-                <NavbarButton variant="secondary" className="text-l">Login</NavbarButton>
+                {user.isLoggedIn ? (
+  <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+              className="flex items-center gap-2 text-l hover:text-blue-600"
+            >
+              {user.name}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  Profile
                 </Link>
+                <button
+                  onClick={() => {
+                    setUser({ isLoggedIn: false });
+                    setIsDropdownOpen(false);
+                    Navigate("/"); 
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+) : (
+  <Link to='/login'>
+    <NavbarButton variant="secondary" className="text-l">Login</NavbarButton>
+  </Link>
+)}
+
               </div>
             </div>
 
@@ -183,18 +241,43 @@ export default function NavbarMain() {
                       </div>
                     </NavbarButton>
                   </Link>
-                  <Link to='/login'>
-                  <NavbarButton
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      console.log("Login clicked (mobile)");
-                    }}
-                    variant="primary"
-                    className="w-full"
-                  >
-                    Login
-                  </NavbarButton>
-                  </Link>
+                  {user.isLoggedIn ? (
+  <>
+    <Link to="/profile">
+      <NavbarButton
+        onClick={() => setIsMobileMenuOpen(false)}
+        variant="primary"
+        className="w-full"
+      >
+        Profile
+      </NavbarButton>
+    </Link>
+    <NavbarButton
+      onClick={() => {
+        setUser({ isLoggedIn: false });
+        setIsMobileMenuOpen(false);
+      }}
+      variant="primary"
+      className="w-full"
+    >
+      Logout
+    </NavbarButton>
+  </>
+) : (
+  <Link to='/login'>
+    <NavbarButton
+      onClick={() => {
+        setIsMobileMenuOpen(false);
+        console.log("Login clicked (mobile)");
+      }}
+      variant="primary"
+      className="w-full"
+    >
+      Login
+    </NavbarButton>
+  </Link>
+)}
+
                 </div>
               </MobileNavMenu>
             </MobileNav>

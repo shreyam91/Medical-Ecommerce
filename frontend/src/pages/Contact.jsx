@@ -4,6 +4,7 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    subject: "",
     message: "",
   });
 
@@ -25,14 +26,15 @@ const Contact = () => {
     setFormData({
       name: "",
       phone: "",
+      subject:"",
       message: "",
     });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-xl">
-        <h2 className="text-2xl font-bold mb-6 text-center">Contact Us</h2>
+        <h2 className="text-4xl font-bold mb-6 text-center text-blue-700">Contact Us</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Name</label>
@@ -56,6 +58,18 @@ const Contact = () => {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Your phone number"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Subject </label>
+            <input
+              type="text"
+              name="subject"
+              required
+              value={formData.subject}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Subject for reaching out."
             />
           </div>
           <div>
