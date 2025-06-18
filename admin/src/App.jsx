@@ -1,14 +1,11 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Dashboard from './app/dashboard/dashboard'
+import AppRoutes from './route/AppRoute'
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-      </Routes>
-    </Router>
+    <>
+      <AppRoutes/>
+    </>
   )
 }
 
