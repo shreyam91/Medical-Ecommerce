@@ -1,21 +1,23 @@
+"use client"
+
 import * as React from "react"
 import {
-  ArrowUpCircleIcon,
-  BarChartIcon,
-  CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
-  FileTextIcon,
-  FolderIcon,
-  HelpCircleIcon,
-  LayoutDashboardIcon,
-  ListIcon,
-  SearchIcon,
-  SettingsIcon,
-  UsersIcon,
-} from "lucide-react"
+  IconCamera,
+  IconChartBar,
+  IconDashboard,
+  IconDatabase,
+  IconFileAi,
+  IconFileDescription,
+  IconFileWord,
+  IconFolder,
+  IconHelp,
+  IconInnerShadowTop,
+  IconListDetails,
+  IconReport,
+  IconSearch,
+  IconSettings,
+  IconUsers,
+} from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -41,44 +43,33 @@ const data = {
     {
       title: "Dashboard",
       url: "#",
-      icon: LayoutDashboardIcon,
+      icon: IconDashboard,
     },
     {
-      title: "Products",
+      title: "Lifecycle",
       url: "#",
-      icon: ListIcon,
+      icon: IconListDetails,
     },
     {
-      title: "Medicines",
+      title: "Analytics",
       url: "#",
-      icon: BarChartIcon,
+      icon: IconChartBar,
     },
     {
-      title: "Blogs",
+      title: "Projects",
       url: "#",
-      icon: BarChartIcon,
-    },{
-      title: "Discount",
-      url: "#",
-      icon: BarChartIcon,
-      // Manage coupons, discounts, sales campaigns
-    },{
-      title: "Content Management",   
-      url: "#",
-      icon: BarChartIcon,
-      // Manage banners, announcements, blog posts (if any)
-    },{
-      title: "Inventory Management",   
-      url: "#",
-      icon: BarChartIcon,
-      // Stock levels monitoring , Low stock alerts, Batch/expiry tracking (important for medical products)
+      icon: IconFolder,
     },
-    
+    {
+      title: "Team",
+      url: "#",
+      icon: IconUsers,
+    },
   ],
   navClouds: [
     {
       title: "Capture",
-      icon: CameraIcon,
+      icon: IconCamera,
       isActive: true,
       url: "#",
       items: [
@@ -94,7 +85,7 @@ const data = {
     },
     {
       title: "Proposal",
-      icon: FileTextIcon,
+      icon: IconFileDescription,
       url: "#",
       items: [
         {
@@ -109,7 +100,7 @@ const data = {
     },
     {
       title: "Prompts",
-      icon: FileCodeIcon,
+      icon: IconFileAi,
       url: "#",
       items: [
         {
@@ -127,49 +118,51 @@ const data = {
     {
       title: "Settings",
       url: "#",
-      icon: SettingsIcon,
+      icon: IconSettings,
     },
     {
       title: "Get Help",
       url: "#",
-      icon: HelpCircleIcon,
+      icon: IconHelp,
     },
     {
       title: "Search",
       url: "#",
-      icon: SearchIcon,
+      icon: IconSearch,
     },
   ],
-  customer: [
+  documents: [
     {
-      name: "Customer",
+      name: "Data Library",
       url: "#",
-      icon: DatabaseIcon,
+      icon: IconDatabase,
     },
     {
-      name: "Sales",
+      name: "Reports",
       url: "#",
-      icon: ClipboardListIcon,
+      icon: IconReport,
     },
     {
       name: "Word Assistant",
       url: "#",
-      icon: FileIcon,
+      icon: IconFileWord,
     },
   ],
 }
 
-export function AppSidebar({
-  ...props
-}) {
+export function AppSidebar(props) {
   return (
-    (<Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="/">
-                <span className="text-base font-semibold">HerbalMG</span>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
+              <a href="#">
+                <IconInnerShadowTop className="!size-5" />
+                <span className="text-base font-semibold">Acme Inc.</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -177,12 +170,12 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.customer} />
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        <NavDocuments items={data.documents} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        {/* <NavUser user={data.user} /> */}
+        <NavUser user={data.user} />
       </SidebarFooter>
-    </Sidebar>)
-  );
+    </Sidebar>
+  )
 }

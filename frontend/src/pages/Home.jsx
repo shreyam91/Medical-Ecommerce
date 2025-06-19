@@ -5,6 +5,7 @@ import Brands from '../components/Brands'
 import Category from '../components/Category'
 import BannerCarousel from '../components/BannerCarousel'
 import DealsOfTheDay from '../components/DealsOfTheDay'
+import Trending from '../components/Trending'
 const Home = () => {
   return (
     <>
@@ -14,6 +15,7 @@ const Home = () => {
     <div className="min-h-screen flex items-center justify-center bg-white">
       <Brands />
     </div>
+    <Trending/>
     <DealsOfTheDay />
     </>
   )

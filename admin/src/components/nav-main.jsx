@@ -1,4 +1,6 @@
-import { MailIcon, PlusCircleIcon } from "lucide-react";
+"use client"
+
+import { IconCirclePlusFilled, IconMail } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -10,24 +12,26 @@ import {
 } from "@/components/ui/sidebar"
 
 export function NavMain({
-  items
+  items,
 }) {
   return (
-    (<SidebarGroup>
+    <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
               tooltip="Quick Create"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground">
-              <PlusCircleIcon />
+              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+            >
+              <IconCirclePlusFilled />
               <span>Quick Create</span>
             </SidebarMenuButton>
             <Button
               size="icon"
-              className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
-              variant="outline">
-              <MailIcon />
+              className="size-8 group-data-[collapsible=icon]:opacity-0"
+              variant="outline"
+            >
+              <IconMail />
               <span className="sr-only">Inbox</span>
             </Button>
           </SidebarMenuItem>
@@ -43,6 +47,6 @@ export function NavMain({
           ))}
         </SidebarMenu>
       </SidebarGroupContent>
-    </SidebarGroup>)
-  );
+    </SidebarGroup>
+  )
 }
