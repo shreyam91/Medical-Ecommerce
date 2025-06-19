@@ -2,16 +2,16 @@ import { useContext, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {Toaster, toast} from 'react-hot-toast'
 
-import add from '../Images/add.png'
-import defaultBanner from '../Images/Blog Banner.png'
+// import add from '../Images/add.png'
+// import defaultBanner from '../Images/Blog Banner.png'
 
-import AnimationWrapper from '../Common/Page_animation'
-import { uploadImage } from '../Common/AWS'
+// import AnimationWrapper from '../Common/Page_animation'
+// import { uploadImage } from '../Common/AWS'
 
 import { EditorContext } from '../pages/Blog'
 
-import EditorJS from '@editorjs/editorjs';
-import { tools } from './Tools'
+// import EditorJS from '@editorjs/editorjs';
+// import { tools } from './Tools'
 
 import axios from 'axios'
 import { UserContext } from '../App'
