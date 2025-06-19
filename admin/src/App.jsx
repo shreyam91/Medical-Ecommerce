@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard'
 import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import Product from './pages/Product'
+import Orders from './pages/Orders'
+import Customer from './pages/Customer'
 
 const App = () => {
   return (
@@ -17,6 +19,8 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             {/* <Route path="/blog" element={<Blog />} /> */}
             <Route path="/products" element={<Product />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/customers" element={<Customer />} />
             {/* Other routes */}
           </Routes>
         </main>
