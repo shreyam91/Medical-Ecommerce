@@ -2,7 +2,7 @@
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
-  const links = ["Dashboard", "Orders", "Inventory", "Products", "Users", "Delivery Status", "Blogs"];
+  const links = ["Dashboard", "Orders", "Inventory", "Products", "Customers", "Delivery Status", "Blogs"];
   return (
     <aside className="w-64 bg-white shadow h-screen fixed">
       <div className="p-6 font-bold text-xl">HerbalMG Admin</div>

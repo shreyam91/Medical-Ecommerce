@@ -6,7 +6,7 @@ const pathNameMap = {
   "/orders": "Orders",
   "/inventory": "Inventory",
   "/products": "Products",
-  "/users": "Users",
+  "/customers": "Customers",
   "/delivery-status": "Delivery Status",
   "/blogs": "Blogs",
 };
