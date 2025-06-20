@@ -7,6 +7,7 @@ import Navbar from './components/Navbar'
 import Product from './pages/Product'
 import Orders from './pages/Orders'
 import Customer from './pages/Customer'
+import Inventory from './pages/Inventory'
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
             <Route path="/products" element={<Product />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/customers" element={<Customer />} />
+            <Route path="/inventory" element={<Inventory />} />
             {/* Other routes */}
           </Routes>
         </main>
