@@ -18,6 +18,7 @@ const App = () => {
         <main className="p-6">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             {/* <Route path="/blog" element={<Blog />} /> */}
             <Route path="/products" element={<Product />} />
             <Route path="/orders" element={<Orders />} />
