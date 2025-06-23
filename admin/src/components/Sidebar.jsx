@@ -2,9 +2,9 @@
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
-  const links = ["Dashboard", "Orders", "Inventory", "Products", "Customers", "Delivery Status", "Blogs"];
+  const links = ["Dashboard", "Orders", "Inventory", "Products", "Customers", "Delivery Status", "Blogs","Payment"];
   return (
-    <aside className="w-64 bg-white shadow h-screen fixed">
+    <aside className="w-58 bg-white shadow h-screen fixed">
       <div className="p-6 font-bold text-xl">HerbalMG Admin</div>
       <nav className="flex flex-col gap-4 p-4">
         {links.map(link => (
