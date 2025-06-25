@@ -28,6 +28,7 @@ const initialOrders = [
     address: '456 Elm St, Rivertown',
     notes: '',
     payment_type: 'COD',
+    prescriptionRequired: true,
   },
   {
     id: 3,
@@ -323,7 +324,11 @@ export default function OrdersPro() {
           </thead>
           <tbody>
             {paginatedOrders.map((order, idx) => (
-              <tr key={order.id}>
+              <tr
+  key={order.id}
+  className={order.prescriptionRequired ? 'border-2 border-red-500' : ''}
+>
+
                 <td className="border text-center">
                   <input
                     type="checkbox"
