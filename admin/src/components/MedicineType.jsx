@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TabletForm from './TabletForm';
 import MedForm from './MedForm';
 
-const MedicineForm = ({ category }) => {
+const MedicineType = ({ category }) => {
   const [type, setType] = useState('');
 
   return (
@@ -24,4 +24,4 @@ const MedicineForm = ({ category }) => {
   );
 };
 
-export default MedicineForm;
+export default MedicineType;

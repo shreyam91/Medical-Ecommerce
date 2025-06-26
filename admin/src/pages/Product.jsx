@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import EquipmentForm from '../components/EquipmentForm';
-import MedicineForm from '../components/MedicineForm';
+import MedicineType from '../components/MedicineType';
 import BrandForm from '@/components/BrandForm';
 import BannerManager from '@/components/BannerManager';
 import RefrenceBook from '@/components/RefrenceBook';
@@ -36,7 +36,7 @@ const Product = () => {
               </select>
             </div>
             {(category === 'ayurvedic' || category === 'homeopathic' || category === 'unani') && (
-              <MedicineForm category={category} />
+              <MedicineType category={category} />
             )}
           </div>
         );
