@@ -1,5 +1,3 @@
-// OrdersPro.jsx
-
 import { useState, useMemo, useEffect } from 'react';
 
 const statusOptions = ['Ordered', 'Shipped', 'Delivered', 'Returned', 'Refunded'];

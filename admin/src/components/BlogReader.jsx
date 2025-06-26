@@ -1,4 +1,3 @@
-import React from 'react';
 
 const renderBlock = (block, index) => {
   try {

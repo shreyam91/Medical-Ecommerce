@@ -1,4 +1,3 @@
-// src/components/BannerManager.jsx
 import React, { useState } from "react";
 
 const BannerManager = () => {

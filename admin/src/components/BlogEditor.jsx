@@ -1,4 +1,3 @@
-// BlogEditor.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import EditorJS from '@editorjs/editorjs';
