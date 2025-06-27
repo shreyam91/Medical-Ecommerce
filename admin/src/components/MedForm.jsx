@@ -16,7 +16,7 @@ const MedForm = ({ category }) => {
     referenceBook: "",
     indications: "",
     lifestyleAdvice: "",
-    prices: [{ unit: "", actualPrice: "",discount: "", sellingPrice: "", quantity: "" }],
+prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: "" }],
   });
 
   const [errors, setErrors] = useState({});
@@ -28,6 +28,8 @@ const MedForm = ({ category }) => {
     "WellnessLabs",
   ];
 
+    const gstOptions = ['5%', '12%', '18%', 'Exempt'];
+
   const referenceBooks = [
   'Ayurvedic Classics',
   'Homeopathic Materia Medica',
@@ -35,28 +37,6 @@ const MedForm = ({ category }) => {
   'Pharmacology Reference',
   'Other',
 ];
-
-const gstOptions = ['5%', '12%', '18%', 'Exempt'];
-
-const handlePriceOrDiscountChange = (e) => {
-    const { name, value } = e.target;
-    const updatedForm = {
-      ...form,
-      [name]: value,
-    };
-
-    const actualPrice = parseFloat(name === 'actualPrice' ? value : form.actualPrice);
-    const discount = parseFloat(name === 'discount' ? value : form.discount);
-
-    if (!isNaN(actualPrice) && !isNaN(discount)) {
-      const discountAmount = (actualPrice * discount) / 100;
-      updatedForm.sellingPrice = (actualPrice - discountAmount).toFixed(2);
-    }
-
-    setForm(updatedForm);
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
-  };
-
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -77,10 +57,20 @@ const handlePriceOrDiscountChange = (e) => {
   };
 
   const handlePriceChange = (index, field, value) => {
-    const updated = [...form.prices];
-    updated[index][field] = value;
-    setForm((prev) => ({ ...prev, prices: updated }));
-  };
+  const updated = [...form.prices];
+  updated[index][field] = value;
+
+  const actual = parseFloat(updated[index].actualPrice) || 0;
+  const discount = parseFloat(updated[index].discount) || 0;
+
+  if (!isNaN(actual) && !isNaN(discount)) {
+    updated[index].sellingPrice = (actual - (actual * discount / 100)).toFixed(2);
+  }
+
+  setForm(prev => ({ ...prev, prices: updated }));
+  setErrors(prev => ({ ...prev, [`${field}_${index}`]: undefined }));
+};
+
 
   const addQuantityPrice = () => {
     setForm((prev) => ({
@@ -123,7 +113,7 @@ const handlePriceOrDiscountChange = (e) => {
     form.prices.forEach((item, idx) => {
       if (!item.unit) {
         newErrors[`unit${idx}`] = "Unit is required.";
-      } else if (quantitiesSet.has(item.unit)) {
+      } else if (unitsSet.has(item.unit)) {
         newErrors[`unit${idx}`] = "Duplicate unit.";
       } else {
         quantitiesSet.add(item.unit);
@@ -135,9 +125,14 @@ const handlePriceOrDiscountChange = (e) => {
         hasValidPrice = true;
       }
 
-      if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
-        newErrors[`sellingPrice_${idx}`] = "Valid selling price required.";
-      }
+      if (!item.discount || parseFloat(item.discount) < 0) {
+  newErrors[`discount_${idx}`] = "Valid discount (%) required.";
+}
+
+if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
+  newErrors[`sellingPrice_${idx}`] = "Valid selling price required.";
+}
+
 
       if (!item.quantity || parseInt(item.quantity) <= 0) {
         newErrors[`quantity_${idx}`] = "Valid Quantity required.";
@@ -172,9 +167,6 @@ const handlePriceOrDiscountChange = (e) => {
 
     console.log("Submitted Product:", finalData);
     toast.success("Medicine details submitted successfully!");
-
-    setForm({ ...initialFormState, category });
-    setErrors({});
   };
 
   return (
@@ -225,28 +217,6 @@ const handlePriceOrDiscountChange = (e) => {
         {errors.brand && <p className="text-red-500 text-sm">{errors.brand}</p>}
       </div>
 
-      {/* Reference Book */}
-<div>
-  <label htmlFor="referenceBook" className="block font-medium mb-1">
-    Reference Book
-  </label>
-  <select
-    id="referenceBook"
-    name="referenceBook"
-    value={form.referenceBook}
-    onChange={handleChange}
-    className="w-full border rounded p-2 border-gray-300"
-  >
-    <option value="">Select Reference Book</option>
-    {referenceBooks.map((book, i) => (
-      <option key={i} value={book}>
-        {book}
-      </option>
-    ))}
-  </select>
-</div>
-
-
       <div>
         <label className="font-medium block mb-1">Dosage Info</label>
         <input
@@ -277,8 +247,18 @@ const handlePriceOrDiscountChange = (e) => {
         )}
       </div>
 
-      
-
+      {/* <div>
+        <label className="font-medium block mb-1">GST (%)</label>
+        <input
+          type="number"
+          name="tax"
+          className="w-full border rounded p-2"
+          value={form.tax}
+          placeholder="enter Gst eg:{5%,12%,18%}"
+          onChange={handleChange}
+        />
+        {errors.tax && <p className="text-red-500 text-sm">{errors.gst}</p>}
+      </div> */}
 
       <div>
   <label className="font-medium block mb-1">Cause</label>
@@ -308,12 +288,32 @@ const handlePriceOrDiscountChange = (e) => {
   )}
 </div>
 
+{/* Reference Book */}
+<div>
+  <label htmlFor="referenceBook" className="block font-medium mb-1">
+    Reference Book
+  </label>
+  <select
+    id="referenceBook"
+    name="referenceBook"
+    value={form.referenceBook}
+    onChange={handleChange}
+    className="w-full border rounded p-2 border-gray-300"
+  >
+    <option value="">Select Reference Book</option>
+    {referenceBooks.map((book, i) => (
+      <option key={i} value={book}>
+        {book}
+      </option>
+    ))}
+  </select>
+</div>
 
 
 <div>
   <label className="font-medium block mb-1">Uses / Indications</label>
   <textarea
-    name="indications"
+    name="usesOrIndications"
     placeholder="Indication eg: "
     className="w-full border rounded p-2"
     rows={2}
@@ -340,62 +340,57 @@ const handlePriceOrDiscountChange = (e) => {
   )}
 </div>
 
-{/* GST */}
-<div>
-  <label htmlFor="gst" className="block font-medium mb-1">
-    GST
-  </label>
-  <select
-    id="gst"
-    name="gst"
-    value={form.gst}
-    onChange={handleChange}
-    className="w-full border rounded p-2 border-gray-300"
-  >
-    <option value="">Select GST</option>
-    {gstOptions.map((option, i) => (
-      <option key={i} value={option}>
-        {option}
-      </option>
-    ))}
-  </select>
-</div>
+<div className="w-1/2">
+            <label htmlFor="gst" className="block font-medium mb-1">GST</label>
+            <select
+              id="gst"
+              name="gst"
+              value={form.gst}
+              onChange={handleChange}
+              className="w-full border rounded p-2 border-gray-300"
+            >
+              <option value="">Select GST</option>
+              {gstOptions.map((option, i) => (
+                <option key={i} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
 
       <div >
         <label className="font-medium block mb-1">Prices per Unit</label>
         <div className="space-y-2 ">
           {form.prices.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
-              <div className="w-1/5">
-                <label className="block font-medium mb-1">Unit</label>
-                <input
-                  type="number"
-                  placeholder="Unit eg: 100 ml/gm"
-                  value={item.unit}
-                  onChange={(e) =>
-                    handlePriceChange(index, "unit", e.target.value)
-                  }
-                  className="w-full border rounded p-2 border-gray-300"
-                />
-                {errors[`unit${index}`] && (
-                  <p className="text-red-500 text-sm">
-                    {errors[`unit${index}`]}
-                  </p>
-                )}
-              </div>
+              <div className="w-1/5 relative">
+  <label className="block font-medium mb-1">Unit</label>
+  <input
+    type="number"
+    placeholder={`e.g. 100`}
+    value={item.unit}
+    onChange={(e) =>
+      handlePriceChange(index, "unit", e.target.value)
+    }
+    className="w-full border rounded p-2 pl-2 pr-10"
+  />
+  <span className="absolute right-2 top-9 text-gray-600">{unit}</span>
+  {errors[`unit${index}`] && (
+    <p className="text-red-500 text-sm">{errors[`unit${index}`]}</p>
+  )}
+</div>
+
 
               <div className="w-1/5 relative">
-                <label className="block font-medium mb-1">Actual Price</label>
+                <label className="text-sm">Actual Price</label>
                 <span className="absolute left-2 top-9 text-gray-500">₹</span>
                 <input
                   type="number"
                   step="0.01"
-                  placeholder=""
+                  placeholder="Actual Price "
                   value={item.actualPrice}
                   onChange={(e) =>
                     handlePriceChange(index, "actualPrice", e.target.value)
                   }
-                  className="w-full border rounded p-2 border-gray-300"
+                  className="border rounded p-1 pl-6 w-full"
                 />
                 {errors[`actualPrice_${index}`] && (
                   <p className="text-red-500 text-sm">
@@ -404,36 +399,33 @@ const handlePriceOrDiscountChange = (e) => {
                 )}
               </div>
 
-              {/* Discount */}
-          <div className="w-1/5 relative">
-            <label htmlFor="discount" className="block font-medium mb-1">Discount (%)</label>
-                            <span className="absolute left-2 top-9 text-gray-500">%</span>
+              <div className="w-1/5">
+  <label className="text-sm">Discount (%)</label>
+  <input
+    type="number"
+    placeholder="Discount %"
+    value={item.discount}
+    onChange={(e) => handlePriceChange(index, "discount", e.target.value)}
+    className="border rounded p-1 w-full"
+  />
+  {errors[`discount_${index}`] && (
+    <p className="text-red-500 text-sm">{errors[`discount_${index}`]}</p>
+  )}
+</div>
 
-            <input
-              type="number"
-              id="discount"
-              name="discount"
-              value={form.discount}
-              onChange={handlePriceOrDiscountChange}
-              min={0}
-              max={100}
-              step="0.01"
-              className="w-full border rounded p-2 border-gray-300"
-            />
-          </div>
 
               <div className="w-1/5 relative">
-                <label className="block font-medium mb-1">Selling Price</label>
+                <label className="text-sm">Selling Price</label>
                 <span className="absolute left-2 top-9 text-gray-500">₹</span>
                 <input
                   type="number"
                   step="0.01"
-                  placeholder=""
+                  placeholder="Selling Price"
                   value={item.sellingPrice}
                   onChange={(e) =>
                     handlePriceChange(index, "sellingPrice", e.target.value)
                   }
-                  className="w-full border rounded p-2 border-gray-300"
+                  className="border rounded p-1 pl-6 w-full"
                 />
                 {errors[`sellingPrice_${index}`] && (
                   <p className="text-red-500 text-sm">
@@ -443,7 +435,7 @@ const handlePriceOrDiscountChange = (e) => {
               </div>
 
               <div className="w-1/5">
-                <label className="block font-medium mb-1">Quantity</label>
+                <label className="text-sm">Quantity</label>
                 <input
                   type="number"
                   placeholder="Quantity eg:150"
@@ -451,7 +443,7 @@ const handlePriceOrDiscountChange = (e) => {
                   onChange={(e) =>
                     handlePriceChange(index, "quantity", e.target.value)
                   }
-                  className="w-full border rounded p-2 border-gray-300"
+                  className="border rounded p-1 w-full"
                 />
                 {errors[`quantity_${index}`] && (
                   <p className="text-red-500 text-sm">
