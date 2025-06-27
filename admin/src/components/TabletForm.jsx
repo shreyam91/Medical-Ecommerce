@@ -25,6 +25,8 @@ const TabletForm = ({ category }) => {
   const [form, setForm] = useState(initialFormState);
   const [errors, setErrors] = useState({});
 
+const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+
   const brands = ['Pfizer', 'Sun Pharma', 'Cipla', 'Dr. Reddy’s', 'Other'];
   const referenceBooks = [
     'Ayurvedic Classics',
@@ -80,15 +82,50 @@ const TabletForm = ({ category }) => {
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (!validate()) return;
 
-    console.log('Submitted Tablet Form:', form);
-    toast.success('Medicine submitted successfully!');
-    setForm({ ...initialFormState, category });
-    setErrors({});
+  //   console.log('Submitted Tablet Form:', form);
+  //   toast.success('Medicine submitted successfully!');
+  //   setForm({ ...initialFormState, category });
+  //   setErrors({});
+  // };
+
+//   const handleSubmit = (e) => {
+//   e.preventDefault();
+//   if (!validate()) return;
+
+//   const finalFormData = {
+//     ...form,
+//     imageUrl,
+//   };
+
+//   console.log("Submitted Tablet Form:", finalFormData);
+//   toast.success("Medicine submitted successfully!");
+//   setForm({ ...initialFormState, category });
+//   setImageUrl("");
+//   setErrors({});
+// };
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+
+  const finalFormData = {
+    ...form,
+    images: uploadedImageUrls,
   };
+
+  console.log("Submitted:", finalFormData);
+  toast.success("Form submitted!");
+
+  setForm({ ...initialFormState, category });
+  setImageUrl("");
+  setErrors({});
+};
+
+
 
   return (
     <>
@@ -97,7 +134,8 @@ const TabletForm = ({ category }) => {
       <form onSubmit={handleSubmit} className="space-y-6 mx-auto p-6">
         <h2 className="text-xl font-semibold mb-4">Add Tablet / Capsule Medicine</h2>
 
-        <ImageUploader />
+        <ImageUploader onUploadComplete={(urls) => setUploadedImageUrls(urls)} />
+
 
         {/* Medicine Name */}
         <div>
