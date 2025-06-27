@@ -7,6 +7,9 @@ const BrandForm = () => {
   const [image, setImage] = useState(null);
   const [brandList, setBrandList] = useState([]);
 
+  const [isUploading, setIsUploading] = useState(false);
+
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -14,26 +17,71 @@ const BrandForm = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!image) {
-      toast.error("Please upload an image.");
-      return;
-    }
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (!image) {
+  //     toast.error("Please upload an image.");
+  //     return;
+  //   }
 
-    const brandImageURL = URL.createObjectURL(image);
+  //   const brandImageURL = URL.createObjectURL(image);
+
+  //   const newBrand = {
+  //     id: Date.now(),
+  //     name: brandName,
+  //     image: brandImageURL,
+  //   };
+
+  //   setBrandList([newBrand, ...brandList]);
+  //   toast.success("Brand added successfully!");
+  //   setBrandName("");
+  //   setImage(null);
+  // };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!image) {
+    toast.error("Please upload an image.");
+    return;
+  }
+
+  setIsUploading(true);
+  const toastId = toast.loading("Uploading brand image...");
+
+  const formData = new FormData();
+  formData.append("image", image);
+
+  try {
+    const res = await fetch("http://localhost:3001/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Upload failed");
+
+    const data = await res.json(); // contains imageUrl, public_id
 
     const newBrand = {
       id: Date.now(),
       name: brandName,
-      image: brandImageURL,
+      image: data.imageUrl, // Cloudinary-hosted image
     };
 
     setBrandList([newBrand, ...brandList]);
-    toast.success("Brand added successfully!");
+    toast.success("Brand added successfully!", { id: toastId });
+
+    // Reset form
     setBrandName("");
     setImage(null);
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("Image upload failed.", { id: toastId });
+  } finally {
+    setIsUploading(false);
+  }
+};
+
 
   const handleRemoveBrand = (id) => {
     const updatedList = brandList.filter((brand) => brand.id !== id);
