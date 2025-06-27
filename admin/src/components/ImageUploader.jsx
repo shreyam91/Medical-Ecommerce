@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import toast from 'react-hot-toast';
 import imageCompression from 'browser-image-compression';
 
-const ImageUploader = ({ onUploadComplete }) => {
+const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUpload }, ref) => {
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  useImperativeHandle(ref, () => ({
+    clearImages: () => {
+      setImages([]);
+      setSelectedFiles([]);
+    }
+  }));
 
   const handleChange = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
+
+    if (deferUpload) {
+      setSelectedFiles(files);
+      setImages(files.map(file => ({ previewUrl: URL.createObjectURL(file) })));
+      onFilesSelected?.(files);
+      return;
+    }
 
     setUploading(true);
     toast.loading('Compressing and uploading images...');
@@ -58,7 +73,14 @@ const ImageUploader = ({ onUploadComplete }) => {
     const updated = [...images];
     updated.splice(index, 1);
     setImages(updated);
-    onUploadComplete?.(updated.map(img => img.url));
+    if (deferUpload) {
+      const updatedFiles = [...selectedFiles];
+      updatedFiles.splice(index, 1);
+      setSelectedFiles(updatedFiles);
+      onFilesSelected?.(updatedFiles);
+    } else {
+      onUploadComplete?.(updated.map(img => img.url));
+    }
   };
 
   return (
@@ -88,6 +110,6 @@ const ImageUploader = ({ onUploadComplete }) => {
       </div>
     </div>
   );
-};
+});
 
 export default ImageUploader;

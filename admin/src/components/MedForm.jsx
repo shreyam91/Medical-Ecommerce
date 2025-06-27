@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -16,10 +16,13 @@ const MedForm = ({ category }) => {
     referenceBook: "",
     indications: "",
     lifestyleAdvice: "",
-prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: "" }],
+    prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: "" }],
   });
 
   const [errors, setErrors] = useState({});
+  const [selectedImages, setSelectedImages] = useState([]);
+  const imageUploaderRef = useRef();
+
   const brands = [
     "Select Brand",
     "HealthCo",
@@ -93,7 +96,7 @@ prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: 
     if (!form.name.trim()) newErrors.name = "Name is required.";
     if (!form.brand) newErrors.brand = "Brand is required.";
     if (!form.dosage.trim()) newErrors.dosage = "Dosage is required.";
-    if (!form.gst || isNaN(form.gst)) newErrors.gst = "Valid GST is required.";
+    if (!form.gst) newErrors.gst = "Valid GST is required.";
     if (!form.description.trim())
       newErrors.description = "Description is required.";
     if (!form.cause.trim()) newErrors.cause = "Cause is required.";
@@ -107,16 +110,16 @@ prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: 
       newErrors.lifestyleAdvice =
         "Dietary/lifecycle advice is required.";
 
-    const quantitiesSet = new Set();
+    const unitSet = new Set();
     let hasValidPrice = false;
 
     form.prices.forEach((item, idx) => {
       if (!item.unit) {
         newErrors[`unit${idx}`] = "Unit is required.";
-      } else if (unitsSet.has(item.unit)) {
+      } else if (unitSet.has(item.unit)) {
         newErrors[`unit${idx}`] = "Duplicate unit.";
       } else {
-        quantitiesSet.add(item.unit);
+        unitSet.add(item.unit);
       }
 
       if (!item.actualPrice || parseFloat(item.actualPrice) <= 0) {
@@ -147,9 +150,38 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleImageFilesSelected = (files) => {
+    setSelectedImages(files);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    let uploadedImageUrls = [];
+    if (selectedImages.length > 0) {
+      toast.loading("Uploading images...");
+      for (const file of selectedImages) {
+        try {
+          // Optionally compress here if needed (see ImageUploader)
+          const formData = new FormData();
+          formData.append("image", file);
+          const res = await fetch("http://localhost:3001/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!res.ok) throw new Error("Upload failed");
+          const data = await res.json();
+          uploadedImageUrls.push(data.imageUrl);
+        } catch (err) {
+          toast.dismiss();
+          toast.error("Image upload failed.");
+          return;
+        }
+      }
+      toast.dismiss();
+      toast.success("Images uploaded!");
+    }
 
     const formattedPrices = form.prices.map((item) => ({
       unit: `${item.unit}${unit}`,
@@ -163,17 +195,42 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
       unit,
       category,
       prices: formattedPrices,
+      images: uploadedImageUrls,
     };
 
     console.log("Submitted Product:", finalData);
     toast.success("Medicine details submitted successfully!");
+
+    // Reset form, unit, errors, and images
+    setForm({
+      name: "",
+      brand: "",
+      dosage: "",
+      gst: "",
+      description: "",
+      prescriptionRequired: false,
+      cause: "",
+      keyIngredients: "",
+      referenceBook: "",
+      indications: "",
+      lifestyleAdvice: "",
+      prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: "" }],
+    });
+    setUnit("ml");
+    setErrors({});
+    setSelectedImages([]);
+    imageUploaderRef.current?.clearImages();
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Toaster position="top-right" />
 
-      <ImageUploader />
+      <ImageUploader
+        ref={imageUploaderRef}
+        deferUpload={true}
+        onFilesSelected={handleImageFilesSelected}
+      />
 
       <div>
         <label className="font-medium block mb-1">Select Unit</label>
@@ -313,7 +370,7 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
 <div>
   <label className="font-medium block mb-1">Uses / Indications</label>
   <textarea
-    name="usesOrIndications"
+    name="indications"
     placeholder="Indication eg: "
     className="w-full border rounded p-2"
     rows={2}

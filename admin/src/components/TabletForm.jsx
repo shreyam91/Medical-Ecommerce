@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import ImageUploader from './ImageUploader';
 
@@ -24,10 +24,10 @@ const TabletForm = ({ category }) => {
 
   const [form, setForm] = useState(initialFormState);
   const [errors, setErrors] = useState({});
+  const [selectedImages, setSelectedImages] = useState([]);
+  const imageUploaderRef = useRef();
 
-const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
-
-  const brands = ['Pfizer', 'Sun Pharma', 'Cipla', 'Dr. Reddy’s', 'Other'];
+  const brands = ['Pfizer', 'Sun Pharma', 'Cipla', 'Dr. Reddy'];
   const referenceBooks = [
     'Ayurvedic Classics',
     'Homeopathic Materia Medica',
@@ -82,50 +82,51 @@ const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (!validate()) return;
-
-  //   console.log('Submitted Tablet Form:', form);
-  //   toast.success('Medicine submitted successfully!');
-  //   setForm({ ...initialFormState, category });
-  //   setErrors({});
-  // };
-
-//   const handleSubmit = (e) => {
-//   e.preventDefault();
-//   if (!validate()) return;
-
-//   const finalFormData = {
-//     ...form,
-//     imageUrl,
-//   };
-
-//   console.log("Submitted Tablet Form:", finalFormData);
-//   toast.success("Medicine submitted successfully!");
-//   setForm({ ...initialFormState, category });
-//   setImageUrl("");
-//   setErrors({});
-// };
-
-const handleSubmit = (e) => {
-  e.preventDefault();
-  if (!validate()) return;
-
-  const finalFormData = {
-    ...form,
-    images: uploadedImageUrls,
+  const handleImageFilesSelected = (files) => {
+    setSelectedImages(files);
   };
 
-  console.log("Submitted:", finalFormData);
-  toast.success("Form submitted!");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-  setForm({ ...initialFormState, category });
-  setImageUrl("");
-  setErrors({});
-};
+    let uploadedImageUrls = [];
+    if (selectedImages.length > 0) {
+      toast.loading("Uploading images...");
+      for (const file of selectedImages) {
+        try {
+          const formData = new FormData();
+          formData.append("image", file);
+          const res = await fetch("http://localhost:3001/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!res.ok) throw new Error("Upload failed");
+          const data = await res.json();
+          uploadedImageUrls.push(data.imageUrl);
+        } catch (err) {
+          toast.dismiss();
+          toast.error("Image upload failed.");
+          return;
+        }
+      }
+      toast.dismiss();
+      toast.success("Images uploaded!");
+    }
 
+    const finalFormData = {
+      ...form,
+      images: uploadedImageUrls,
+    };
 
+    console.log("Submitted:", finalFormData);
+    toast.success("Form submitted!");
+
+    setForm({ ...initialFormState, category });
+    setErrors({});
+    setSelectedImages([]);
+    imageUploaderRef.current?.clearImages();
+  };
 
   return (
     <>
@@ -134,8 +135,11 @@ const handleSubmit = (e) => {
       <form onSubmit={handleSubmit} className="space-y-6 mx-auto p-6">
         <h2 className="text-xl font-semibold mb-4">Add Tablet / Capsule Medicine</h2>
 
-        <ImageUploader onUploadComplete={(urls) => setUploadedImageUrls(urls)} />
-
+        <ImageUploader
+          ref={imageUploaderRef}
+          deferUpload={true}
+          onFilesSelected={handleImageFilesSelected}
+        />
 
         {/* Medicine Name */}
         <div>
