@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
 const BannerManager = () => {
   const [newBanner, setNewBanner] = useState(null);
@@ -13,31 +14,83 @@ const BannerManager = () => {
     }
   };
 
-  const handleAddBanner = () => {
+  const handleAddBanner = async () => {
     if (newBanner) {
-      const bannerObj = {
-        id: Date.now(),
-        file: newBanner,
-        url: preview,
-        alt: newBanner.name || "Uploaded banner", // <-- Added alt text
-      };
-      setBanners([...banners, bannerObj]);
-      setNewBanner(null);
-      setPreview(null);
+      const formData = new FormData();
+      formData.append("image", newBanner);
+
+      const toastId = toast.loading("Uploading banner...");
+
+      try {
+        const res = await fetch("http://localhost:3001/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+
+        const bannerObj = {
+          id: Date.now(),
+          url: data.imageUrl,
+          alt: newBanner.name || "Uploaded banner",
+          public_id: data.public_id,
+        };
+
+        setBanners([...banners, bannerObj]);
+        setNewBanner(null);
+        setPreview(null);
+
+        toast.success("Banner uploaded successfully!", { id: toastId });
+      } catch (error) {
+        console.error("Upload failed:", error);
+        toast.error("Upload failed. Please try again.", { id: toastId });
+      }
     }
   };
 
-  const handleRemoveBanner = (id) => {
-    setBanners(banners.filter((banner) => banner.id !== id));
+  const handleRemoveBanner = async (id, public_id) => {
+    const toastId = toast.loading("Removing banner...");
+    const encodedId = encodeURIComponent(public_id);
+    try {
+      await fetch(`http://localhost:3001/api/delete/${encodedId}`, {
+        method: "DELETE",
+      });
+
+      setBanners(banners.filter((banner) => banner.id !== id));
+      toast.success("Banner removed.", { id: toastId });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to remove banner.", { id: toastId });
+    }
   };
+
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/api/images");
+        const data = await res.json();
+        const bannersFromCloudinary = data.map((item) => ({
+          id: item.asset_id,
+          url: item.secure_url,
+          alt: item.public_id,
+          public_id: item.public_id,
+        }));
+        setBanners(bannersFromCloudinary);
+      } catch (error) {
+        console.error("Failed to fetch banners:", error);
+        toast.error("Could not load banners.");
+      }
+    };
+
+    fetchBanners();
+  }, []);
 
   return (
     <div className="max-w-xl mx-auto p-6 mt-10">
-      {/* <h2 className="text-xl font-bold mb-4">Banner Manager</h2> */}
-
+            <Toaster position="top-right" />
+      
       {/* Upload Section */}
       <div className="mb-4">
-        {/* <label className="block mb-2 text-sm font-medium">Upload Banner</label> */}
         <input type="file" accept="image/*" onChange={handleImageChange} />
 
         {/* Preview */}
@@ -45,7 +98,7 @@ const BannerManager = () => {
           <div className="relative mt-4">
             <img
               src={preview}
-              alt={newBanner?.name || "Banner preview"} // <-- Preview alt
+              alt={newBanner?.name || "Banner preview"}
               className="rounded w-full"
             />
             <button
@@ -81,11 +134,11 @@ const BannerManager = () => {
               <div key={banner.id} className="relative border rounded overflow-hidden">
                 <img
                   src={banner.url}
-                  alt={banner.alt} // <-- Displayed banner alt
+                  alt={banner.alt}
                   className="w-full h-auto"
                 />
                 <button
-                  onClick={() => handleRemoveBanner(banner.id)}
+                  onClick={() => handleRemoveBanner(banner.id, banner.public_id)}
                   className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"
                 >
                   Remove
