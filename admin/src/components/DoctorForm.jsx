@@ -17,6 +17,9 @@ function DoctorForm() {
   const [imagePreview, setImagePreview] = useState(null);
   const [submittedData, setSubmittedData] = useState(null);
 
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -25,12 +28,77 @@ function DoctorForm() {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setImagePreview(URL.createObjectURL(file));
+  //   }
+  // };
+
+//   const handleImageChange = async (e) => {
+//   const file = e.target.files[0];
+//   if (!file) return;
+
+//   setImagePreview(URL.createObjectURL(file));
+//   toast.loading("Uploading image...");
+
+//   const formData = new FormData();
+//   formData.append("image", file);
+
+//   try {
+//     const res = await fetch("http://localhost:3001/api/upload", {
+//       method: "POST",
+//       body: formData,
+//     });
+
+//     if (!res.ok) throw new Error("Image upload failed");
+
+//     const data = await res.json();
+//     setUploadedImageUrl(data.imageUrl);
+
+//     toast.success("Image uploaded successfully!");
+//   } catch (error) {
+//     console.error("Image upload error:", error);
+//     toast.error("Image upload failed.");
+//     setImagePreview(null);
+//   }
+// };
+
+const handleImageChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  setImagePreview(URL.createObjectURL(file));
+
+  // 🔥 Show loading toast immediately
+  const toastId = toast.loading("Uploading image...");
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const res = await fetch("http://localhost:3001/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Image upload failed");
+
+    const data = await res.json();
+    setUploadedImageUrl(data.imageUrl);
+
+    // ✅ Update toast to success
+    toast.success("Image uploaded successfully!", { id: toastId });
+  } catch (error) {
+    console.error("Image upload error:", error);
+
+    // ❌ Update toast to error
+    toast.error("Image upload failed.", { id: toastId });
+    setImagePreview(null);
+  }
+};
+
+
 
   const validateForm = () => {
     const {
@@ -78,32 +146,62 @@ function DoctorForm() {
     return true;
   };
 
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   if (!validateForm()) return;
+
+  //   setSubmittedData({
+  //     ...formData,
+  //     image: imagePreview,
+  //   });
+
+  //   toast.success("Form submitted successfully!");
+
+  //   // Reset form
+  //   setFormData({
+  //     name: "",
+  //     phone: "",
+  //     degree: "",
+  //     address: "",
+  //     city: "",
+  //     state: "",
+  //     pincode: "",
+  //     startTime: "",
+  //     endTime: "",
+  //   });
+  //   setImagePreview(null);
+  // };
+
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    setSubmittedData({
-      ...formData,
-      image: imagePreview,
-    });
+  setSubmittedData({
+    ...formData,
+    image: uploadedImageUrl,
+  });
 
-    toast.success("Form submitted successfully!");
+  toast.success("Form submitted successfully!");
 
-    // Reset form
-    setFormData({
-      name: "",
-      phone: "",
-      degree: "",
-      address: "",
-      city: "",
-      state: "",
-      pincode: "",
-      startTime: "",
-      endTime: "",
-    });
-    setImagePreview(null);
-  };
+  // Reset form
+  setFormData({
+    name: "",
+    phone: "",
+    degree: "",
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+    startTime: "",
+    endTime: "",
+  });
+  setImagePreview(null);
+  setUploadedImageUrl(null);
+};
+
+
 
   return (
     <div className="min-h-screen p-8 ">
