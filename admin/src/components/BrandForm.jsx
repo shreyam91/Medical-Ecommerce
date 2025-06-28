@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import imageCompression from 'browser-image-compression';
 
 
 const BrandForm = () => {
@@ -39,48 +40,59 @@ const BrandForm = () => {
   // };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!image) {
-    toast.error("Please upload an image.");
-    return;
-  }
+    if (!image) {
+      toast.error("Please upload an image.");
+      return;
+    }
 
-  setIsUploading(true);
-  const toastId = toast.loading("Uploading brand image...");
+    setIsUploading(true);
+    const toastId = toast.loading("Uploading brand image...");
 
-  const formData = new FormData();
-  formData.append("image", image);
+    let compressedFile = image;
+    try {
+      compressedFile = await imageCompression(image, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
+    } catch (err) {
+      toast.error('Image compression failed. Uploading original.');
+    }
 
-  try {
-    const res = await fetch("http://localhost:3001/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    const formData = new FormData();
+    formData.append("image", compressedFile);
 
-    if (!res.ok) throw new Error("Upload failed");
+    try {
+      const res = await fetch("http://localhost:3001/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json(); // contains imageUrl, public_id
+      if (!res.ok) throw new Error("Upload failed");
 
-    const newBrand = {
-      id: Date.now(),
-      name: brandName,
-      image: data.imageUrl, // Cloudinary-hosted image
-    };
+      const data = await res.json(); // contains imageUrl, public_id
 
-    setBrandList([newBrand, ...brandList]);
-    toast.success("Brand added successfully!", { id: toastId });
+      const newBrand = {
+        id: Date.now(),
+        name: brandName,
+        image: data.imageUrl, // Cloudinary-hosted image
+      };
 
-    // Reset form
-    setBrandName("");
-    setImage(null);
-  } catch (err) {
-    console.error(err);
-    toast.error("Image upload failed.", { id: toastId });
-  } finally {
-    setIsUploading(false);
-  }
-};
+      setBrandList([newBrand, ...brandList]);
+      toast.success("Brand added successfully!", { id: toastId });
+
+      // Reset form
+      setBrandName("");
+      setImage(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Image upload failed.", { id: toastId });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
 
   const handleRemoveBrand = (id) => {

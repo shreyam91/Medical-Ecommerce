@@ -6,6 +6,8 @@ import List from '@editorjs/list';
 import ImageTool from '@editorjs/image';
 import Paragraph from '@editorjs/paragraph';
 
+import imageCompression from 'browser-image-compression';
+
 // Tools configuration
 const EDITOR_JS_TOOLS = {
   header: Header,
@@ -45,13 +47,48 @@ const BlogEditor = ({ blog = {}, onSave, onCancel }) => {
     // eslint-disable-next-line
   }, []);
 
-  const handleBannerUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setBannerFile(file);
-      setBanner(URL.createObjectURL(file));
-    }
-  };
+  // const handleBannerUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setBannerFile(file);
+  //     setBanner(URL.createObjectURL(file));
+  //   }
+  // };
+
+  const handleBannerUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    toast.loading('Uploading banner...');
+    
+    const compressed = await imageCompression(file, {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1200,
+      useWebWorker: true,
+    });
+
+    const formData = new FormData();
+    formData.append('image', compressed);
+
+    const response = await fetch('http://localhost:3001/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error('Upload failed');
+
+    const data = await response.json();
+    setBanner(data.imageUrl); // Assuming backend returns { imageUrl: '...' }
+
+    toast.dismiss();
+    toast.success('Banner uploaded!');
+  } catch (err) {
+    console.error('Image upload failed', err);
+    toast.dismiss();
+    toast.error('Failed to upload banner');
+  }
+};
 
   const handleAddTag = (e) => {
     if (e.key === 'Enter' || e.key === ',') {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import imageCompression from 'browser-image-compression';
 
 function DoctorForm() {
   const [formData, setFormData] = useState({
@@ -73,8 +74,19 @@ const handleImageChange = async (e) => {
   // 🔥 Show loading toast immediately
   const toastId = toast.loading("Uploading image...");
 
+  let compressedFile = file;
+  try {
+    compressedFile = await imageCompression(file, {
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 1024,
+      useWebWorker: true,
+    });
+  } catch (err) {
+    toast.error('Image compression failed. Uploading original.');
+  }
+
   const formData = new FormData();
-  formData.append("image", file);
+  formData.append("image", compressedFile);
 
   try {
     const res = await fetch("http://localhost:3001/api/upload", {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import imageCompression from 'browser-image-compression';
 
 const BannerManager = () => {
   const [newBanner, setNewBanner] = useState(null);
@@ -17,29 +18,34 @@ const BannerManager = () => {
   const handleAddBanner = async () => {
     if (newBanner) {
       const formData = new FormData();
-      formData.append("image", newBanner);
-
+      // Compress the image before upload
+      let compressedFile = newBanner;
+      try {
+        compressedFile = await imageCompression(newBanner, {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1024,
+          useWebWorker: true,
+        });
+      } catch (err) {
+        toast.error('Image compression failed. Uploading original.');
+      }
+      formData.append("image", compressedFile);
       const toastId = toast.loading("Uploading banner...");
-
       try {
         const res = await fetch("http://localhost:3001/api/upload", {
           method: "POST",
           body: formData,
         });
-
         const data = await res.json();
-
         const bannerObj = {
           id: Date.now(),
           url: data.imageUrl,
           alt: newBanner.name || "Uploaded banner",
           public_id: data.public_id,
         };
-
         setBanners([...banners, bannerObj]);
         setNewBanner(null);
         setPreview(null);
-
         toast.success("Banner uploaded successfully!", { id: toastId });
       } catch (error) {
         console.error("Upload failed:", error);
