@@ -74,7 +74,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen px-4 py-10 sm:px-8 lg:px-24 max-w-6xl mx-auto bg-white">
-      <h1 className="text-3xl font-bold text-blue-600 mb-8">Our Blog Posts</h1>
+      <h1 className="text-3xl font-bold text-green-600 mb-8">Our Blog Posts</h1>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -89,7 +89,7 @@ const Blog = () => {
               }}
               className={`px-4 py-1 rounded-full border text-sm ${
                 selectedCategory === cat
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-orange-400 text-white'
                   : 'bg-white text-gray-700 border-gray-300'
               }`}
             >
@@ -131,18 +131,18 @@ const Blog = () => {
             />
             <div className="flex-1">
               <Link to={`/blog/${id}`}>
-                <h2 className="text-2xl font-semibold text-blue-700 hover:underline">
+                <h2 className="text-2xl font-semibold text-orange-600 hover:underline">
                   {title}
                 </h2>
               </Link>
               <div className="flex items-center justify-between text-sm text-gray-500 mt-1">
                 <span>{new Date(date).toDateString()}</span>
-                <span className="italic">{category}</span>
+                <span className="italic ">{category}</span>
               </div>
               <p className="mt-3 text-gray-700">{summary}</p>
               <Link
                 to={`/blog/${id}`}
-                className="text-blue-600 hover:underline mt-3 block"
+                className="text-green-600 hover:underline mt-3 block"
               >
                 Read More →
               </Link>

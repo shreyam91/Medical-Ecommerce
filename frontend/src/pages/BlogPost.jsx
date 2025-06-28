@@ -85,7 +85,7 @@ const BlogPost = () => {
       <div className="flex flex-wrap justify-between items-center text-sm text-gray-500 border-b pb-4 mb-6 gap-2">
         <div className="flex gap-4">
           <span>{new Date(blog.date).toDateString()}</span>
-          <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+          <span className="bg-blue-50 text-green-700 px-2 py-0.5 rounded-full text-s font-semibold">
             {blog.category}
           </span>
         </div>
