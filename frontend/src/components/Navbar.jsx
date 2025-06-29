@@ -42,8 +42,8 @@ const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   }, []);
 
 
-//   const [locations, setLocations] = useState<string>([]);
-// const [selectedPincode, setSelectedPincode] = useState<string>("");
+  const [locations, setLocations] = useState([]);
+const [selectedPincode, setSelectedPincode] = useState("");
 
   // Calculate total items in cart
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -55,25 +55,25 @@ const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     { name: "Contact", link: "#contact" },
   ];
 
-//   useEffect(() => {
-//   // 1. Load all unique pincodes
-//   fetch("http://localhost:3001/api/pincodes")
-//     .then((res) => res.json())
-//     .then((pincodes) => {
-//       setLocations(pincodes); // Dropdown options
-//     })
-//     .catch((err) => console.error("Failed to load pincodes:", err));
+  useEffect(() => {
+  // 1. Load all unique pincodes
+  fetch("http://localhost:3001/api/pincodes")
+    .then((res) => res.json())
+    .then((pincodes) => {
+      setLocations(pincodes); // Dropdown options
+    })
+    .catch((err) => console.error("Failed to load pincodes:", err));
 
-//   // 2. Detect user's pincode from backend
-//   fetch("http://localhost:3001/api/detect-location")
-//     .then((res) => res.json())
-//     .then((data) => {
-//       if (data.pincode) {
-//         setSelectedPincode(data.pincode); // Auto-select this
-//       }
-//     })
-//     .catch((err) => console.warn("Location detection failed:", err));
-// }, []);
+  // 2. Detect user's pincode from backend
+  fetch("http://localhost:3001/api/detect-location")
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.pincode) {
+        setSelectedPincode(data.pincode); // Auto-select this
+      }
+    })
+    .catch((err) => console.warn("Location detection failed:", err));
+}, []);
 
 
 
@@ -99,14 +99,14 @@ const [isDropdownOpen, setIsDropdownOpen] = useState(false);
               <div className="flex-1 flex justify-center">
                 <div className="flex items-center gap-4 w-full max-w-2xl">
 
-                 {/* <select value={selectedPincode} onChange={handleLocationChange}>
+                 <select value={selectedPincode} onChange={handleLocationChange}>
   <option value="">Select Pincode</option>
   {locations.map((pincode, idx) => (
     <option key={idx} value={pincode}>
       {pincode}
     </option>
   ))}
-</select> */}
+</select>
 
 
 
@@ -120,7 +120,15 @@ const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
               <div className="flex items-center gap-4">
 
-                <Link to= "/offers">
+                {/* <Link to= "/offers">
+                <NavbarButton variant="secondary" >
+                    <div className="flex items-center gap-2 text-xl">
+                      <BiSolidOffer />
+                    </div>
+                </NavbarButton>
+                </Link> */}
+                
+                <Link to= "/doctors">
                 <NavbarButton variant="secondary" >
                     <div className="flex items-center gap-2 text-xl">
                       <BiSolidOffer />

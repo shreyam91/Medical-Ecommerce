@@ -20,6 +20,7 @@ import BlogPost from '../pages/BlogPost';
 import Offers from '../pages/Offers';
 import Contact from '../pages/Contact';
 import UserProfile from '../pages/UserProfile';
+import DoctorPage from '../pages/DoctorPage';
 const AppRoutes = () => {
   return (
     <Routes>
@@ -45,6 +46,7 @@ const AppRoutes = () => {
       <Route path="/contact" element={<Contact/>} />
 
       <Route path="/profile" element={<UserProfile/>} />
+      <Route path="/doctors" element={<DoctorPage/>} />
 
       {/* Protected Routes (require login) */}
       {/* <Route path="/profile" element={
