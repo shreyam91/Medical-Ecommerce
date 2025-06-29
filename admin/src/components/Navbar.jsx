@@ -11,15 +11,15 @@ const pathNameMap = {
   "/payment": "Payment",
 };
 
-const Navbar = () => {
+const Navbar = ({ onLogout }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const title = pathNameMap[location.pathname] || "Dashboard";
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-
-    navigate("/login");
+    localStorage.removeItem("user");
+    if (onLogout) onLogout();
+    navigate("/");
   };
 
   return (
