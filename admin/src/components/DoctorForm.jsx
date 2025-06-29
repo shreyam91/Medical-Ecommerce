@@ -29,55 +29,18 @@ function DoctorForm() {
     }));
   };
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setImagePreview(URL.createObjectURL(file));
-  //   }
-  // };
-
-//   const handleImageChange = async (e) => {
-//   const file = e.target.files[0];
-//   if (!file) return;
-
-//   setImagePreview(URL.createObjectURL(file));
-//   toast.loading("Uploading image...");
-
-//   const formData = new FormData();
-//   formData.append("image", file);
-
-//   try {
-//     const res = await fetch("http://localhost:3001/api/upload", {
-//       method: "POST",
-//       body: formData,
-//     });
-
-//     if (!res.ok) throw new Error("Image upload failed");
-
-//     const data = await res.json();
-//     setUploadedImageUrl(data.imageUrl);
-
-//     toast.success("Image uploaded successfully!");
-//   } catch (error) {
-//     console.error("Image upload error:", error);
-//     toast.error("Image upload failed.");
-//     setImagePreview(null);
-//   }
-// };
-
 const handleImageChange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
   setImagePreview(URL.createObjectURL(file));
 
-  // 🔥 Show loading toast immediately
   const toastId = toast.loading("Uploading image...");
 
   let compressedFile = file;
   try {
     compressedFile = await imageCompression(file, {
-      maxSizeMB: 0.5,
+      maxSizeMB: 0.2,
       maxWidthOrHeight: 1024,
       useWebWorker: true,
     });
@@ -102,7 +65,7 @@ const handleImageChange = async (e) => {
     // ✅ Update toast to success
     toast.success("Image uploaded successfully!", { id: toastId });
   } catch (error) {
-    console.error("Image upload error:", error);
+    // console.error("Image upload error:", error);
 
     // ❌ Update toast to error
     toast.error("Image upload failed.", { id: toastId });
@@ -157,33 +120,6 @@ const handleImageChange = async (e) => {
 
     return true;
   };
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-
-  //   if (!validateForm()) return;
-
-  //   setSubmittedData({
-  //     ...formData,
-  //     image: imagePreview,
-  //   });
-
-  //   toast.success("Form submitted successfully!");
-
-  //   // Reset form
-  //   setFormData({
-  //     name: "",
-  //     phone: "",
-  //     degree: "",
-  //     address: "",
-  //     city: "",
-  //     state: "",
-  //     pincode: "",
-  //     startTime: "",
-  //     endTime: "",
-  //   });
-  //   setImagePreview(null);
-  // };
 
   const handleSubmit = (e) => {
   e.preventDefault();

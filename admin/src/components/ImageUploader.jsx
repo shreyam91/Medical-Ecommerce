@@ -57,7 +57,7 @@ const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUplo
           previewUrl: URL.createObjectURL(compressedFile),
         });
       } catch (err) {
-        console.error('Error:', err);
+        // console.error('Error:', err);
         toast.error('Failed to upload some images.');
       }
     }

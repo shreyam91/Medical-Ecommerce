@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import ImageUploader from './ImageUploader';
+import { gstOptions } from '../context/UserContext';
 
 const TabletForm = ({ category }) => {
   const initialFormState = {
@@ -35,7 +36,6 @@ const TabletForm = ({ category }) => {
     'Pharmacology Reference',
     'Other',
   ];
-  const gstOptions = ['5%', '12%', '18%', 'Exempt'];
 
   useEffect(() => {
     setForm((prev) => ({ ...prev, category }));
@@ -344,9 +344,11 @@ const TabletForm = ({ category }) => {
               className="w-full border rounded p-2 border-gray-300"
             >
               <option value="">Select GST</option>
-              {gstOptions.map((option, i) => (
-                <option key={i} value={option}>{option}</option>
-              ))}
+              {gstOptions.map((option, index) => (
+                              <option key={index} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
             </select>
           </div>
 

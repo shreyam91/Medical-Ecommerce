@@ -69,7 +69,7 @@ const renderBlock = (block, index) => {
         return null; // safely ignore unknown blocks
     }
   } catch (err) {
-    console.error('Error rendering block:', block, err);
+    // console.error('Error rendering block:', block, err);
     return null;
   }
 };

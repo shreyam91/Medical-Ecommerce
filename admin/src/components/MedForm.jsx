@@ -1,8 +1,11 @@
 import React, { useState, useRef } from "react";
 import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
+import { gstOptions } from '../context/UserContext';
+
 
 const MedForm = ({ category }) => {
+
   const [unit, setUnit] = useState("ml");
   const [form, setForm] = useState({
     name: "",
@@ -30,8 +33,6 @@ const MedForm = ({ category }) => {
     "MediCare",
     "WellnessLabs",
   ];
-
-    const gstOptions = ['5%', '12%', '18%', 'Exempt'];
 
   const referenceBooks = [
   'Ayurvedic Classics',
@@ -198,7 +199,7 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
       images: uploadedImageUrls,
     };
 
-    console.log("Submitted Product:", finalData);
+    // console.log("Submitted Product:", finalData);
     toast.success("Medicine details submitted successfully!");
 
     // Reset form, unit, errors, and images
@@ -274,6 +275,27 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
         {errors.brand && <p className="text-red-500 text-sm">{errors.brand}</p>}
       </div>
 
+      {/* Reference Book */}
+<div>
+  <label htmlFor="referenceBook" className="block font-medium mb-1">
+    Reference Book
+  </label>
+  <select
+    id="referenceBook"
+    name="referenceBook"
+    value={form.referenceBook}
+    onChange={handleChange}
+    className="w-full border rounded p-2 border-gray-300"
+  >
+    <option value="">Select Reference Book</option>
+    {referenceBooks.map((book, i) => (
+      <option key={i} value={book}>
+        {book}
+      </option>
+    ))}
+  </select>
+</div>
+
       <div>
         <label className="font-medium block mb-1">Dosage Info</label>
         <input
@@ -304,19 +326,6 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
         )}
       </div>
 
-      {/* <div>
-        <label className="font-medium block mb-1">GST (%)</label>
-        <input
-          type="number"
-          name="tax"
-          className="w-full border rounded p-2"
-          value={form.tax}
-          placeholder="enter Gst eg:{5%,12%,18%}"
-          onChange={handleChange}
-        />
-        {errors.tax && <p className="text-red-500 text-sm">{errors.gst}</p>}
-      </div> */}
-
       <div>
   <label className="font-medium block mb-1">Cause</label>
   <input
@@ -343,27 +352,6 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
   {errors.keyIngredients && (
     <p className="text-red-500 text-sm">{errors.keyIngredients}</p>
   )}
-</div>
-
-{/* Reference Book */}
-<div>
-  <label htmlFor="referenceBook" className="block font-medium mb-1">
-    Reference Book
-  </label>
-  <select
-    id="referenceBook"
-    name="referenceBook"
-    value={form.referenceBook}
-    onChange={handleChange}
-    className="w-full border rounded p-2 border-gray-300"
-  >
-    <option value="">Select Reference Book</option>
-    {referenceBooks.map((book, i) => (
-      <option key={i} value={book}>
-        {book}
-      </option>
-    ))}
-  </select>
 </div>
 
 
@@ -407,8 +395,10 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
               className="w-full border rounded p-2 border-gray-300"
             >
               <option value="">Select GST</option>
-              {gstOptions.map((option, i) => (
-                <option key={i} value={option}>{option}</option>
+              {gstOptions.map((option, index) => (
+                <option key={index} value={option.value}>
+                  {option.label}
+                </option>
               ))}
             </select>
           </div>

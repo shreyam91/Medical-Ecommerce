@@ -22,7 +22,7 @@ const BannerManager = () => {
       let compressedFile = newBanner;
       try {
         compressedFile = await imageCompression(newBanner, {
-          maxSizeMB: 0.5,
+          maxSizeMB: 0.2,
           maxWidthOrHeight: 1024,
           useWebWorker: true,
         });
@@ -48,7 +48,7 @@ const BannerManager = () => {
         setPreview(null);
         toast.success("Banner uploaded successfully!", { id: toastId });
       } catch (error) {
-        console.error("Upload failed:", error);
+        // console.error("Upload failed:", error);
         toast.error("Upload failed. Please try again.", { id: toastId });
       }
     }
@@ -65,7 +65,7 @@ const BannerManager = () => {
       setBanners(banners.filter((banner) => banner.id !== id));
       toast.success("Banner removed.", { id: toastId });
     } catch (err) {
-      console.error("Delete failed:", err);
+      // console.error("Delete failed:", err);
       toast.error("Failed to remove banner.", { id: toastId });
     }
   };
@@ -83,7 +83,7 @@ const BannerManager = () => {
         }));
         setBanners(bannersFromCloudinary);
       } catch (error) {
-        console.error("Failed to fetch banners:", error);
+        // console.error("Failed to fetch banners:", error);
         toast.error("Could not load banners.");
       }
     };

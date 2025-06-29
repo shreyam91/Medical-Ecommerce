@@ -18,26 +18,6 @@ const BrandForm = () => {
     }
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (!image) {
-  //     toast.error("Please upload an image.");
-  //     return;
-  //   }
-
-  //   const brandImageURL = URL.createObjectURL(image);
-
-  //   const newBrand = {
-  //     id: Date.now(),
-  //     name: brandName,
-  //     image: brandImageURL,
-  //   };
-
-  //   setBrandList([newBrand, ...brandList]);
-  //   toast.success("Brand added successfully!");
-  //   setBrandName("");
-  //   setImage(null);
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +33,7 @@ const BrandForm = () => {
     let compressedFile = image;
     try {
       compressedFile = await imageCompression(image, {
-        maxSizeMB: 0.5,
+        maxSizeMB: 0.2,
         maxWidthOrHeight: 1024,
         useWebWorker: true,
       });
@@ -72,12 +52,12 @@ const BrandForm = () => {
 
       if (!res.ok) throw new Error("Upload failed");
 
-      const data = await res.json(); // contains imageUrl, public_id
+      const data = await res.json(); 
 
       const newBrand = {
         id: Date.now(),
         name: brandName,
-        image: data.imageUrl, // Cloudinary-hosted image
+        image: data.imageUrl, 
       };
 
       setBrandList([newBrand, ...brandList]);
@@ -87,7 +67,7 @@ const BrandForm = () => {
       setBrandName("");
       setImage(null);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast.error("Image upload failed.", { id: toastId });
     } finally {
       setIsUploading(false);
