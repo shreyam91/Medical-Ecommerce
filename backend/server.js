@@ -9,10 +9,21 @@ require('dotenv').config(); // This loads .env variables into process.env
 
 const app = express();
 const PORT = 3001;
+app.use(cors({ origin: "http://localhost:5173" }));
+app.use(express.json());
 
 app.use(cors());
 app.use('/api', uploadRoutes);
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use('/api/blog', require('./routes/blog'));
+app.use('/api/delivery_status', require('./routes/delivery_status'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/product_price', require('./routes/product_price'));
+app.use('/api/product', require('./routes/product'));
+app.use('/api/doctor', require('./routes/doctor'));
+app.use('/api/banner', require('./routes/banner'));
+app.use('/api/book', require('./routes/book'));
+app.use('/api/brand', require('./routes/brand'));
+app.use('/api/order', require('./routes/order'));
 
 // Endpoint to return unique pincodes
 // app.get('/api/pincodes', (req, res) => {
