@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import ImageUploader from './ImageUploader';
 import { gstOptions } from '../context/UserContext';
+import { createProduct, updateProduct } from '../lib/productApi';
 
-const TabletForm = ({ category }) => {
+const TabletForm = ({ category, editProduct, setEditProduct }) => {
   const initialFormState = {
     name: '',
     brand: '',
@@ -38,8 +39,28 @@ const TabletForm = ({ category }) => {
   ];
 
   useEffect(() => {
-    setForm((prev) => ({ ...prev, category }));
-  }, [category]);
+    if (editProduct) {
+      setForm({
+        name: editProduct.name || '',
+        brand: editProduct.brand || '',
+        dosage: editProduct.dosage_information || '',
+        quantity: editProduct.total_quantity || '',
+        gst: editProduct.gst || '',
+        description: editProduct.description || '',
+        keyIngredients: editProduct.key_ingredients || '',
+        referenceBook: (editProduct.reference_books && editProduct.reference_books[0]) || '',
+        indications: editProduct.uses_indications || '',
+        lifestyleAdvice: '',
+        actualPrice: editProduct.actual_price || '',
+        discount: editProduct.discount_percent || '',
+        sellingPrice: editProduct.selling_price || '',
+        prescriptionRequired: editProduct.prescription_required || false,
+        category: editProduct.category || category,
+        cause: editProduct.cause || '',
+      });
+      setSelectedImages(editProduct.images || []);
+    }
+  }, [editProduct]);
 
   const validate = () => {
     const newErrors = {};
@@ -91,7 +112,7 @@ const TabletForm = ({ category }) => {
     if (!validate()) return;
 
     let uploadedImageUrls = [];
-    if (selectedImages.length > 0) {
+    if (selectedImages.length > 0 && typeof selectedImages[0] !== 'string') {
       toast.loading("Uploading images...");
       for (const file of selectedImages) {
         try {
@@ -112,6 +133,8 @@ const TabletForm = ({ category }) => {
       }
       toast.dismiss();
       toast.success("Images uploaded!");
+    } else if (selectedImages.length > 0) {
+      uploadedImageUrls = selectedImages;
     }
 
     const finalFormData = {
@@ -119,13 +142,22 @@ const TabletForm = ({ category }) => {
       images: uploadedImageUrls,
     };
 
-    console.log("Submitted:", finalFormData);
-    toast.success("Form submitted!");
-
-    setForm({ ...initialFormState, category });
-    setErrors({});
-    setSelectedImages([]);
-    imageUploaderRef.current?.clearImages();
+    try {
+      if (editProduct) {
+        await updateProduct(editProduct.id, finalFormData);
+        toast.success("Product updated!");
+        setEditProduct(null);
+      } else {
+        await createProduct(finalFormData);
+        toast.success("Product created!");
+      }
+      setForm({ ...initialFormState, category });
+      setErrors({});
+      setSelectedImages([]);
+      imageUploaderRef.current?.clearImages();
+    } catch (err) {
+      toast.error("Failed to save product.");
+    }
   };
 
   return (

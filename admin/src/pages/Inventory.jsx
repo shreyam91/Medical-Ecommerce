@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getProducts, deleteProduct, updateProduct } from '../lib/productApi';
 
 const initialData = [
   {
@@ -68,28 +69,43 @@ const getStatusFromQuantity = (quantity) => {
 };
 
 const InventoryPage = () => {
-  const [inventory, setInventory] = useState(initialData);
+  const [inventory, setInventory] = useState([]);
   const [search, setSearch] = useState("");
   const [brandFilter, setBrandFilter] = useState("All");
   const [editingItem, setEditingItem] = useState(null);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
-  const handleDelete = (id) => {
-    setInventory(inventory.filter((item) => item.id !== id));
+  useEffect(() => {
+    getProducts().then(setInventory).catch(() => setInventory([]));
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await deleteProduct(id);
+      setInventory(inventory.filter((item) => item.id !== id));
+    } catch (err) {
+      alert('Failed to delete product');
+    }
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     const updatedItem = {
       ...editingItem,
       status: getStatusFromQuantity(editingItem.quantity),
     };
-    setInventory((prev) =>
-      prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
-    );
-    setEditingItem(null);
+    try {
+      await updateProduct(updatedItem.id, updatedItem);
+      setInventory((prev) =>
+        prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
+      );
+      setEditingItem(null);
+    } catch (err) {
+      alert('Failed to update product');
+    }
   };
 
   const handleSort = (key) => {

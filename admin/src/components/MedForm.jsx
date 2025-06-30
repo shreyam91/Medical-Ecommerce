@@ -1,10 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
 import { gstOptions } from '../context/UserContext';
+import { createProduct, updateProduct } from '../lib/productApi';
 
 
-const MedForm = ({ category }) => {
+const MedForm = ({ category, editProduct, setEditProduct }) => {
 
   const [unit, setUnit] = useState("ml");
   const [form, setForm] = useState({
@@ -155,16 +156,35 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
     setSelectedImages(files);
   };
 
+  useEffect(() => {
+    if (editProduct) {
+      setForm({
+        name: editProduct.name || '',
+        brand: editProduct.brand || '',
+        dosage: editProduct.dosage_information || '',
+        gst: editProduct.gst || '',
+        description: editProduct.description || '',
+        prescriptionRequired: editProduct.prescription_required || false,
+        cause: editProduct.cause || '',
+        keyIngredients: editProduct.key_ingredients || '',
+        referenceBook: (editProduct.reference_books && editProduct.reference_books[0]) || '',
+        indications: editProduct.uses_indications || '',
+        lifestyleAdvice: '',
+        prices: [{ unit: '', actualPrice: editProduct.actual_price || '', discount: editProduct.discount_percent || '', sellingPrice: editProduct.selling_price || '', quantity: editProduct.total_quantity || '' }],
+      });
+      setSelectedImages(editProduct.images || []);
+    }
+  }, [editProduct]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     let uploadedImageUrls = [];
-    if (selectedImages.length > 0) {
+    if (selectedImages.length > 0 && typeof selectedImages[0] !== 'string') {
       toast.loading("Uploading images...");
       for (const file of selectedImages) {
         try {
-          // Optionally compress here if needed (see ImageUploader)
           const formData = new FormData();
           formData.append("image", file);
           const res = await fetch("http://localhost:3001/api/upload", {
@@ -182,10 +202,12 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
       }
       toast.dismiss();
       toast.success("Images uploaded!");
+    } else if (selectedImages.length > 0) {
+      uploadedImageUrls = selectedImages;
     }
 
     const formattedPrices = form.prices.map((item) => ({
-      unit: `${item.unit}${unit}`,
+      unit: item.unit,
       actualPrice: item.actualPrice,
       sellingPrice: item.sellingPrice,
       quantity: item.quantity,
@@ -199,28 +221,35 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
       images: uploadedImageUrls,
     };
 
-    // console.log("Submitted Product:", finalData);
-    toast.success("Medicine details submitted successfully!");
-
-    // Reset form, unit, errors, and images
-    setForm({
-      name: "",
-      brand: "",
-      dosage: "",
-      gst: "",
-      description: "",
-      prescriptionRequired: false,
-      cause: "",
-      keyIngredients: "",
-      referenceBook: "",
-      indications: "",
-      lifestyleAdvice: "",
-      prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: "" }],
-    });
-    setUnit("ml");
-    setErrors({});
-    setSelectedImages([]);
-    imageUploaderRef.current?.clearImages();
+    try {
+      if (editProduct) {
+        await updateProduct(editProduct.id, finalData);
+        toast.success("Product updated!");
+        setEditProduct(null);
+      } else {
+        await createProduct(finalData);
+        toast.success("Product created!");
+      }
+      setForm({
+        name: '',
+        brand: '',
+        dosage: '',
+        gst: '',
+        description: '',
+        prescriptionRequired: false,
+        cause: '',
+        keyIngredients: '',
+        referenceBook: '',
+        indications: '',
+        lifestyleAdvice: '',
+        prices: [{ unit: '', actualPrice: '', discount: '', sellingPrice: '', quantity: '' }],
+      });
+      setErrors({});
+      setSelectedImages([]);
+      imageUploaderRef.current?.clearImages();
+    } catch (err) {
+      toast.error("Failed to save product.");
+    }
   };
 
   return (
