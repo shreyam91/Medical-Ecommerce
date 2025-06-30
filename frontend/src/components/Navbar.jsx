@@ -14,7 +14,7 @@ import { MdAddShoppingCart } from "react-icons/md";
 import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
 import { Link, Navigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { BiSolidOffer } from "react-icons/bi";
+import { FaUserDoctor } from "react-icons/fa6";
 import { useRef } from "react";
 
 export default function NavbarMain() {
@@ -23,11 +23,11 @@ export default function NavbarMain() {
   const { cartItems } = useCart();
 
   const [user, setUser] = useState({
-  isLoggedIn: true, // toggle to false to simulate logout
-  name: "John Doe",
-});
+    isLoggedIn: true, // toggle to false to simulate logout
+    name: "John Doe",
+  });
 
-const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Click outside to close dropdown
@@ -41,12 +41,14 @@ const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
   const [locations, setLocations] = useState([]);
-const [selectedPincode, setSelectedPincode] = useState("");
+  const [selectedPincode, setSelectedPincode] = useState("");
 
   // Calculate total items in cart
-  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const cartItemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   const navigationLinks = [
     { name: "Home", link: "/" },
@@ -56,33 +58,29 @@ const [selectedPincode, setSelectedPincode] = useState("");
   ];
 
   useEffect(() => {
-  // 1. Load all unique pincodes
-  fetch("http://localhost:3001/api/pincodes")
-    .then((res) => res.json())
-    .then((pincodes) => {
-      setLocations(pincodes); // Dropdown options
-    })
-    .catch((err) => console.error("Failed to load pincodes:", err));
+    // 1. Load all unique pincodes
+    fetch("http://localhost:3001/api/pincodes")
+      .then((res) => res.json())
+      .then((pincodes) => {
+        setLocations(pincodes); // Dropdown options
+      })
+      .catch((err) => console.error("Failed to load pincodes:", err));
 
-  // 2. Detect user's pincode from backend
-  fetch("http://localhost:3001/api/detect-location")
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.pincode) {
-        setSelectedPincode(data.pincode); // Auto-select this
-      }
-    })
-    .catch((err) => console.warn("Location detection failed:", err));
-}, []);
+    // 2. Detect user's pincode from backend
+    fetch("http://localhost:3001/api/detect-location")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.pincode) {
+          setSelectedPincode(data.pincode); // Auto-select this
+        }
+      })
+      .catch((err) => console.warn("Location detection failed:", err));
+  }, []);
 
-
-
-
- const handleLocationChange = (e) => {
-  setSelectedPincode(e.target.value);
-  console.log("Selected pincode:", e.target.value);
-};
-
+  const handleLocationChange = (e) => {
+    setSelectedPincode(e.target.value);
+    console.log("Selected pincode:", e.target.value);
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -98,17 +96,17 @@ const [selectedPincode, setSelectedPincode] = useState("");
               <NavbarLogo />
               <div className="flex-1 flex justify-center">
                 <div className="flex items-center gap-4 w-full max-w-2xl">
-
-                 <select value={selectedPincode} onChange={handleLocationChange}>
-  <option value="">Select Pincode</option>
-  {locations.map((pincode, idx) => (
-    <option key={idx} value={pincode}>
-      {pincode}
-    </option>
-  ))}
-</select>
-
-
+                  <select
+                    value={selectedPincode}
+                    onChange={handleLocationChange}
+                  >
+                    <option value="">Select Pincode</option>
+                    {locations.map((pincode, idx) => (
+                      <option key={idx} value={pincode}>
+                        {pincode}
+                      </option>
+                    ))}
+                  </select>
 
                   <input
                     type="text"
@@ -119,21 +117,12 @@ const [selectedPincode, setSelectedPincode] = useState("");
               </div>
 
               <div className="flex items-center gap-4">
-
-                {/* <Link to= "/offers">
-                <NavbarButton variant="secondary" >
-                    <div className="flex items-center gap-2 text-xl">
-                      <BiSolidOffer />
+                <Link to="/doctors">
+                  <NavbarButton variant="secondary">
+                    <div className="flex items-center gap-2 text-l">
+                      Near By Doctor <FaUserDoctor />
                     </div>
-                </NavbarButton>
-                </Link> */}
-                
-                <Link to= "/doctors">
-                <NavbarButton variant="secondary" >
-                    <div className="flex items-center gap-2 text-xl">
-                      <BiSolidOffer />
-                    </div>
-                </NavbarButton>
+                  </NavbarButton>
                 </Link>
 
                 <Link to="/cart">
@@ -145,45 +134,56 @@ const [selectedPincode, setSelectedPincode] = useState("");
                   </NavbarButton>
                 </Link>
                 {user.isLoggedIn ? (
-  <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-2 text-l hover:text-blue-600"
-            >
-              {user.name}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setIsDropdownOpen((prev) => !prev)}
+                      className="flex items-center gap-2 text-l hover:text-blue-600"
+                    >
+                      {user.name}
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
 
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={() => {
-                    setUser({ isLoggedIn: false });
-                    setIsDropdownOpen(false);
-                    Navigate("/"); 
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-) : (
-  <Link to='/login'>
-    <NavbarButton variant="secondary" className="text-l">Login</NavbarButton>
-  </Link>
-)}
-
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setUser({ isLoggedIn: false });
+                            setIsDropdownOpen(false);
+                            Navigate("/");
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link to="/login">
+                    <NavbarButton variant="secondary" className="text-l">
+                      Login
+                    </NavbarButton>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -250,42 +250,41 @@ const [selectedPincode, setSelectedPincode] = useState("");
                     </NavbarButton>
                   </Link>
                   {user.isLoggedIn ? (
-  <>
-    <Link to="/profile">
-      <NavbarButton
-        onClick={() => setIsMobileMenuOpen(false)}
-        variant="primary"
-        className="w-full"
-      >
-        Profile
-      </NavbarButton>
-    </Link>
-    <NavbarButton
-      onClick={() => {
-        setUser({ isLoggedIn: false });
-        setIsMobileMenuOpen(false);
-      }}
-      variant="primary"
-      className="w-full"
-    >
-      Logout
-    </NavbarButton>
-  </>
-) : (
-  <Link to='/login'>
-    <NavbarButton
-      onClick={() => {
-        setIsMobileMenuOpen(false);
-        console.log("Login clicked (mobile)");
-      }}
-      variant="primary"
-      className="w-full"
-    >
-      Login
-    </NavbarButton>
-  </Link>
-)}
-
+                    <>
+                      <Link to="/profile">
+                        <NavbarButton
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          variant="primary"
+                          className="w-full"
+                        >
+                          Profile
+                        </NavbarButton>
+                      </Link>
+                      <NavbarButton
+                        onClick={() => {
+                          setUser({ isLoggedIn: false });
+                          setIsMobileMenuOpen(false);
+                        }}
+                        variant="primary"
+                        className="w-full"
+                      >
+                        Logout
+                      </NavbarButton>
+                    </>
+                  ) : (
+                    <Link to="/login">
+                      <NavbarButton
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          console.log("Login clicked (mobile)");
+                        }}
+                        variant="primary"
+                        className="w-full"
+                      >
+                        Login
+                      </NavbarButton>
+                    </Link>
+                  )}
                 </div>
               </MobileNavMenu>
             </MobileNav>

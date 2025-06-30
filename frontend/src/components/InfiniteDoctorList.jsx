@@ -25,7 +25,7 @@ export default function InfiniteDoctorList({ doctors, onSelect }) {
           <DoctorCard key={doctor.id} doctor={doctor} onSelect={onSelect} />
         ))}
       </div>
-      <div ref={loader} className="text-center py-4 text-sm text-gray-500">
+      <div ref={loader} className="text-center py-4 text-l text-green-500">
         {items.length < doctors.length ? "Loading more doctors..." : "You've reached the end!"}
       </div>
     </>
