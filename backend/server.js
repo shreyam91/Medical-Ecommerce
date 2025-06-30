@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const uploadRoutes = require('./routes/upload');
+const supabase = require('./config/supabase');
+const sql = require('./config/supabase').default || require('./config/supabase');
 require('dotenv').config(); // This loads .env variables into process.env
 
 
@@ -36,6 +38,31 @@ app.use(cors({ origin: "http://localhost:5173" }));
 //   });
 // });
 
+// Test route to verify Postgres connection
+app.get('/api/postgres-test', async (req, res) => {
+  try {
+    const result = await sql`SELECT 1 as test`;
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Backend server running at http://localhost:${PORT}`);
 });
+
+
+// Example usage in a route
+
+// Example: Fetch data from a table
+async function getData() {
+  const { data, error } = await supabase
+    .from('your_table')
+    .select('*');
+  if (error) {
+    console.error(error);
+    return null;
+  }
+  return data;
+}
