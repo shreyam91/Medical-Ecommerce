@@ -253,7 +253,7 @@ const TabletForm = ({ category }) => {
         </div>
 
         {/* Indications */}
-        <div>
+        {/* <div>
           <label htmlFor="indications" className="block font-medium mb-1">Uses / Indications</label>
           <textarea
             id="indications"
@@ -263,10 +263,10 @@ const TabletForm = ({ category }) => {
             rows={2}
             className="w-full border rounded p-2 border-gray-300"
           />
-        </div>
+        </div> */}
 
         {/* Lifestyle Advice */}
-        <div>
+        {/* <div>
           <label htmlFor="lifestyleAdvice" className="block font-medium mb-1">Dietary & Lifestyle Advice</label>
           <textarea
             id="lifestyleAdvice"
@@ -276,7 +276,7 @@ const TabletForm = ({ category }) => {
             rows={2}
             className="w-full border rounded p-2 border-gray-300"
           />
-        </div>
+        </div> */}
 
         {/* Actual Price, Discount, and Selling Price */}
         <div className="flex gap-4">

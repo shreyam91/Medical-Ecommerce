@@ -355,7 +355,7 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
 </div>
 
 
-<div>
+{/* <div>
   <label className="font-medium block mb-1">Uses / Indications</label>
   <textarea
     name="indications"
@@ -368,9 +368,9 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
   {errors.indications && (
     <p className="text-red-500 text-sm">{errors.indications}</p>
   )}
-</div>
+</div> */}
 
-<div>
+{/* <div>
   <label className="font-medium block mb-1">Dietary / Lifecycle Advice</label>
   <textarea
     name="lifestyleAdvice"
@@ -383,7 +383,7 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
   {errors.lifestyleAdvice && (
     <p className="text-red-500 text-sm">{errors.lifestyleAdvice}</p>
   )}
-</div>
+</div> */}
 
 <div className="w-1/2">
             <label htmlFor="gst" className="block font-medium mb-1">GST</label>

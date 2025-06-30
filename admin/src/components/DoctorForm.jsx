@@ -7,6 +7,7 @@ function DoctorForm() {
     name: "",
     phone: "",
     degree: "",
+    specialization: "",
     address: "",
     city: "",
     state: "",
@@ -80,6 +81,7 @@ const handleImageChange = async (e) => {
       name,
       phone,
       degree,
+      specialization,
       address,
       city,
       state,
@@ -92,6 +94,7 @@ const handleImageChange = async (e) => {
       !name ||
       !phone ||
       !degree ||
+      !specialization ||
       !address ||
       !city ||
       !state ||
@@ -138,6 +141,7 @@ const handleImageChange = async (e) => {
     name: "",
     phone: "",
     degree: "",
+    specialization: "",
     address: "",
     city: "",
     state: "",
@@ -192,6 +196,17 @@ const handleImageChange = async (e) => {
               type="text"
               name="degree"
               value={formData.degree}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Specialization*</label>
+            <input
+              type="text"
+              name="specialization"
+              value={formData.specialization}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
             />
@@ -287,6 +302,7 @@ const handleImageChange = async (e) => {
           <div>
             <h3 className="text-xl font-bold">{submittedData.name}</h3>
             <p className="text-gray-600">{submittedData.degree}</p>
+            <p className="text-gray-600">{submittedData.specialization}</p>
             <p className="text-gray-500">
               {submittedData.address}, {submittedData.city},{" "}
               {submittedData.state} - {submittedData.pincode}
