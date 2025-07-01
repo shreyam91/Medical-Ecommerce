@@ -1,27 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { getBooks, createBook, deleteBook } from '../lib/bookApi';
 
 const RefrenceBook = () => {
   const [bookName, setBookName] = useState("");
   const [bookList, setBookList] = useState([]);
+  const [editBook, setEditBook] = useState(null);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    getBooks().then(setBookList).catch(() => setBookList([]));
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newBook = {
-      id: Date.now(),
-      name: bookName,
-    };
-
-    setBookList([newBook, ...bookList]);
-    toast.success("Book added successfully!");
-    setBookName("");
+    try {
+      if (editBook) {
+        // Update book in backend
+        const res = await fetch(`http://localhost:3001/api/book/${editBook.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: bookName }),
+        });
+        const updated = await res.json();
+        setBookList(bookList.map(b => b.id === editBook.id ? updated : b));
+        setEditBook(null);
+        toast.success("Book updated successfully!");
+      } else {
+        const created = await createBook({ name: bookName });
+        setBookList([created, ...bookList]);
+        toast.success("Book added successfully!");
+      }
+      setBookName("");
+    } catch {
+      toast.error("Failed to save book.");
+    }
   };
 
-  const handleRemoveBook = (id) => {
-    const updatedList = bookList.filter((book) => book.id !== id);
-    setBookList(updatedList);
-    toast.info("Book removed.");
+  const handleRemoveBook = async (id) => {
+    try {
+      await deleteBook(id);
+      setBookList(bookList.filter((book) => book.id !== id));
+      toast.success("Book removed.");
+    } catch {
+      toast.error("Failed to remove book.");
+    }
+  };
+
+  const handleEditBook = (book) => {
+    setEditBook(book);
+    setBookName(book.name);
   };
 
   return (
@@ -46,7 +73,7 @@ const RefrenceBook = () => {
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
           >
-            Submit
+            {editBook ? 'Update Book' : 'Submit'}
           </button>
         </form>
 
@@ -71,6 +98,12 @@ const RefrenceBook = () => {
                       className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                     >
                       Remove
+                    </button>
+                    <button
+                      onClick={() => handleEditBook(book)}
+                      className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2"
+                    >
+                      Edit
                     </button>
                   </li>
                 ))}
