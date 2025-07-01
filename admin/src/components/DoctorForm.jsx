@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import imageCompression from 'browser-image-compression';
+import { getDoctors, createDoctor, updateDoctor, deleteDoctor } from '../lib/doctorApi';
 
 function DoctorForm() {
   const [formData, setFormData] = useState({
@@ -17,10 +18,13 @@ function DoctorForm() {
   });
 
   const [imagePreview, setImagePreview] = useState(null);
-  const [submittedData, setSubmittedData] = useState(null);
-
+  const [doctorList, setDoctorList] = useState([]);
+  const [editDoctor, setEditDoctor] = useState(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
+  useEffect(() => {
+    getDoctors().then(setDoctorList).catch(() => setDoctorList([]));
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,51 +34,37 @@ function DoctorForm() {
     }));
   };
 
-const handleImageChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  setImagePreview(URL.createObjectURL(file));
-
-  const toastId = toast.loading("Uploading image...");
-
-  let compressedFile = file;
-  try {
-    compressedFile = await imageCompression(file, {
-      maxSizeMB: 0.2,
-      maxWidthOrHeight: 1024,
-      useWebWorker: true,
-    });
-  } catch (err) {
-    toast.error('Image compression failed. Uploading original.');
-  }
-
-  const formData = new FormData();
-  formData.append("image", compressedFile);
-
-  try {
-    const res = await fetch("http://localhost:3001/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) throw new Error("Image upload failed");
-
-    const data = await res.json();
-    setUploadedImageUrl(data.imageUrl);
-
-    // ✅ Update toast to success
-    toast.success("Image uploaded successfully!", { id: toastId });
-  } catch (error) {
-    // console.error("Image upload error:", error);
-
-    // ❌ Update toast to error
-    toast.error("Image upload failed.", { id: toastId });
-    setImagePreview(null);
-  }
-};
-
-
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImagePreview(URL.createObjectURL(file));
+    const toastId = toast.loading("Uploading image...");
+    let compressedFile = file;
+    try {
+      compressedFile = await imageCompression(file, {
+        maxSizeMB: 0.2,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
+    } catch (err) {
+      toast.error('Image compression failed. Uploading original.');
+    }
+    const formDataImg = new FormData();
+    formDataImg.append("image", compressedFile);
+    try {
+      const res = await fetch("http://localhost:3001/api/upload", {
+        method: "POST",
+        body: formDataImg,
+      });
+      if (!res.ok) throw new Error("Image upload failed");
+      const data = await res.json();
+      setUploadedImageUrl(data.imageUrl);
+      toast.success("Image uploaded successfully!", { id: toastId });
+    } catch (error) {
+      toast.error("Image upload failed.", { id: toastId });
+      setImagePreview(null);
+    }
+  };
 
   const validateForm = () => {
     const {
@@ -89,7 +79,6 @@ const handleImageChange = async (e) => {
       startTime,
       endTime,
     } = formData;
-
     if (
       !name ||
       !phone ||
@@ -105,57 +94,97 @@ const handleImageChange = async (e) => {
       toast.error("Please fill in all required fields.");
       return false;
     }
-
     if (!/^\d{10}$/.test(phone)) {
       toast.error("Phone number must be 10 digits.");
       return false;
     }
-
     if (!/^\d{6}$/.test(pincode)) {
       toast.error("Pincode must be 6 digits.");
       return false;
     }
-
     if (startTime >= endTime) {
       toast.error("Start time must be earlier than end time.");
       return false;
     }
-
     return true;
   };
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    const doctorPayload = {
+      image_url: uploadedImageUrl,
+      name: formData.name,
+      phone_number: formData.phone,
+      degree: formData.degree,
+      specialization: formData.specialization,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      pincode: formData.pincode,
+      start_time: formData.startTime,
+      end_time: formData.endTime,
+    };
+    try {
+      if (editDoctor) {
+        const updated = await updateDoctor(editDoctor.id, doctorPayload);
+        setDoctorList(doctorList.map((d) => (d.id === editDoctor.id ? updated : d)));
+        setEditDoctor(null);
+        toast.success("Doctor updated successfully!");
+      } else {
+        const created = await createDoctor(doctorPayload);
+        setDoctorList([created, ...doctorList]);
+        toast.success("Form submitted successfully!");
+      }
+      setFormData({
+        name: "",
+        phone: "",
+        degree: "",
+        specialization: "",
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        startTime: "",
+        endTime: "",
+      });
+      setImagePreview(null);
+      setUploadedImageUrl(null);
+    } catch {
+      toast.error("Failed to save doctor.");
+    }
+  };
 
-  if (!validateForm()) return;
+  const handleEdit = (doc) => {
+    setEditDoctor(doc);
+    setFormData({
+      name: doc.name,
+      phone: doc.phone_number,
+      degree: doc.degree,
+      specialization: doc.specialization,
+      address: doc.address,
+      city: doc.city,
+      state: doc.state,
+      pincode: doc.pincode,
+      startTime: doc.start_time,
+      endTime: doc.end_time,
+    });
+    setUploadedImageUrl(doc.image_url || null);
+    setImagePreview(doc.image_url || null);
+  };
 
-  setSubmittedData({
-    ...formData,
-    image: uploadedImageUrl,
-  });
-
-  toast.success("Form submitted successfully!");
-
-  // Reset form
-  setFormData({
-    name: "",
-    phone: "",
-    degree: "",
-    specialization: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-    startTime: "",
-    endTime: "",
-  });
-  setImagePreview(null);
-  setUploadedImageUrl(null);
-};
-
-
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoctor(id);
+      setDoctorList(doctorList.filter((d) => d.id !== id));
+      toast.success("Doctor removed.");
+    } catch {
+      toast.error("Failed to remove doctor.");
+    }
+  };
 
   return (
+    <>
     <div className="min-h-screen p-8 ">
       <Toaster position="top-right" />
       <div className="max-w-xl mx-auto">
@@ -289,32 +318,47 @@ const handleImageChange = async (e) => {
         </form>
       </div>
 
-      {/* Submitted Data Preview */}
-      {submittedData && (
-        <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded shadow flex items-center space-x-4">
-          {submittedData.image && (
-            <img
-              src={submittedData.image}
-              alt="Doctor"
-              className="w-24 h-24 rounded-full object-cover"
-            />
-          )}
-          <div>
-            <h3 className="text-xl font-bold">{submittedData.name}</h3>
-            <p className="text-gray-600">{submittedData.degree}</p>
-            <p className="text-gray-600">{submittedData.specialization}</p>
-            <p className="text-gray-500">
-              {submittedData.address}, {submittedData.city},{" "}
-              {submittedData.state} - {submittedData.pincode}
-            </p>
-            <p className="text-gray-500">📞 {submittedData.phone}</p>
-            <p className="text-gray-500">
-              ⏰ {submittedData.startTime} - {submittedData.endTime}
-            </p>
-          </div>
+      {/* Doctor List Preview */}
+      {doctorList.length > 0 && (
+        <div className="max-w-xl mx-auto mt-10">
+          <h3 className="text-lg font-semibold mb-4">All Doctors</h3>
+          <ul className="space-y-4">
+            {doctorList.map((doc) => (
+              <li key={doc.id} className="flex items-center bg-white p-4 rounded shadow space-x-4">
+                {doc.image_url && (
+                  <img
+                    src={doc.image_url}
+                    alt={doc.name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                )}
+                <div className="flex-1">
+                  <h4 className="font-bold">{doc.name}</h4>
+                  <p className="text-gray-600">{doc.degree} - {doc.specialization}</p>
+                  <p className="text-gray-500">{doc.address}, {doc.city}, {doc.state} - {doc.pincode}</p>
+                  <p className="text-gray-500">📞 {doc.phone_number}</p>
+                  <p className="text-gray-500">⏰ {doc.start_time} - {doc.end_time}</p>
+                </div>
+                <button
+                  onClick={() => handleDelete(doc.id)}
+                  className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Remove
+                </button>
+                <button
+                  onClick={() => handleEdit(doc)}
+                  className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2"
+                >
+                  Edit
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
+    
+    </>
   );
 }
 
