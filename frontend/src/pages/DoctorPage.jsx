@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InfiniteDoctorList from '../components/InfiniteDoctorList';
 import SearchBar from '../components/SearchBar';
 
 export default function DoctorPage({ city }) {
-  // Default to Karachi if city is not provided
+  // Default to Jaipur if city is not provided
   const selectedCity = city || "Jaipur";
   const [search, setSearch] = useState("");
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const doctors = generateDoctors(); // Replace with actual API call
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch('http://localhost:3001/api/doctor')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch doctors');
+        return res.json();
+      })
+      .then(data => {
+        setDoctors(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
   const filtered = doctors
-    .filter(doc => doc.city === selectedCity)
+    .filter(doc => doc.city && doc.city.trim().toLowerCase() === selectedCity.trim().toLowerCase())
     .filter(doc => doc.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -19,26 +38,14 @@ export default function DoctorPage({ city }) {
       <h1 className="text-3xl font-bold text-center mb-8 text-green-700">
         Find Doctor's in {selectedCity}
       </h1>
-      {/* <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-6">
         <SearchBar value={search} onChange={e => setSearch(e.target.value)} />
-      </div> */}
-      <InfiniteDoctorList doctors={filtered} onSelect={setSelectedDoc} />
+      </div>
+      {loading && <div className="text-center text-gray-500">Loading doctors...</div>}
+      {error && <div className="text-center text-red-500">{error}</div>}
+      {!loading && !error && (
+        <InfiniteDoctorList doctors={filtered} onSelect={setSelectedDoc} />
+      )}
     </div>
   );
-}
-
-// Temporary doctor generator
-function generateDoctors() {
-  return Array.from({ length: 15 }, (_, i) => ({
-    id: i + 1,
-    name: `Dr. Test ${i + 1}`,
-    image: "https://via.placeholder.com/150",
-    address: `Clinic ${i + 1}, ${i % 2 ? "Jaipur" : "Udaipur"}`,
-    city: i % 2 ? "Jaipur" : "Udaipur",
-    mobile: `+92 300 000000${i}`,
-    timing: "Mon-Fri: 9am - 5pm",
-    specialization: "Cardiologist",
-    lat: 24.8607 + i * 0.01,
-    lng: 67.0011 + i * 0.01,
-  }));
 }
