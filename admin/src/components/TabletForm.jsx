@@ -3,6 +3,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import ImageUploader from './ImageUploader';
 import { gstOptions } from '../context/UserContext';
 import { createProduct, updateProduct } from '../lib/productApi';
+import { getBrands } from '../lib/brandApi';
+import { getBooks } from '../lib/bookApi';
 
 const TabletForm = ({ category, editProduct, setEditProduct }) => {
   const initialFormState = {
@@ -28,15 +30,11 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
   const [errors, setErrors] = useState({});
   const [selectedImages, setSelectedImages] = useState([]);
   const imageUploaderRef = useRef();
-
-  const brands = ['Pfizer', 'Sun Pharma', 'Cipla', 'Dr. Reddy'];
-  const referenceBooks = [
-    'Ayurvedic Classics',
-    'Homeopathic Materia Medica',
-    'Unani Medicine Guide',
-    'Pharmacology Reference',
-    'Other',
-  ];
+  const [brands, setBrands] = useState([]);
+  const [referenceBooks, setReferenceBooks] = useState([]);
+  const allowedGst = [0, 5, 12, 18];
+  const allowedCategories = ['Ayurvedic', 'Unani', 'Homeopathic'];
+  const [categoryValue, setCategoryValue] = useState(category || allowedCategories[0]);
 
   useEffect(() => {
     if (editProduct) {
@@ -59,8 +57,18 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
         cause: editProduct.cause || '',
       });
       setSelectedImages(editProduct.images || []);
+      if (editProduct.category && allowedCategories.includes(editProduct.category)) {
+        setCategoryValue(editProduct.category);
+      }
+    } else if (category && allowedCategories.includes(category)) {
+      setCategoryValue(category);
     }
-  }, [editProduct]);
+  }, [editProduct, category]);
+
+  useEffect(() => {
+    getBrands().then(setBrands).catch(() => setBrands([]));
+    getBooks().then(setReferenceBooks).catch(() => setReferenceBooks([]));
+  }, []);
 
   const validate = () => {
     const newErrors = {};
@@ -79,7 +87,7 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : (name === "gst" ? parseInt(value, 10) : value),
     }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
@@ -110,6 +118,14 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    if (!allowedCategories.includes(categoryValue)) {
+      toast.error("Category must be Ayurvedic, Unani, or Homeopathic");
+      return;
+    }
+    if (!allowedGst.includes(Number(form.gst))) {
+      toast.error("GST must be 0, 5, 12, or 18");
+      return;
+    }
 
     let uploadedImageUrls = [];
     if (selectedImages.length > 0 && typeof selectedImages[0] !== 'string') {
@@ -142,16 +158,38 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
       images: uploadedImageUrls,
     };
 
+    // Map frontend fields to backend schema
+    const payload = {
+      name: form.name,
+      category: categoryValue,
+      medicine_type: 'Tablet', // or get from form if available
+      images: uploadedImageUrls,
+      brand: form.brand ? [form.brand] : [],
+      reference_books: form.referenceBook ? [form.referenceBook] : [],
+      dosage_information: form.dosage,
+      cause: form.cause,
+      description: form.description,
+      key_ingredients: form.keyIngredients,
+      uses_indications: form.indications,
+      actual_price: Number(form.actualPrice),
+      selling_price: Number(form.sellingPrice),
+      discount_percent: Number(form.discount),
+      gst: parseInt(form.gst, 10),
+      total_quantity: Number(form.quantity),
+      prescription_required: form.prescriptionRequired,
+    };
+    console.log('Product payload:', payload);
+
     try {
       if (editProduct) {
-        await updateProduct(editProduct.id, finalFormData);
+        await updateProduct(editProduct.id, payload);
         toast.success("Product updated!");
         setEditProduct(null);
       } else {
-        await createProduct(finalFormData);
+        await createProduct(payload);
         toast.success("Product created!");
       }
-      setForm({ ...initialFormState, category });
+      setForm({ ...initialFormState, category: categoryValue });
       setErrors({});
       setSelectedImages([]);
       imageUploaderRef.current?.clearImages();
@@ -203,10 +241,8 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
             className={`w-full border rounded p-2 ${errors.brand ? 'border-red-500' : 'border-gray-300'}`}
           >
             <option value="">Select Brand</option>
-            {brands.map((b, i) => (
-              <option key={i} value={b}>
-                {b}
-              </option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.name}>{b.name}</option>
             ))}
           </select>
           {errors.brand && <p className="text-red-600 text-sm mt-1">{errors.brand}</p>}
@@ -223,8 +259,8 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
             className="w-full border rounded p-2 border-gray-300"
           >
             <option value="">Select Reference Book</option>
-            {referenceBooks.map((book, i) => (
-              <option key={i} value={book}>{book}</option>
+            {referenceBooks.map((book) => (
+              <option key={book.id} value={book.name}>{book.name}</option>
             ))}
           </select>
         </div>
@@ -373,14 +409,13 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
               name="gst"
               value={form.gst}
               onChange={handleChange}
-              className="w-full border rounded p-2 border-gray-300"
+              className="w-full border rounded p-2"
             >
               <option value="">Select GST</option>
-              {gstOptions.map((option, index) => (
-                              <option key={index} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
+              <option value={0}>0%</option>
+              <option value={5}>5%</option>
+              <option value={12}>12%</option>
+              <option value={18}>18%</option>
             </select>
           </div>
 

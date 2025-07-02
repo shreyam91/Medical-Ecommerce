@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
-import { gstOptions } from '../context/UserContext';
-import { createProduct, updateProduct } from '../lib/productApi';
+import { gstOptions } from "../context/UserContext";
+import { createProduct, updateProduct } from "../lib/productApi";
+import { getBrands } from "../lib/brandApi";
+import { getBooks } from "../lib/bookApi";
 
-
-const MedForm = ({ category, editProduct, setEditProduct }) => {
-
+const MedForm = ({ editProduct, setEditProduct, category }) => {
   const [unit, setUnit] = useState("ml");
   const [form, setForm] = useState({
     name: "",
@@ -20,34 +20,32 @@ const MedForm = ({ category, editProduct, setEditProduct }) => {
     referenceBook: "",
     indications: "",
     lifestyleAdvice: "",
-    prices: [{ unit: "", actualPrice: "", discount: "", sellingPrice: "", quantity: "" }],
+    prices: [
+      {
+        unit: "",
+        actualPrice: "",
+        discount: "",
+        sellingPrice: "",
+        quantity: "",
+      },
+    ],
   });
 
   const [errors, setErrors] = useState({});
   const [selectedImages, setSelectedImages] = useState([]);
   const imageUploaderRef = useRef();
+  const [brands, setBrands] = useState([]);
+  const [referenceBooks, setReferenceBooks] = useState([]);
 
-  const brands = [
-    "Select Brand",
-    "HealthCo",
-    "PharmaPlus",
-    "MediCare",
-    "WellnessLabs",
-  ];
-
-  const referenceBooks = [
-  'Ayurvedic Classics',
-  'Homeopathic Materia Medica',
-  'Unani Medicine Guide',
-  'Pharmacology Reference',
-  'Other',
-];
+  const allowedGst = [0, 5, 12, 18];
+  const allowedCategories = ['Ayurvedic', 'Unani', 'Homeopathic'];
+  const [categoryValue, setCategoryValue] = useState(category || allowedCategories[0]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : (name === "gst" ? parseInt(value, 10) : value),
     }));
   };
 
@@ -62,20 +60,22 @@ const MedForm = ({ category, editProduct, setEditProduct }) => {
   };
 
   const handlePriceChange = (index, field, value) => {
-  const updated = [...form.prices];
-  updated[index][field] = value;
+    const updated = [...form.prices];
+    updated[index][field] = value;
 
-  const actual = parseFloat(updated[index].actualPrice) || 0;
-  const discount = parseFloat(updated[index].discount) || 0;
+    const actual = parseFloat(updated[index].actualPrice) || 0;
+    const discount = parseFloat(updated[index].discount) || 0;
 
-  if (!isNaN(actual) && !isNaN(discount)) {
-    updated[index].sellingPrice = (actual - (actual * discount / 100)).toFixed(2);
-  }
+    if (!isNaN(actual) && !isNaN(discount)) {
+      updated[index].sellingPrice = (
+        actual -
+        (actual * discount) / 100
+      ).toFixed(2);
+    }
 
-  setForm(prev => ({ ...prev, prices: updated }));
-  setErrors(prev => ({ ...prev, [`${field}_${index}`]: undefined }));
-};
-
+    setForm((prev) => ({ ...prev, prices: updated }));
+    setErrors((prev) => ({ ...prev, [`${field}_${index}`]: undefined }));
+  };
 
   const addQuantityPrice = () => {
     setForm((prev) => ({
@@ -106,11 +106,10 @@ const MedForm = ({ category, editProduct, setEditProduct }) => {
       newErrors.keyIngredients = "Key ingredients are required.";
     if (!form.referenceBook.trim())
       newErrors.referenceBook = "Reference book is required.";
-    if (!form.indications.trim())
-      newErrors.indications = "Uses or indications are required.";
-    if (!form.lifestyleAdvice.trim())
-      newErrors.lifestyleAdvice =
-        "Dietary/lifecycle advice is required.";
+    // if (!form.indications.trim())
+    //   newErrors.indications = "Uses or indications are required.";
+    // if (!form.lifestyleAdvice.trim())
+    //   newErrors.lifestyleAdvice = "Dietary/lifecycle advice is required.";
 
     const unitSet = new Set();
     let hasValidPrice = false;
@@ -131,13 +130,12 @@ const MedForm = ({ category, editProduct, setEditProduct }) => {
       }
 
       if (!item.discount || parseFloat(item.discount) < 0) {
-  newErrors[`discount_${idx}`] = "Valid discount (%) required.";
-}
+        newErrors[`discount_${idx}`] = "Valid discount (%) required.";
+      }
 
-if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
-  newErrors[`sellingPrice_${idx}`] = "Valid selling price required.";
-}
-
+      if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
+        newErrors[`sellingPrice_${idx}`] = "Valid selling price required.";
+      }
 
       if (!item.quantity || parseInt(item.quantity) <= 0) {
         newErrors[`quantity_${idx}`] = "Valid Quantity required.";
@@ -157,31 +155,64 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
   };
 
   useEffect(() => {
+    console.log('MedForm useEffect: editProduct changed:', editProduct);
     if (editProduct) {
       setForm({
-        name: editProduct.name || '',
-        brand: editProduct.brand || '',
-        dosage: editProduct.dosage_information || '',
-        gst: editProduct.gst || '',
-        description: editProduct.description || '',
+        name: editProduct.name || "",
+        brand: editProduct.brand || "",
+        dosage: editProduct.dosage_information || "",
+        gst: editProduct.gst || "",
+        description: editProduct.description || "",
         prescriptionRequired: editProduct.prescription_required || false,
-        cause: editProduct.cause || '',
-        keyIngredients: editProduct.key_ingredients || '',
-        referenceBook: (editProduct.reference_books && editProduct.reference_books[0]) || '',
-        indications: editProduct.uses_indications || '',
-        lifestyleAdvice: '',
-        prices: [{ unit: '', actualPrice: editProduct.actual_price || '', discount: editProduct.discount_percent || '', sellingPrice: editProduct.selling_price || '', quantity: editProduct.total_quantity || '' }],
+        cause: editProduct.cause || "",
+        keyIngredients: editProduct.key_ingredients || "",
+        referenceBook:
+          (editProduct.reference_books && editProduct.reference_books[0]) || "",
+        indications: editProduct.uses_indications || "",
+        lifestyleAdvice: "",
+        prices: [
+          {
+            unit: "",
+            actualPrice: editProduct.actual_price || "",
+            discount: editProduct.discount_percent || "",
+            sellingPrice: editProduct.selling_price || "",
+            quantity: editProduct.total_quantity || "",
+          },
+        ],
       });
       setSelectedImages(editProduct.images || []);
+      if (editProduct.category && allowedCategories.includes(editProduct.category)) {
+        setCategoryValue(editProduct.category);
+      }
+    } else if (category && allowedCategories.includes(category)) {
+      setCategoryValue(category);
     }
-  }, [editProduct]);
+  }, [editProduct, category]);
+
+  useEffect(() => {
+    getBrands()
+      .then(setBrands)
+      .catch(() => setBrands([]));
+    getBooks()
+      .then(setReferenceBooks)
+      .catch(() => setReferenceBooks([]));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('categoryValue:', categoryValue, 'category prop:', category);
     if (!validateForm()) return;
+    if (!allowedCategories.includes(categoryValue)) {
+      toast.error("Category must be Ayurvedic, Unani, or Homeopathic");
+      return;
+    }
+    if (!allowedGst.includes(Number(form.gst))) {
+      toast.error("GST must be 0, 5, 12, or 18");
+      return;
+    }
 
     let uploadedImageUrls = [];
-    if (selectedImages.length > 0 && typeof selectedImages[0] !== 'string') {
+    if (selectedImages.length > 0 && typeof selectedImages[0] !== "string") {
       toast.loading("Uploading images...");
       for (const file of selectedImages) {
         try {
@@ -216,18 +247,40 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
     const finalData = {
       ...form,
       unit,
-      category,
+      category: categoryValue,
       prices: formattedPrices,
       images: uploadedImageUrls,
     };
 
+    // Map frontend fields to backend schema
+    const payload = {
+      name: form.name,
+      category: categoryValue,
+      medicine_type: 'Syrup', // or get from form if available
+      images: uploadedImageUrls,
+      brand: form.brand ? [form.brand] : [],
+      reference_books: form.referenceBook ? [form.referenceBook] : [],
+      dosage_information: form.dosage,
+      cause: form.cause,
+      description: form.description,
+      key_ingredients: form.keyIngredients,
+      uses_indications: form.indications,
+      actual_price: Number(form.prices[0]?.actualPrice),
+      selling_price: Number(form.prices[0]?.sellingPrice),
+      discount_percent: Number(form.prices[0]?.discount),
+      gst: parseInt(form.gst, 10),
+      total_quantity: Number(form.prices[0]?.quantity),
+      prescription_required: form.prescriptionRequired,
+    };
+    console.log('Product payload:', payload);
+
     try {
       if (editProduct) {
-        await updateProduct(editProduct.id, finalData);
+        await updateProduct(editProduct.id, payload);
         toast.success("Product updated!");
         setEditProduct(null);
       } else {
-        await createProduct(finalData);
+        await createProduct(payload);
         toast.success("Product created!");
       }
       setForm({
@@ -255,6 +308,38 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Toaster position="top-right" />
+
+      {editProduct && (
+        <div className="flex justify-between items-center bg-yellow-100 border-l-4 border-yellow-500 p-3 mb-4">
+          <span className="text-yellow-800 font-medium">Editing: {editProduct.name}</span>
+          <button
+            type="button"
+            className="ml-4 px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded text-gray-800"
+            onClick={() => {
+              setEditProduct(null);
+              setForm({
+                name: '',
+                brand: '',
+                dosage: '',
+                gst: '',
+                description: '',
+                prescriptionRequired: false,
+                cause: '',
+                keyIngredients: '',
+                referenceBook: '',
+                indications: '',
+                lifestyleAdvice: '',
+                prices: [{ unit: '', actualPrice: '', discount: '', sellingPrice: '', quantity: '' }],
+              });
+              setErrors({});
+              setSelectedImages([]);
+              imageUploaderRef.current?.clearImages();
+            }}
+          >
+            Cancel Edit
+          </button>
+        </div>
+      )}
 
       <ImageUploader
         ref={imageUploaderRef}
@@ -288,42 +373,49 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
       </div>
 
       <div>
-        <label className="font-medium block mb-1">Brand</label>
+        <label htmlFor="brand" className="block font-medium mb-1">
+          Brand <span className="text-red-600">*</span>
+        </label>
         <select
+          id="brand"
           name="brand"
-          className="w-full border rounded p-2"
-          onChange={handleChange}
           value={form.brand}
+          onChange={handleChange}
+          className={`w-full border rounded p-2 ${
+            errors.brand ? "border-red-500" : "border-gray-300"
+          }`}
         >
-          {brands.map((b, idx) => (
-            <option key={idx} value={idx === 0 ? "" : b} disabled={idx === 0}>
-              {b}
+          <option value="">Select Brand</option>
+          {brands.map((b) => (
+            <option key={b.id} value={b.name}>
+              {b.name}
             </option>
           ))}
         </select>
-        {errors.brand && <p className="text-red-500 text-sm">{errors.brand}</p>}
+        {errors.brand && (
+          <p className="text-red-600 text-sm mt-1">{errors.brand}</p>
+        )}
       </div>
 
-      {/* Reference Book */}
-<div>
-  <label htmlFor="referenceBook" className="block font-medium mb-1">
-    Reference Book
-  </label>
-  <select
-    id="referenceBook"
-    name="referenceBook"
-    value={form.referenceBook}
-    onChange={handleChange}
-    className="w-full border rounded p-2 border-gray-300"
-  >
-    <option value="">Select Reference Book</option>
-    {referenceBooks.map((book, i) => (
-      <option key={i} value={book}>
-        {book}
-      </option>
-    ))}
-  </select>
-</div>
+      <div>
+        <label htmlFor="referenceBook" className="block font-medium mb-1">
+          Reference Book
+        </label>
+        <select
+          id="referenceBook"
+          name="referenceBook"
+          value={form.referenceBook}
+          onChange={handleChange}
+          className="w-full border rounded p-2 border-gray-300"
+        >
+          <option value="">Select Reference Book</option>
+          {referenceBooks.map((book) => (
+            <option key={book.id} value={book.name}>
+              {book.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div>
         <label className="font-medium block mb-1">Dosage Info</label>
@@ -356,35 +448,34 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
       </div>
 
       <div>
-  <label className="font-medium block mb-1">Cause</label>
-  <input
-    type="text"
-    name="cause"
-    placeholder="Cause eg: Fever, Cough"
-    className="w-full border rounded p-2"
-    value={form.cause}
-    onChange={handleChange}
-  />
-  {errors.cause && <p className="text-red-500 text-sm">{errors.cause}</p>}
-</div>
+        <label className="font-medium block mb-1">Cause</label>
+        <input
+          type="text"
+          name="cause"
+          placeholder="Cause eg: Fever, Cough"
+          className="w-full border rounded p-2"
+          value={form.cause}
+          onChange={handleChange}
+        />
+        {errors.cause && <p className="text-red-500 text-sm">{errors.cause}</p>}
+      </div>
 
-<div>
-  <label className="font-medium block mb-1">Key Ingredients</label>
-  <textarea
-    name="keyIngredients"
-    placeholder="Key Ingredients eg: Tulsi etc."
-    className="w-full border rounded p-2"
-    rows={2}
-    value={form.keyIngredients}
-    onChange={handleChange}
-  />
-  {errors.keyIngredients && (
-    <p className="text-red-500 text-sm">{errors.keyIngredients}</p>
-  )}
-</div>
+      <div>
+        <label className="font-medium block mb-1">Key Ingredients</label>
+        <textarea
+          name="keyIngredients"
+          placeholder="Key Ingredients eg: Tulsi etc."
+          className="w-full border rounded p-2"
+          rows={2}
+          value={form.keyIngredients}
+          onChange={handleChange}
+        />
+        {errors.keyIngredients && (
+          <p className="text-red-500 text-sm">{errors.keyIngredients}</p>
+        )}
+      </div>
 
-
-{/* <div>
+      {/* <div>
   <label className="font-medium block mb-1">Uses / Indications</label>
   <textarea
     name="indications"
@@ -399,7 +490,7 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
   )}
 </div> */}
 
-{/* <div>
+      {/* <div>
   <label className="font-medium block mb-1">Dietary / Lifecycle Advice</label>
   <textarea
     name="lifestyleAdvice"
@@ -414,46 +505,50 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
   )}
 </div> */}
 
-<div className="w-1/2">
-            <label htmlFor="gst" className="block font-medium mb-1">GST</label>
-            <select
-              id="gst"
-              name="gst"
-              value={form.gst}
-              onChange={handleChange}
-              className="w-full border rounded p-2 border-gray-300"
-            >
-              <option value="">Select GST</option>
-              {gstOptions.map((option, index) => (
-                <option key={index} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div className="w-1/2">
+        <label htmlFor="gst" className="block font-medium mb-1">
+          GST
+        </label>
+        <select
+          id="gst"
+          name="gst"
+          value={form.gst}
+          onChange={handleChange}
+          className="w-full border rounded p-2"
+        >
+          <option value="">Select GST</option>
+          <option value={0}>0%</option>
+          <option value={5}>5%</option>
+          <option value={12}>12%</option>
+          <option value={18}>18%</option>
+        </select>
+      </div>
 
-      <div >
+      <div>
         <label className="font-medium block mb-1">Prices per Unit</label>
         <div className="space-y-2 ">
           {form.prices.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <div className="w-1/5 relative">
-  <label className="block font-medium mb-1">Unit</label>
-  <input
-    type="number"
-    placeholder={`e.g. 100`}
-    value={item.unit}
-    onChange={(e) =>
-      handlePriceChange(index, "unit", e.target.value)
-    }
-    className="w-full border rounded p-2 pl-2 pr-10"
-  />
-  <span className="absolute right-2 top-9 text-gray-600">{unit}</span>
-  {errors[`unit${index}`] && (
-    <p className="text-red-500 text-sm">{errors[`unit${index}`]}</p>
-  )}
-</div>
-
+                <label className="block font-medium mb-1">Unit</label>
+                <input
+                  type="number"
+                  placeholder={`e.g. 100`}
+                  value={item.unit}
+                  onChange={(e) =>
+                    handlePriceChange(index, "unit", e.target.value)
+                  }
+                  className="w-full border rounded p-2 pl-2 pr-10"
+                />
+                <span className="absolute right-2 top-9 text-gray-600">
+                  {unit}
+                </span>
+                {errors[`unit${index}`] && (
+                  <p className="text-red-500 text-sm">
+                    {errors[`unit${index}`]}
+                  </p>
+                )}
+              </div>
 
               <div className="w-1/5 relative">
                 <label className="text-sm">Actual Price</label>
@@ -476,19 +571,22 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
               </div>
 
               <div className="w-1/5">
-  <label className="text-sm">Discount (%)</label>
-  <input
-    type="number"
-    placeholder="Discount %"
-    value={item.discount}
-    onChange={(e) => handlePriceChange(index, "discount", e.target.value)}
-    className="border rounded p-1 w-full"
-  />
-  {errors[`discount_${index}`] && (
-    <p className="text-red-500 text-sm">{errors[`discount_${index}`]}</p>
-  )}
-</div>
-
+                <label className="text-sm">Discount (%)</label>
+                <input
+                  type="number"
+                  placeholder="Discount %"
+                  value={item.discount}
+                  onChange={(e) =>
+                    handlePriceChange(index, "discount", e.target.value)
+                  }
+                  className="border rounded p-1 w-full"
+                />
+                {errors[`discount_${index}`] && (
+                  <p className="text-red-500 text-sm">
+                    {errors[`discount_${index}`]}
+                  </p>
+                )}
+              </div>
 
               <div className="w-1/5 relative">
                 <label className="text-sm">Selling Price</label>
@@ -569,7 +667,8 @@ if (!item.sellingPrice || parseFloat(item.sellingPrice) <= 0) {
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded"
       >
-        Submit {unit === "ml" ? "Syrup" : "Powder"}
+        Submit
+          {unit === "ml" ? "Syrup" : "Powder"}
       </button>
     </form>
   );

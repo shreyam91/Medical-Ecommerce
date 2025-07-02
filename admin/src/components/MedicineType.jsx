@@ -25,7 +25,9 @@ const MedicineType = ({ category }) => {
   };
 
   const handleEdit = (product) => {
+    console.log('Editing product:', product);
     setEditProduct(product);
+    console.log('Setting type to:', product.medicine_type?.toLowerCase() || '');
     setType(product.medicine_type?.toLowerCase() || '');
   };
 

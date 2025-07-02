@@ -8,6 +8,7 @@ const BrandForm = () => {
   const [image, setImage] = useState(null);
   const [brandList, setBrandList] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [editBrand, setEditBrand] = useState(null);
 
   useEffect(() => {
     getBrands()
@@ -22,110 +23,73 @@ const BrandForm = () => {
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (!image) {
-  //     toast.error("Please upload an image.");
-  //     return;
-  //   }
-  //   setIsUploading(true);
-  //   const toastId = toast.loading("Uploading brand image...");
-  //   let compressedFile = image;
-  //   try {
-  //     compressedFile = await imageCompression(image, {
-  //       maxSizeMB: 0.2,
-  //       maxWidthOrHeight: 1024,
-  //       useWebWorker: true,
-  //     });
-  //   } catch (err) {
-  //     toast.error("Image compression failed. Uploading original.");
-  //   }
-  //   const formData = new FormData();
-  //   formData.append("image", compressedFile);
-  //   try {
-  //     const res = await fetch("http://localhost:3001/api/upload", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-  //     if (!res.ok) throw new Error("Upload failed");
-  //     const data = await res.json();
-  //     const newBrand = {
-  //       name: brandName,
-  //       image_url: data.imageUrl,
-  //     };
-  //     const created = await createBrand(newBrand);
-  //     setBrandList([created, ...brandList]);
-  //     toast.success("Brand added successfully!", { id: toastId });
-  //     setBrandName("");
-  //     setImage(null);
-  //   } catch (err) {
-  //     toast.error("Image upload or brand creation failed.", { id: toastId });
-  //   } finally {
-  //     setIsUploading(false);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    if (!image && !editBrand) {
+      toast.error("Please upload an image.");
+      return;
+    }
+    setIsUploading(true);
+    let imageUrl = editBrand ? editBrand.image_url : null;
+    if (image) {
+      const toastId = toast.loading("Uploading brand image...");
+      let compressedFile = image;
+      try {
+        compressedFile = await imageCompression(image, {
+          maxSizeMB: 0.2,
+          maxWidthOrHeight: 1024,
+          useWebWorker: true,
+        });
+      } catch (err) {
+        toast.error('Image compression failed. Uploading original.');
+      }
+      const formData = new FormData();
+      formData.append("image", compressedFile);
+      try {
+        const res = await fetch("http://localhost:3001/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) throw new Error("Upload failed");
+        const data = await res.json();
+        imageUrl = data.imageUrl;
+        toast.success("Image uploaded!", { id: toastId });
+      } catch (err) {
+        toast.error("Image upload failed.", { id: toastId });
+        setIsUploading(false);
+        return;
+      }
+    }
+    try {
+      if (editBrand) {
+        // Update brand in backend
+        const updated = await fetch(`http://localhost:3001/api/brand/${editBrand.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: brandName, image_url: imageUrl }),
+        }).then(r => r.json());
+        setBrandList(brandList.map(b => b.id === editBrand.id ? updated : b));
+        setEditBrand(null);
+        toast.success("Brand updated successfully!");
+      } else {
+        const created = await createBrand({ name: brandName, image_url: imageUrl });
+        setBrandList([created, ...brandList]);
+        toast.success("Brand added successfully!");
+      }
+      setBrandName("");
+      setImage(null);
+    } catch (err) {
+      toast.error("Brand creation or update failed.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
-  // Form validation first
-  if (!brandName.trim()) {
-    toast.error("Please enter a brand name.");
-    return;
-  }
-
-  if (!image) {
-    toast.error("Please upload an image.");
-    return;
-  }
-
-  setIsUploading(true);
-  const toastId = toast.loading("Uploading brand image...");
-  let compressedFile = image;
-
-  try {
-    // Compress image
-    compressedFile = await imageCompression(image, {
-      maxSizeMB: 0.2,
-      maxWidthOrHeight: 1024,
-      useWebWorker: true,
-    });
-  } catch (err) {
-    toast.error("Image compression failed. Uploading original.");
-  }
-
-  const formData = new FormData();
-  formData.append("image", compressedFile);
-
-  try {
-    // Upload image
-    const res = await fetch("http://localhost:3001/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-    if (!res.ok) throw new Error("Upload failed");
-
-    const data = await res.json();
-    const newBrand = {
-      name: brandName,
-      image_url: data.imageUrl,
-    };
-
-    // Save brand
-    const created = await createBrand(newBrand);
-    setBrandList([created, ...brandList]);
-    toast.success("Brand added successfully!", { id: toastId });
-
-    // Reset form
-    setBrandName("");
+  const handleEditBrand = (brand) => {
+    setEditBrand(brand);
+    setBrandName(brand.name);
     setImage(null);
-  } catch (err) {
-    toast.error("Image upload or brand creation failed.", { id: toastId });
-  } finally {
-    setIsUploading(false);
-  }
-};
-
+  };
 
   const handleRemoveBrand = async (id) => {
     // Only try API delete if id is a real number
@@ -165,15 +129,30 @@ const BrandForm = () => {
             accept="image/*"
             onChange={handleImageChange}
             className="mb-4"
-            required
+            // required only if not editing
+            required={!editBrand}
           />
 
           <button
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+            disabled={isUploading}
           >
-            Submit
+            {editBrand ? 'Update Brand' : 'Submit'}
           </button>
+          {editBrand && (
+            <button
+              type="button"
+              className="w-full mt-2 bg-gray-400 text-white p-2 rounded hover:bg-gray-500"
+              onClick={() => {
+                setEditBrand(null);
+                setBrandName("");
+                setImage(null);
+              }}
+            >
+              Cancel Edit
+            </button>
+          )}
         </form>
 
         {/* Right: Brand List */}
@@ -202,6 +181,12 @@ const BrandForm = () => {
                       className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                     >
                       Remove
+                    </button>
+                    <button
+                      onClick={() => handleEditBrand(brand)}
+                      className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2"
+                    >
+                      Edit
                     </button>
                   </li>
                 ))}

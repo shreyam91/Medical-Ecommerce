@@ -33,6 +33,7 @@ router.post('/', async (req, res) => {
       RETURNING *`;
     res.status(201).json(product);
   } catch (err) {
+    console.error('Error creating product:', err);
     res.status(500).json({ error: err.message });
   }
 });
