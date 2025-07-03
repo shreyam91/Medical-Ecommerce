@@ -21,10 +21,10 @@ export default function ProfileForm() {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validatePhone = (phone) =>
-    /^[6-9]\d{9}$/.test(phone); // Indian 10-digit mobile starting 6-9
+    /^[6-9]\d{9}$/.test(phone);
 
   const validatePinCode = (pin) =>
-    /^\d{6}$/.test(pin); // 6 digit pin
+    /^\d{6}$/.test(pin);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,257 +78,232 @@ export default function ProfileForm() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md mt-10">
-      <h2 className="text-2xl font-semibold mb-6">User Profile</h2>
-      <form onSubmit={handleSave} noValidate>
-        <div className="grid grid-cols-2 gap-6">
-          {/* First Name */}
-          <div>
-            <label
-              htmlFor="firstName"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              First Name
-            </label>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              value={user.firstName}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
+      <div className="max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 bg-white shadow-md rounded-md">
+        <h2 className="text-2xl font-semibold mb-6">User Profile</h2>
+        <form onSubmit={handleSave} noValidate>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* First Name */}
+            <div>
+              <label htmlFor="firstName" className="block text-gray-700 mb-1 font-medium">
+                First Name
+              </label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                value={user.firstName}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label htmlFor="lastName" className="block text-gray-700 mb-1 font-medium">
+                Last Name
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                value={user.lastName}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-gray-700 mb-1 font-medium">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={user.email}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Contact Number */}
+            <div>
+              <label htmlFor="contact" className="block text-gray-700 mb-1 font-medium">
+                Phone Number
+              </label>
+              <input
+                id="contact"
+                name="contact"
+                type="tel"
+                value={user.contact}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                maxLength={10}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Address (Full Width) */}
+            <div className="col-span-1 md:col-span-2">
+              <label htmlFor="address" className="block text-gray-700 mb-1 font-medium">
+                Address
+              </label>
+              <textarea
+                id="address"
+                name="address"
+                type="text"
+                value={user.address}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* State */}
+            <div>
+              <label htmlFor="state" className="block text-gray-700 mb-1 font-medium">
+                State
+              </label>
+              <input
+                id="state"
+                name="state"
+                type="text"
+                value={user.state}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* City */}
+            <div>
+              <label htmlFor="city" className="block text-gray-700 mb-1 font-medium">
+                City
+              </label>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                value={user.city}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Pin Code */}
+            <div>
+              <label htmlFor="pinCode" className="block text-gray-700 mb-1 font-medium">
+                Pin Code
+              </label>
+              <input
+                id="pinCode"
+                name="pinCode"
+                type="text"
+                value={user.pinCode}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                maxLength={6}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Country */}
+            <div>
+              <label htmlFor="country" className="block text-gray-700 mb-1 font-medium">
+                Country
+              </label>
+              <input
+                id="country"
+                name="country"
+                type="text"
+                value={user.country}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
           </div>
 
-          {/* Last Name */}
-          <div>
-            <label
-              htmlFor="lastName"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              Last Name
-            </label>
-            <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              value={user.lastName}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6">
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={handleEdit}
+                className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+              >
+                Edit
+              </button>
+            )}
+            {isEditing && (
+              <button
+                type="submit"
+                className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
+              >
+                Save
+              </button>
+            )}
           </div>
+        </form>
 
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={user.email}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
-          </div>
-
-          {/* Contact Number */}
-          <div>
-            <label
-              htmlFor="contact"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              Phone Number
-            </label>
-            <input
-              id="contact"
-              name="contact"
-              type="tel"
-              value={user.contact}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              maxLength={10}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
-          </div>
-
-          {/* Address (full width) */}
-          <div className="col-span-2">
-            <label
-              htmlFor="address"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              Address
-            </label>
-            <textarea
-              id="address"
-              name="address"
-              type="text"
-              value={user.address}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
-          </div>
-
-          {/* State */}
-          <div>
-            <label
-              htmlFor="state"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              State
-            </label>
-            <input
-              id="state"
-              name="state"
-              type="text"
-              value={user.state}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
-          </div>
-
-          {/* City */}
-          <div>
-            <label
-              htmlFor="city"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              City
-            </label>
-            <input
-              id="city"
-              name="city"
-              type="text"
-              value={user.city}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
-          </div>
-
-          {/* Pin Code */}
-          <div>
-            <label
-              htmlFor="pinCode"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              Pin Code
-            </label>
-            <input
-              id="pinCode"
-              name="pinCode"
-              type="text"
-              value={user.pinCode}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              maxLength={6}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
-          </div>
-
-          {/* Country */}
-          <div>
-            <label
-              htmlFor="country"
-              className="block text-gray-700 mb-1 font-medium"
-            >
-              Country
-            </label>
-            <input
-              id="country"
-              name="country"
-              type="text"
-              value={user.country}
-              onChange={handleChange}
-              readOnly={!isEditing}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-              }`}
-              required
-            />
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-3 pt-6">
-          {!isEditing && (
-            <button
-              type="button"
-              onClick={handleEdit}
-              className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
-            >
-              Edit
-            </button>
-          )}
-          {isEditing && (
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
-            >
-              Save
-            </button>
-          )}
-        </div>
-      </form>
-
-      {/* Order History */}
-      <div className="mt-10">
-        <h3 className="text-xl font-semibold mb-4">Order History</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left border">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="px-4 py-2 border">Name</th>
-                <th className="px-4 py-2 border">Quantity</th>
-                <th className="px-4 py-2 border">Price</th>
-                <th className="px-4 py-2 border">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dummyOrders.map((order) => (
-                <tr key={order.id} className="border-t">
-                  <td className="px-4 py-2 border">{order.name}</td>
-                  <td className="px-4 py-2 border">{order.quantity}</td>
-                  <td className="px-4 py-2 border">{order.price}</td>
-                  <td className="px-4 py-2 border">{order.status}</td>
+        {/* Order History */}
+        <div className="mt-10">
+          <h3 className="text-xl font-semibold mb-4">Order History</h3>
+          <div className="overflow-x-auto w-full">
+            <table className="min-w-full text-left border">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="px-4 py-2 border">Name</th>
+                  <th className="px-4 py-2 border">Quantity</th>
+                  <th className="px-4 py-2 border">Price</th>
+                  <th className="px-4 py-2 border">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {dummyOrders.map((order) => (
+                  <tr key={order.id} className="border-t">
+                    <td className="px-4 py-2 border">{order.name}</td>
+                    <td className="px-4 py-2 border">{order.quantity}</td>
+                    <td className="px-4 py-2 border">{order.price}</td>
+                    <td className="px-4 py-2 border">{order.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
