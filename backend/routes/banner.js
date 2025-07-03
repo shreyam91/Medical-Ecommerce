@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
+const cloudinary = require('../config/cloudinary');
+
+function extractCloudinaryPublicId(url) {
+  if (!url) return null;
+  const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
+  return matches ? matches[1] : null;
+}
 
 // Get all banners
 router.get('/', async (req, res) => {
@@ -54,8 +61,24 @@ router.put('/:id', async (req, res) => {
 // Delete banner
 router.delete('/:id', async (req, res) => {
   try {
-    const [banner] = await sql`DELETE FROM banner WHERE id=${req.params.id} RETURNING *`;
+    // Get banner first to access image_url
+    const [banner] = await sql`SELECT * FROM banner WHERE id=${req.params.id}`;
+    console.log('Fetched banner:', banner);
     if (!banner) return res.status(404).json({ error: 'Not found' });
+    // Delete image from Cloudinary if present
+    if (banner.image_url) {
+      const publicId = extractCloudinaryPublicId(banner.image_url);
+      console.log('Deleting banner image:', banner.image_url, 'Extracted publicId:', publicId);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (cloudErr) {
+          console.error('Cloudinary delete error:', cloudErr);
+        }
+      }
+    }
+    // Delete banner from DB
+    const [deleted] = await sql`DELETE FROM banner WHERE id=${req.params.id} RETURNING *`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

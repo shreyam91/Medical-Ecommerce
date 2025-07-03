@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
+const cloudinary = require('../config/cloudinary');
+
+function extractCloudinaryPublicId(url) {
+  if (!url) return null;
+  const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
+  return matches ? matches[1] : null;
+}
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -55,8 +62,36 @@ router.put('/:id', async (req, res) => {
 // Delete product
 router.delete('/:id', async (req, res) => {
   try {
-    const [product] = await sql`DELETE FROM product WHERE id=${req.params.id} RETURNING *`;
+    // Get product first to access images
+    const [product] = await sql`SELECT * FROM product WHERE id=${req.params.id}`;
+    console.log('Fetched product:', product);
     if (!product) return res.status(404).json({ error: 'Not found' });
+    // Delete images from Cloudinary if present
+    if (product.images) {
+      let imageUrls = product.images;
+      if (typeof imageUrls === 'string') {
+        // Try to parse as JSON array, fallback to comma-separated
+        try {
+          imageUrls = JSON.parse(imageUrls);
+        } catch {
+          imageUrls = imageUrls.split(',').map(s => s.trim());
+        }
+      }
+      if (!Array.isArray(imageUrls)) imageUrls = [imageUrls];
+      for (const url of imageUrls) {
+        const publicId = extractCloudinaryPublicId(url);
+        console.log('Deleting product image:', url, 'Extracted publicId:', publicId);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId);
+          } catch (cloudErr) {
+            console.error('Cloudinary delete error:', cloudErr);
+          }
+        }
+      }
+    }
+    // Delete product from DB
+    const [deleted] = await sql`DELETE FROM product WHERE id=${req.params.id} RETURNING *`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

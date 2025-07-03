@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
+const cloudinary = require('../config/cloudinary');
+
+function extractCloudinaryPublicId(url) {
+  if (!url) return null;
+  const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
+  return matches ? matches[1] : null;
+}
 
 // Get all doctors
 router.get('/', async (req, res) => {
@@ -54,8 +61,24 @@ router.put('/:id', async (req, res) => {
 // Delete doctor
 router.delete('/:id', async (req, res) => {
   try {
-    const [doctor] = await sql`DELETE FROM doctor WHERE id=${req.params.id} RETURNING *`;
+    // Get doctor first to access image_url
+    const [doctor] = await sql`SELECT * FROM doctor WHERE id=${req.params.id}`;
+    console.log('Fetched doctor:', doctor);
     if (!doctor) return res.status(404).json({ error: 'Not found' });
+    // Delete image from Cloudinary if present
+    if (doctor.image_url) {
+      const publicId = extractCloudinaryPublicId(doctor.image_url);
+      console.log('Deleting doctor image:', doctor.image_url, 'Extracted publicId:', publicId);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (cloudErr) {
+          console.error('Cloudinary delete error:', cloudErr);
+        }
+      }
+    }
+    // Delete doctor from DB
+    const [deleted] = await sql`DELETE FROM doctor WHERE id=${req.params.id} RETURNING *`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

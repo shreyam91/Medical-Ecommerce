@@ -97,14 +97,15 @@ const BrandForm = () => {
       try {
         await deleteBrand(id);
         setBrandList(brandList.filter((brand) => brand.id !== id));
-        toast.info("Brand removed.");
-      } catch {
+        toast.success("Brand removed.");
+      } catch (err) {
+        console.error('Delete brand error:', err);
         toast.error("Failed to remove brand.");
       }
     } else {
       // Remove local-only brands
       setBrandList(brandList.filter((brand) => brand.id !== id));
-      toast.info("Brand removed (local only).");
+      toast.success("Brand removed (local only).");
     }
   };
 
