@@ -8,12 +8,12 @@ import {
 
 const Footer = () => {
   return (
-    <footer className=" text-black pt-4 pb-4 mt-16 border-t-2 border-green-700 rounded-2xl">
+    <footer className="bg-white text-black pt-6 pb-6 mt-16 border-t-2 border-green-700 rounded-t-2xl">
       {/* Top Section */}
-      <div className="container mx-auto px-4 mb-12">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <h2 className="text-3xl font-bold text-green-600">HerbalMG</h2>
-          <p className="text-m text-gray-900 md:max-w-2xl">
+      <div className="container mx-auto px-4 mb-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-green-600">HerbalMG</h2>
+          <p className="text-sm sm:text-base text-gray-900 md:max-w-2xl">
             HerbalMG is your trusted online medical store, offering genuine medicines,
             health supplements, and wellness products — delivered with care and convenience.
           </p>
@@ -24,9 +24,9 @@ const Footer = () => {
       <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Company */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-green-800">Company</h3>
-          <ul className="space-y-2 text-m text-gray-700">
-            <li><Link to="/about-us" className="hover:text-orange-600 ">About</Link></li>
+          <h3 className="text-base sm:text-lg font-semibold mb-3 text-green-800">Company</h3>
+          <ul className="space-y-2 text-sm sm:text-base text-gray-700">
+            <li><Link to="/about-us" className="hover:text-orange-600">About</Link></li>
             <li><Link to="/contact" className="hover:text-orange-600">Contact</Link></li>
             <li><Link to="/blog" className="hover:text-orange-600">Blogs</Link></li>
           </ul>
@@ -34,8 +34,8 @@ const Footer = () => {
 
         {/* Policies */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-green-800">Policies</h3>
-          <ul className="space-y-2 text-m text-gray-700">
+          <h3 className="text-base sm:text-lg font-semibold mb-3 text-green-800">Policies</h3>
+          <ul className="space-y-2 text-sm sm:text-base text-gray-700">
             <li><Link to="/terms-and-conditions" className="hover:text-orange-600">Terms & Conditions</Link></li>
             <li><Link to="/privacy-policy" className="hover:text-orange-600">Privacy Policy</Link></li>
             <li><Link to="/return-and-refund-policy" className="hover:text-orange-600">Return & Refund Policy</Link></li>
@@ -45,8 +45,8 @@ const Footer = () => {
 
         {/* Social Media */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-black">Follow Us</h3>
-          <div className="flex space-x-5 text-2xl">
+          <h3 className="text-base sm:text-lg font-semibold mb-3 text-black">Follow Us</h3>
+          <div className="flex space-x-4 text-xl sm:text-2xl">
             <a href="#" target="_blank" aria-label="Facebook">
               <FaFacebookF className="text-[#1877F2] hover:text-black transition" />
             </a>
@@ -62,21 +62,21 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Newsletter (optional) */}
+        {/* Newsletter */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-black">Stay Updated</h3>
-          <p className="text-m text-gray-400 mb-3">
+          <h3 className="text-base sm:text-lg font-semibold mb-3 text-black">Stay Updated</h3>
+          <p className="text-sm text-gray-500 mb-2">
             Subscribe to our newsletter for the latest offers.
           </p>
-          <form className="flex">
+          <form className="flex flex-col sm:flex-row gap-2">
             <input
               type="email"
               placeholder="Enter your email"
-              className="px-3 py-2 w-full text-black rounded-l-md focus:outline-none"
+              className="px-3 py-2 w-full text-black rounded-md sm:rounded-l-md focus:outline-none border border-gray-300"
             />
             <button
               type="submit"
-              className="bg-green-500 px-4 py-2 rounded-r-md text-white hover:bg-orange-600"
+              className="bg-green-500 px-4 py-2 rounded-md sm:rounded-r-md text-white hover:bg-orange-600"
             >
               Subscribe
             </button>
@@ -85,14 +85,14 @@ const Footer = () => {
       </div>
 
       {/* Bottom note */}
-      <div className="text-center text-gray-900 text-xs pt-6">
-        &copy; {new Date().getFullYear()} HerbalMG. All rights reserved.
+      <div className="text-center text-gray-700 text-xs pt-8 px-4 leading-relaxed">
+        &copy; {new Date().getFullYear()} HerbalMG. All rights reserved. <br />
         Dispensed in accordance with the Drugs and Cosmetics Act, 1940 & Rules, 1945.
         <br />
-        Crafted with 🧡  by{" "}
+        Crafted with 🧡 by{" "}
         <a
           href="https://portfolio-shreyam91s-projects.vercel.app/"
-          className="text-green-400 hover:underline"
+          className="text-green-500 hover:underline"
           target="_blank"
           rel="noopener noreferrer"
         >

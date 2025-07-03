@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import "./LogoCircles.css"; // 👈 Import custom styles for scrollbar
+import "./LogoCircles.css"; 
 
 const Brands = () => {
   const scrollRef = useRef(null);
