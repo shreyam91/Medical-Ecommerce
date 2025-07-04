@@ -9,10 +9,16 @@ function extractCloudinaryPublicId(url) {
   return matches ? matches[1] : null;
 }
 
-// Get all products
+// Get all products, optionally filter by brandId
 router.get('/', async (req, res) => {
   try {
-    const products = await sql`SELECT * FROM product ORDER BY id DESC`;
+    const { brandId } = req.query;
+    let products;
+    if (brandId) {
+      products = await sql`SELECT * FROM product WHERE ${brandId} = ANY(brand) ORDER BY id DESC`;
+    } else {
+      products = await sql`SELECT * FROM product ORDER BY id DESC`;
+    }
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
