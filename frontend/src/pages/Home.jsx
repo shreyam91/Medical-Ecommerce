@@ -12,9 +12,9 @@ const Home = () => {
     <Banner/>
     <Breadcrumb/>
     <Category/>
-    <div className="min-h-screen flex items-center justify-center bg-white">
       <Brands />
-    </div>
+    {/* <div className="min-h-screen flex items-center justify-center">
+    </div> */}
     <Trending/>
     <DealsOfTheDay />
     </>

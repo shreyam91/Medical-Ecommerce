@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import "./LogoCircles.css"; // Reuse scrollbar hiding CSS
+import "./LogoCircles.css"; // optional: hides scrollbar
 
 const data = [
   { id: 1, title: "Diabetes", imageUrl: "https://source.unsplash.com/300x300/?mountain" },
@@ -14,55 +14,35 @@ const data = [
 
 export default function Category() {
   const scrollRef = useRef(null);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
-  const autoScrollInterval = useRef(null);
+  const autoScrollRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const scrollAmount = 300;
-
-  const checkScroll = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setAtStart(el.scrollLeft === 0);
-    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 5);
-  };
-
-  const scroll = (direction) => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
-  };
-
-  // Auto-scroll logic
+  // Simulate loading delay for skeletons
   useEffect(() => {
-    autoScrollInterval.current = setInterval(() => {
-      if (!scrollRef.current) return;
-      const el = scrollRef.current;
-      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        scroll("right");
-      }
-    }, 4000);
-
-    return () => clearInterval(autoScrollInterval.current);
+    const timer = setTimeout(() => setLoading(false), 1500); // 1.5s
+    return () => clearTimeout(timer);
   }, []);
 
-  // Track scroll position
+  // Auto-scroll with pause on hover
   useEffect(() => {
-    checkScroll();
     const el = scrollRef.current;
     if (!el) return;
 
-    el.addEventListener("scroll", checkScroll);
-    window.addEventListener("resize", checkScroll);
-    return () => {
-      el.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
+    const startAutoScroll = () => {
+      autoScrollRef.current = setInterval(() => {
+        if (isHovered) return;
+        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+          el.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          el.scrollBy({ left: 300, behavior: "smooth" });
+        }
+      }, 4000);
     };
-  }, []);
+
+    startAutoScroll();
+    return () => clearInterval(autoScrollRef.current);
+  }, [isHovered]);
 
   // Touch swipe support
   useEffect(() => {
@@ -101,64 +81,50 @@ export default function Category() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 relative">
-      <h1 className="text-3xl font-bold mb-6 text-center text-green-700">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-green-700">
         Shop by Health Concern
       </h1>
-
-      {/* Left scroll button */}
-      <div className="absolute left-0 top-0 h-full flex items-center z-20">
-        <button
-          onClick={() => scroll("left")}
-          disabled={atStart}
-          aria-label="Scroll Left"
-          className={`bg-green-600 text-white rounded-full p-3 shadow hover:bg-green-700 transition-opacity ${
-            atStart ? "opacity-30 cursor-not-allowed" : ""
-          }`}
-        >
-          &#8592;
-        </button>
-      </div>
 
       {/* Scrollable Categories */}
       <div
         ref={scrollRef}
-        className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth px-10"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth px-4 sm:px-10"
         style={{ scrollSnapType: "x mandatory" }}
         aria-label="Carousel of health categories"
       >
-        {data.map(({ id, title, imageUrl }) => (
-          <div
-            key={id}
-            className="flex-shrink-0 w-44 scroll-snap-align-center"
-            title={title}
-            role="img"
-            aria-label={`Category: ${title}`}
-          >
-            <div className="w-44 h-44 bg-gray-200 overflow-hidden rounded-md shadow">
-              <img
-                src={imageUrl}
-                alt={title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-            <p className="mt-2 text-center text-md font-medium">{title}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Right scroll button */}
-      <div className="absolute right-0 top-0 h-full flex items-center z-20">
-        <button
-          onClick={() => scroll("right")}
-          disabled={atEnd}
-          aria-label="Scroll Right"
-          className={`bg-green-600 text-white rounded-full p-3 shadow hover:bg-green-700 transition-opacity ${
-            atEnd ? "opacity-30 cursor-not-allowed" : ""
-          }`}
-        >
-          &#8594;
-        </button>
+        {loading
+          ? Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex-shrink-0 w-40 sm:w-44 animate-pulse"
+                style={{ scrollSnapAlign: "center" }}
+              >
+                <div className="w-full h-44 bg-gray-200 rounded-md shadow" />
+                <div className="h-4 w-24 bg-gray-200 mt-2 mx-auto rounded" />
+              </div>
+            ))
+          : data.map(({ id, title, imageUrl }) => (
+              <div
+                key={id}
+                className="flex-shrink-0 w-40 sm:w-44"
+                style={{ scrollSnapAlign: "center" }}
+                title={title}
+                role="img"
+                aria-label={`Category: ${title}`}
+              >
+                <div className="w-full h-44 bg-gray-200 overflow-hidden rounded-md shadow">
+                  <img
+                    src={imageUrl}
+                    alt={title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <p className="mt-2 text-center text-md font-medium">{title}</p>
+              </div>
+            ))}
       </div>
     </div>
   );
