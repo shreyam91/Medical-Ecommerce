@@ -1,17 +1,15 @@
 import { useRef, useState, useEffect } from "react";
-import "./LogoCircles.css"; 
+import "./LogoCircles.css";
 
 const Brands = () => {
   const scrollRef = useRef(null);
+  const autoScrollInterval = useRef(null);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const scrollAmount = 250;
-  let autoScrollInterval = useRef(null);
-
+  // Fetch data
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -30,54 +28,23 @@ const Brands = () => {
       });
   }, []);
 
-  const checkScroll = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setAtStart(el.scrollLeft === 0);
-    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 5);
-  };
-
-  const scroll = (direction) => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
-  };
-
-  // Auto-scroll setup
+  // Auto-scroll with pause on hover
   useEffect(() => {
     const startAutoScroll = () => {
       autoScrollInterval.current = setInterval(() => {
-        if (!scrollRef.current) return;
+        if (isHovered || !scrollRef.current) return;
         const el = scrollRef.current;
         if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
-          el.scrollTo({ left: 0, behavior: "smooth" }); // loop back
+          el.scrollTo({ left: 0, behavior: "smooth" });
         } else {
-          scroll("right");
+          el.scrollBy({ left: 250, behavior: "smooth" });
         }
-      }, 4000); // auto-scroll interval in ms
+      }, 4000);
     };
 
     startAutoScroll();
-
     return () => clearInterval(autoScrollInterval.current);
-  }, []);
-
-  // Track scroll position
-  useEffect(() => {
-    checkScroll();
-    const el = scrollRef.current;
-    if (!el) return;
-
-    el.addEventListener("scroll", checkScroll);
-    window.addEventListener("resize", checkScroll);
-
-    return () => {
-      el.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
-    };
-  }, []);
+  }, [isHovered]);
 
   // Touch swipe support
   useEffect(() => {
@@ -114,83 +81,52 @@ const Brands = () => {
     };
   }, []);
 
-  if (loading)
-    return (
-      <div className="p-10 max-w-6xl mx-auto text-center">
-        Loading brands...
-      </div>
-    );
-  if (error)
-    return (
-      <div className="p-10 max-w-6xl mx-auto text-center text-red-500">
-        {error}
-      </div>
-    );
-  if (!brands.length)
-    return (
-      <div className="p-10 max-w-6xl mx-auto text-center text-gray-400">
-        No brands available
-      </div>
-    );
-
   return (
-    <div className="relative px-4 md:px-10 py-8 max-w-7xl mx-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-green-700 text-center md:text-left">
+    <div className="relative px-4 md:px-10 py-8 max-w-full md:max-w-7xl mx-auto">
+<h1 className="text-xl text-center sm:text-2xl md:text-3xl font-bold mb-6 text-green-700">
         Shop by Brands
       </h1>
 
-      {/* Left Button */}
-      <div className="hidden lg:flex absolute left-0 top-1/2 transform -translate-y-1/2 z-20">
-        <button
-          onClick={() => scroll("left")}
-          disabled={atStart}
-          className={`bg-green-600 text-white rounded-full p-3 shadow hover:bg-green-700 transition-opacity ${
-            atStart ? "opacity-30 cursor-not-allowed" : ""
-          }`}
-          aria-label="Scroll Left"
-        >
-          &#8592;
-        </button>
-      </div>
-
-      {/* Logos Scroll Wrapper */}
+      {/* Scrollable area */}
       <div
         ref={scrollRef}
-        className="flex gap-4 sm:gap-6 overflow-x-auto px-2 sm:px-10 no-scrollbar scroll-smooth"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="flex gap-4 sm:gap-6 overflow-x-auto px-1 sm:px-4 no-scrollbar scroll-smooth"
         style={{ scrollSnapType: "x mandatory" }}
         aria-label="Carousel of Ayurvedic Brand Logos"
       >
-        {brands.map((brand) => (
-          <div
-            key={brand.id}
-            className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-white border shadow flex items-center justify-center cursor-pointer hover:scale-105 sm:hover:scale-110 transition-transform duration-300"
-            style={{ scrollSnapAlign: "center" }}
-            role="img"
-            aria-label={`Brand logo of ${brand.name}`}
-            title={brand.name}
-          >
-            <img
-              src={brand.image_url}
-              alt={brand.name}
-              className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-              loading="lazy"
+        {loading ? (
+          Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gray-200 animate-pulse"
+              style={{ scrollSnapAlign: "center" }}
             />
-          </div>
-        ))}
-      </div>
-
-      {/* Right Button */}
-      <div className="hidden lg:flex absolute right-0 top-1/2 transform -translate-y-1/2 z-20">
-        <button
-          onClick={() => scroll("right")}
-          disabled={atEnd}
-          className={`bg-green-600 text-white rounded-full p-3 shadow hover:bg-green-700 transition-opacity ${
-            atEnd ? "opacity-30 cursor-not-allowed" : ""
-          }`}
-          aria-label="Scroll Right"
-        >
-          &#8594;
-        </button>
+          ))
+        ) : error ? (
+          <div className="text-red-500 text-center">{error}</div>
+        ) : brands.length ? (
+          brands.map((brand) => (
+            <div
+              key={brand.id}
+              className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-white border shadow flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300"
+              style={{ scrollSnapAlign: "center" }}
+              role="img"
+              aria-label={`Brand logo of ${brand.name}`}
+              title={brand.name}
+            >
+              <img
+                src={brand.image_url}
+                alt={brand.name}
+                className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                loading="lazy"
+              />
+            </div>
+          ))
+        ) : (
+          <div className="text-gray-400 text-center">No brands available</div>
+        )}
       </div>
     </div>
   );
