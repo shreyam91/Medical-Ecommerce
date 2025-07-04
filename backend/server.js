@@ -25,29 +25,63 @@ app.use('/api/book', require('./routes/book'));
 app.use('/api/brand', require('./routes/brand'));
 app.use('/api/order', require('./routes/order'));
 
-// Endpoint to return unique pincodes
-// app.get('/api/pincodes', (req, res) => {
-//   fs.readFile('./data.json', 'utf8', (err, jsonData) => {
-//     if (err) {
-//       console.error('Failed to read data.json:', err);
-//       return res.status(500).json({ error: 'Internal server error' });
-//     }
+// Endpoint to fetch pincodes by city or pincode using a free public API
+app.get('/api/pincodes/:query', async (req, res) => {
+  const query = req.params.query;
+  let url;
+  if (/^\d+$/.test(query)) {
+    // If query is all digits, search by pincode
+    url = `https://api.postalpincode.in/pincode/${encodeURIComponent(query)}`;
+  } else {
+    // Otherwise, search by city
+    url = `https://api.postalpincode.in/postoffice/${encodeURIComponent(query)}`;
+  }
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (Array.isArray(data) && data[0].Status === "Success") {
+      const pincodes = data[0].PostOffice.map(po => ({
+        Pincode: po.Pincode,
+        Name: po.Name,
+        District: po.District,
+        State: po.State
+      }));
+      res.json(pincodes);
+    } else {
+      res.status(404).json({ error: "No pincodes found for this query" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch pincodes" });
+  }
+});
 
-//     try {
-//       const data = JSON.parse(jsonData);
-//       const pincodes = new Set();
-
-//       data.Pincodes.forEach(item => {
-//         pincodes.add(item.Pincode);
-//       });
-
-//       res.json(Array.from(pincodes));
-//     } catch (parseErr) {
-//       console.error('Error parsing data.json:', parseErr);
-//       res.status(500).json({ error: 'Invalid JSON format' });
-//     }
-//   });
-// });
+// Endpoint to detect user location and return pincode using the public API
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+app.get('/api/detect-location', async (req, res) => {
+  try {
+    const ipRes = await fetch('https://ipapi.co/json/');
+    const ipData = await ipRes.json();
+    console.log('ipapi.co response:', ipData); // Debug log
+    const userCity = ipData.city;
+    if (!userCity) {
+      console.log('No city detected from IP');
+      return res.status(404).json({ message: 'Could not detect city from IP' });
+    }
+    // Fetch pincodes for the detected city
+    const response = await fetch(`https://api.postalpincode.in/postoffice/${encodeURIComponent(userCity)}`);
+    const data = await response.json();
+    console.log('Postal API for city:', userCity, data); // Debug log
+    if (Array.isArray(data) && data[0].Status === "Success" && data[0].PostOffice.length > 0) {
+      res.json({ pincode: data[0].PostOffice[0].Pincode });
+    } else {
+      console.log('No pincode found for detected city:', userCity);
+      res.status(404).json({ message: 'Pincode not found for your location' });
+    }
+  } catch (err) {
+    console.error('Geo detection error:', err);
+    res.status(500).json({ message: 'Failed to detect location' });
+  }
+});
 
 // Test route to verify Postgres connection
 app.get('/api/postgres-test', async (req, res) => {
