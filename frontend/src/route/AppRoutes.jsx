@@ -21,6 +21,8 @@ import Offers from '../pages/Offers';
 import Contact from '../pages/Contact';
 import UserProfile from '../pages/UserProfile';
 import DoctorPage from '../pages/DoctorPage';
+import BrandProducts from '../pages/BrandProducts';
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -47,6 +49,7 @@ const AppRoutes = () => {
 
       <Route path="/profile" element={<UserProfile/>} />
       <Route path="/doctors" element={<DoctorPage/>} />
+      <Route path="/brand/:brandId" element={<BrandProducts />} />
 
       {/* Protected Routes (require login) */}
       {/* <Route path="/profile" element={

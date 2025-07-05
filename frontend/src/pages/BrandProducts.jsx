@@ -13,7 +13,7 @@ const BrandProducts = () => {
     setLoading(true);
     setError(null);
     // Fetch products for this brand
-    fetch(`http://localhost:3001/api/product?brandName=${brandId}`)
+    fetch(`http://localhost:3001/api/product?brandId=${brandId}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch products');
         return res.json();

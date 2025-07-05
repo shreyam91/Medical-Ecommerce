@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import "./LogoCircles.css";
+import { useNavigate } from "react-router-dom";
 
 const Brands = () => {
   const scrollRef = useRef(null);
@@ -8,6 +9,7 @@ const Brands = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   // Fetch data
   useEffect(() => {
@@ -115,6 +117,7 @@ const Brands = () => {
               role="img"
               aria-label={`Brand logo of ${brand.name}`}
               title={brand.name}
+              onClick={() => navigate(`/brand/${brand.id}`)}
             >
               <img
                 src={brand.image_url}
