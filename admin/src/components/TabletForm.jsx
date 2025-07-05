@@ -9,7 +9,7 @@ import { getBooks } from '../lib/bookApi';
 const TabletForm = ({ category, editProduct, setEditProduct }) => {
   const initialFormState = {
     name: '',
-    brand: '',
+    brand_id: '',
     dosage: '',
     quantity: '',
     gst: '',
@@ -40,7 +40,7 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
     if (editProduct) {
       setForm({
         name: editProduct.name || '',
-        brand: editProduct.brand || '',
+        brand_id: editProduct.brand_id || '',
         dosage: editProduct.dosage_information || '',
         quantity: editProduct.total_quantity || '',
         gst: editProduct.gst || '',
@@ -73,7 +73,7 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
   const validate = () => {
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = 'Medicine Name is required';
-    if (!form.brand) newErrors.brand = 'Brand is required';
+    if (!form.brand_id) newErrors.brand_id = 'Brand is required';
     if (form.actualPrice === '' || Number(form.actualPrice) <= 0)
       newErrors.actualPrice = 'Actual Price must be greater than 0';
     if (form.sellingPrice === '' || Number(form.sellingPrice) <= 0)
@@ -162,9 +162,9 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
     const payload = {
       name: form.name,
       category: categoryValue,
-      medicine_type: 'Tablet', // or get from form if available
+      medicine_type: 'Tablet',
       images: uploadedImageUrls,
-      brand: form.brand ? [form.brand] : [],
+      brand_id: form.brand_id ? parseInt(form.brand_id, 10) : null,
       reference_books: form.referenceBook ? [form.referenceBook] : [],
       dosage_information: form.dosage,
       cause: form.cause,
@@ -230,22 +230,22 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
 
         {/* Brand */}
         <div>
-          <label htmlFor="brand" className="block font-medium mb-1">
+          <label htmlFor="brand_id" className="block font-medium mb-1">
             Brand <span className="text-red-600">*</span>
           </label>
           <select
-            id="brand"
-            name="brand"
-            value={form.brand}
+            id="brand_id"
+            name="brand_id"
+            value={form.brand_id}
             onChange={handleChange}
-            className={`w-full border rounded p-2 ${errors.brand ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full border rounded p-2 ${errors.brand_id ? 'border-red-500' : 'border-gray-300'}`}
           >
             <option value="">Select Brand</option>
             {brands.map((b) => (
-              <option key={b.id} value={b.name}>{b.name}</option>
+              <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>
-          {errors.brand && <p className="text-red-600 text-sm mt-1">{errors.brand}</p>}
+          {errors.brand_id && <p className="text-red-600 text-sm mt-1">{errors.brand_id}</p>}
         </div>
 
         {/* Reference Book */}
@@ -321,7 +321,7 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
         </div>
 
         {/* Indications */}
-        {/* <div>
+        <div>
           <label htmlFor="indications" className="block font-medium mb-1">Uses / Indications</label>
           <textarea
             id="indications"
@@ -331,7 +331,7 @@ const TabletForm = ({ category, editProduct, setEditProduct }) => {
             rows={2}
             className="w-full border rounded p-2 border-gray-300"
           />
-        </div> */}
+        </div>
 
         {/* Lifestyle Advice */}
         {/* <div>

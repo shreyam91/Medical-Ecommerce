@@ -4,7 +4,7 @@ CREATE TABLE product (
     category TEXT CHECK (category IN ('Ayurvedic', 'Unani', 'Homeopathic')),
     medicine_type TEXT CHECK (medicine_type IN ('Tablet', 'Syrup', 'Powder')),
     images TEXT[],  -- Array of image URLs or paths
-    brand TEXT[],
+    brand_id INTEGER NOT NULL REFERENCES brand(id) ON DELETE RESTRICT,
     reference_books TEXT[],  -- Array of book names
     dosage_information TEXT,
     cause TEXT,
@@ -19,6 +19,7 @@ CREATE TABLE product (
     prescription_required BOOLEAN DEFAULT FALSE
 );
 
+
 -- 🔍 Indexes for search performance
 
 -- Index for fast name-based searching (e.g., product name search)
@@ -30,8 +31,8 @@ CREATE INDEX idx_product_category ON product (category);
 -- Index for medicine type filtering
 CREATE INDEX idx_product_medicine_type ON product (medicine_type);
 
--- Index for brand searches
-CREATE INDEX idx_product_brand ON product (brand);
+-- ✅ Fixed: Index for brand searches (use brand_id now)
+CREATE INDEX idx_product_brand_id ON product (brand_id);
 
 -- Index for price range queries
 CREATE INDEX idx_product_selling_price ON product (selling_price);

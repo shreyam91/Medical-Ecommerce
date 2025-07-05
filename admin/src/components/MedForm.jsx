@@ -10,14 +10,14 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
   const [unit, setUnit] = useState("ml");
   const [form, setForm] = useState({
     name: "",
-    brand: "",
+    brand_id: "",
     dosage: "",
     gst: "",
     description: "",
     prescriptionRequired: false,
     cause: "",
     keyIngredients: "",
-    referenceBook: "",
+    referenceBook: '',
     indications: "",
     lifestyleAdvice: "",
     prices: [
@@ -96,7 +96,7 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
   const validateForm = () => {
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = "Name is required.";
-    if (!form.brand) newErrors.brand = "Brand is required.";
+    if (!form.brand_id) newErrors.brand_id = "Brand is required.";
     if (!form.dosage.trim()) newErrors.dosage = "Dosage is required.";
     if (!form.gst) newErrors.gst = "Valid GST is required.";
     if (!form.description.trim())
@@ -159,15 +159,14 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
     if (editProduct) {
       setForm({
         name: editProduct.name || "",
-        brand: editProduct.brand || "",
+        brand_id: editProduct.brand_id || "",
         dosage: editProduct.dosage_information || "",
         gst: editProduct.gst || "",
         description: editProduct.description || "",
         prescriptionRequired: editProduct.prescription_required || false,
         cause: editProduct.cause || "",
         keyIngredients: editProduct.key_ingredients || "",
-        referenceBook:
-          (editProduct.reference_books && editProduct.reference_books[0]) || "",
+        referenceBook: (editProduct.reference_books && editProduct.reference_books[0]) || '',
         indications: editProduct.uses_indications || "",
         lifestyleAdvice: "",
         prices: [
@@ -256,9 +255,9 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
     const payload = {
       name: form.name,
       category: categoryValue,
-      medicine_type: 'Syrup', // or get from form if available
+      medicine_type: unit === 'ml' ? 'Syrup' : 'Powder',
       images: uploadedImageUrls,
-      brand: form.brand ? [form.brand] : [],
+      brand_id: form.brand_id ? parseInt(form.brand_id, 10) : null,
       reference_books: form.referenceBook ? [form.referenceBook] : [],
       dosage_information: form.dosage,
       cause: form.cause,
@@ -285,7 +284,7 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
       }
       setForm({
         name: '',
-        brand: '',
+        brand_id: '',
         dosage: '',
         gst: '',
         description: '',
@@ -319,7 +318,7 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
               setEditProduct(null);
               setForm({
                 name: '',
-                brand: '',
+                brand_id: '',
                 dosage: '',
                 gst: '',
                 description: '',
@@ -373,34 +372,28 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
       </div>
 
       <div>
-        <label htmlFor="brand" className="block font-medium mb-1">
+        <label htmlFor="brand_id" className="block font-medium mb-1">
           Brand <span className="text-red-600">*</span>
         </label>
         <select
-          id="brand"
-          name="brand"
-          value={form.brand}
+          id="brand_id"
+          name="brand_id"
+          value={form.brand_id}
           onChange={handleChange}
-          className={`w-full border rounded p-2 ${
-            errors.brand ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full border rounded p-2 ${errors.brand_id ? "border-red-500" : "border-gray-300"}`}
         >
           <option value="">Select Brand</option>
           {brands.map((b) => (
-            <option key={b.id} value={b.name}>
-              {b.name}
-            </option>
+            <option key={b.id} value={b.id}>{b.name}</option>
           ))}
         </select>
-        {errors.brand && (
-          <p className="text-red-600 text-sm mt-1">{errors.brand}</p>
+        {errors.brand_id && (
+          <p className="text-red-600 text-sm mt-1">{errors.brand_id}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="referenceBook" className="block font-medium mb-1">
-          Reference Book
-        </label>
+        <label htmlFor="referenceBook" className="block font-medium mb-1">Reference Book</label>
         <select
           id="referenceBook"
           name="referenceBook"
@@ -410,9 +403,7 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
         >
           <option value="">Select Reference Book</option>
           {referenceBooks.map((book) => (
-            <option key={book.id} value={book.name}>
-              {book.name}
-            </option>
+            <option key={book.id} value={book.name}>{book.name}</option>
           ))}
         </select>
       </div>
@@ -475,35 +466,35 @@ const MedForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
-      {/* <div>
-  <label className="font-medium block mb-1">Uses / Indications</label>
-  <textarea
-    name="indications"
-    placeholder="Indication eg: "
-    className="w-full border rounded p-2"
-    rows={2}
-    value={form.indications}
-    onChange={handleChange}
-  />
-  {errors.indications && (
-    <p className="text-red-500 text-sm">{errors.indications}</p>
-  )}
-</div> */}
+      <div>
+        <label className="font-medium block mb-1">Uses / Indications</label>
+        <textarea
+          name="indications"
+          placeholder="Indication eg: "
+          className="w-full border rounded p-2"
+          rows={2}
+          value={form.indications}
+          onChange={handleChange}
+        />
+        {errors.indications && (
+          <p className="text-red-500 text-sm">{errors.indications}</p>
+        )}
+      </div>
 
-      {/* <div>
-  <label className="font-medium block mb-1">Dietary / Lifecycle Advice</label>
-  <textarea
-    name="lifestyleAdvice"
-    placeholder="Advice eg: "
-    className="w-full border rounded p-2"
-    rows={2}
-    value={form.lifestyleAdvice}
-    onChange={handleChange}
-  />
-  {errors.lifestyleAdvice && (
-    <p className="text-red-500 text-sm">{errors.lifestyleAdvice}</p>
-  )}
-</div> */}
+      <div>
+        <label className="font-medium block mb-1">Dietary / Lifecycle Advice</label>
+        <textarea
+          name="lifestyleAdvice"
+          placeholder="Advice eg: "
+          className="w-full border rounded p-2"
+          rows={2}
+          value={form.lifestyleAdvice}
+          onChange={handleChange}
+        />
+        {errors.lifestyleAdvice && (
+          <p className="text-red-500 text-sm">{errors.lifestyleAdvice}</p>
+        )}
+      </div>
 
       <div className="w-1/2">
         <label htmlFor="gst" className="block font-medium mb-1">

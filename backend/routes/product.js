@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     const { brandId } = req.query;
     let products;
     if (brandId) {
-      products = await sql`SELECT * FROM product WHERE ${brandId} = ANY(brand) ORDER BY id DESC`;
+      products = await sql`SELECT * FROM product WHERE brand_id = ${brandId} ORDER BY id DESC`;
     } else {
       products = await sql`SELECT * FROM product ORDER BY id DESC`;
     }
@@ -38,11 +38,12 @@ router.get('/:id', async (req, res) => {
 
 // Create product
 router.post('/', async (req, res) => {
-  const { name, category, medicine_type, images, brand, reference_books, dosage_information, cause, description, key_ingredients, uses_indications, actual_price, selling_price, discount_percent, gst, total_quantity, prescription_required } = req.body;
+  console.log('POST /api/product payload:', req.body);
+  const { name, category, medicine_type, images, brand_id, reference_books, dosage_information, cause, description, key_ingredients, uses_indications, actual_price, selling_price, discount_percent, gst, total_quantity, prescription_required } = req.body;
   try {
     const [product] = await sql`
-      INSERT INTO product (name, category, medicine_type, images, brand, reference_books, dosage_information, cause, description, key_ingredients, uses_indications, actual_price, selling_price, discount_percent, gst, total_quantity, prescription_required)
-      VALUES (${name}, ${category}, ${medicine_type}, ${images}, ${brand}, ${reference_books}, ${dosage_information}, ${cause}, ${description}, ${key_ingredients}, ${uses_indications}, ${actual_price}, ${selling_price}, ${discount_percent}, ${gst}, ${total_quantity}, ${prescription_required})
+      INSERT INTO product (name, category, medicine_type, images, brand_id, reference_books, dosage_information, cause, description, key_ingredients, uses_indications, actual_price, selling_price, discount_percent, gst, total_quantity, prescription_required)
+      VALUES (${name}, ${category}, ${medicine_type}, ${images}, ${brand_id}, ${reference_books}, ${dosage_information}, ${cause}, ${description}, ${key_ingredients}, ${uses_indications}, ${actual_price}, ${selling_price}, ${discount_percent}, ${gst}, ${total_quantity}, ${prescription_required})
       RETURNING *`;
     res.status(201).json(product);
   } catch (err) {
@@ -53,10 +54,11 @@ router.post('/', async (req, res) => {
 
 // Update product
 router.put('/:id', async (req, res) => {
-  const { name, category, medicine_type, images, brand, reference_books, dosage_information, cause, description, key_ingredients, uses_indications, actual_price, selling_price, discount_percent, gst, total_quantity, prescription_required } = req.body;
+  console.log('PUT /api/product payload:', req.body);
+  const { name, category, medicine_type, images, brand_id, reference_books, dosage_information, cause, description, key_ingredients, uses_indications, actual_price, selling_price, discount_percent, gst, total_quantity, prescription_required } = req.body;
   try {
     const [product] = await sql`
-      UPDATE product SET name=${name}, category=${category}, medicine_type=${medicine_type}, images=${images}, brand=${brand}, reference_books=${reference_books}, dosage_information=${dosage_information}, cause=${cause}, description=${description}, key_ingredients=${key_ingredients}, uses_indications=${uses_indications}, actual_price=${actual_price}, selling_price=${selling_price}, discount_percent=${discount_percent}, gst=${gst}, total_quantity=${total_quantity}, prescription_required=${prescription_required}
+      UPDATE product SET name=${name}, category=${category}, medicine_type=${medicine_type}, images=${images}, brand_id=${brand_id}, reference_books=${reference_books}, dosage_information=${dosage_information}, cause=${cause}, description=${description}, key_ingredients=${key_ingredients}, uses_indications=${uses_indications}, actual_price=${actual_price}, selling_price=${selling_price}, discount_percent=${discount_percent}, gst=${gst}, total_quantity=${total_quantity}, prescription_required=${prescription_required}
       WHERE id=${req.params.id} RETURNING *`;
     if (!product) return res.status(404).json({ error: 'Not found' });
     res.json(product);
