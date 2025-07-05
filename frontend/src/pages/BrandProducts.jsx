@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-// import ProductCard from '../components/ProductCard'; // Uncomment and enhance ProductCard as needed
+import ProductCard from '../components/ProductCard'; // Ensure the path is correct
 
 const BrandProducts = () => {
   const { brandId } = useParams();
@@ -12,6 +12,7 @@ const BrandProducts = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
+
     // Fetch products for this brand
     fetch(`http://localhost:3001/api/product?brandId=${brandId}`)
       .then((res) => {
@@ -26,9 +27,10 @@ const BrandProducts = () => {
         setError(err.message);
         setLoading(false);
       });
-    // Fetch brand info (optional)
+
+    // Fetch brand info
     fetch(`http://localhost:3001/api/brand/${brandId}`)
-      .then((res) => res.ok ? res.json() : null)
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => setBrand(data))
       .catch(() => {});
   }, [brandId]);
@@ -41,16 +43,13 @@ const BrandProducts = () => {
       <h1 className="text-2xl font-bold mb-6 text-green-700 text-center">
         Products for {brand ? brand.name : 'Brand'}
       </h1>
+
       {products.length === 0 ? (
         <div className="text-gray-400 text-center">No products found for this brand.</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {/* Replace below with <ProductCard product={product} /> */}
           {products.map((product) => (
-            <div key={product.id} className="border rounded p-4 shadow">
-              <h2 className="font-semibold">{product.name}</h2>
-              {/* Add more product details here */}
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
@@ -58,4 +57,4 @@ const BrandProducts = () => {
   );
 };
 
-export default BrandProducts; 
+export default BrandProducts;
