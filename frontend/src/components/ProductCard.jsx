@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
       )}
 
       {/* Product Image with lazy-loading and hover zoom */}
-      <div className="bg-gray-100 flex justify-center items-center h-48 overflow-hidden">
+      <div className=" flex justify-center items-center h-48 overflow-hidden">
         <img
           src={image}
           alt={name}
@@ -41,16 +41,17 @@ const ProductCard = ({ product }) => {
 <h3 className="text-lg font-medium text-gray-800 line-clamp-2">{name}</h3>
 
         {/* Prices */}
-        <div className="mt-2 mb-4 flex items-center gap-2 flex-wrap">
-          {hasDiscount && (
-            <span className="text-sm text-gray-400 line-through">
-              ₹{actualPriceNum.toFixed(2)}
-            </span>
-          )}
-          <span className="text-lg font-bold text-gray-900">
-            ₹{sellingPriceNum.toFixed(2)}
-          </span>
-        </div>
+       <div className="mt-2 mb-4 flex flex-col">
+  <span className="text-lg font-bold text-gray-900">
+    ₹{sellingPriceNum.toFixed(2)}
+  </span>
+  {hasDiscount && (
+    <span className="text-sm text-gray-400">
+      MRP: <span className="line-through">₹{actualPriceNum.toFixed(2)}</span>
+    </span>
+  )}
+</div>
+
 
         {/* Add to Cart Button */}
         <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded transition duration-200">
