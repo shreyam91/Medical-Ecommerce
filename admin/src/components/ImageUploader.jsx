@@ -18,12 +18,23 @@ const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUplo
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    if (deferUpload) {
-      setSelectedFiles(files);
-      setImages(files.map(file => ({ previewUrl: URL.createObjectURL(file) })));
-      onFilesSelected?.(files);
-      return;
-    }
+   if (deferUpload) {
+  const combinedFiles = [...selectedFiles, ...files];
+
+  // Optional: deduplicate by name + size
+  const uniqueMap = new Map();
+  combinedFiles.forEach((file) => {
+    uniqueMap.set(file.name + file.size, file);
+  });
+
+  const uniqueFiles = Array.from(uniqueMap.values());
+
+  setSelectedFiles(uniqueFiles);
+  setImages(uniqueFiles.map(file => ({ previewUrl: URL.createObjectURL(file) })));
+  onFilesSelected?.(uniqueFiles);
+  return;
+}
+
 
     setUploading(true);
     toast.loading('Compressing and uploading images...');
