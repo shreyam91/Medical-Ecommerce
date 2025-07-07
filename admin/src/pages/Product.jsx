@@ -24,7 +24,7 @@ const Product = () => {
           <div>
             <h2 className="text-2xl font-semibold mb-6">Product</h2>
             <div className="mb-6">
-              <label className="block font-medium mb-2">Select Category</label>
+              <label className="block font-medium mb-2">Select Category of Medicine</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
