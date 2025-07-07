@@ -1,99 +1,152 @@
-import React, { useContext, useEffect, useState } from 'react'
-import {useParams} from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
+export default function ProductDetails() {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [activeTab, setActiveTab] = useState("description");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [unit, setUnit] = useState("");
 
-const ProductDetails = () => {
-  const{productId} = useParams();
-  const{products, currency, addToCart} = useContext(ShopContext);
-  const[productData, setProductData] = useState(false);
-  const[image,setImage] = useState('')
-  const[size,setSize] = useState('')
+  useEffect(() => {
+    setLoading(true);
+    fetch(`http://localhost:3001/api/product/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch product");
+        return res.json();
+      })
+      .then((data) => {
+        setProduct(data);
+        setSelectedImage(Array.isArray(data.images) && data.images.length > 0 ? data.images[0] : null);
+        // Fetch unit from product_price
+        fetch(`http://localhost:3001/api/product_price`)
+          .then((res) => res.json())
+          .then((prices) => {
+            const priceObj = Array.isArray(prices) ? prices.find(p => String(p.product_id) === String(data.id)) : null;
+            setUnit(priceObj ? priceObj.unit : "");
+          })
+          .catch(() => setUnit(""));
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [id]);
 
-  const fetchProductData = async() =>{
-    products.map((item) =>{
-      if(item._id === productId){
-        setProductData(item);
-        setImage(item.image[0])
-        return null;
-      }
-    })
-  }
+  if (loading) return <div className="p-10 text-center">Loading product...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
+  if (!product) return <div className="p-10 text-center text-gray-400">Product not found.</div>;
 
-  useEffect(()=>{
-    fetchProductData();
-  },[productId, products])
+  const sizes = product.sizes || [];
+  const actualPriceNum = Number(product.actual_price);
+  const sellingPriceNum = Number(product.selling_price);
+  const hasDiscount = actualPriceNum > sellingPriceNum;
+  const discountPercentage = hasDiscount
+    ? Math.round(((actualPriceNum - sellingPriceNum) / actualPriceNum) * 100)
+    : 0;
 
-  return  productData ? (
-    <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
-      { /* Product Data */}
-      <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
-        {/* Product Images */}
-        <div className='flex-1 flex flex-col-reverse gap-3 sm:flex-row'>
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex gap-6 flex-col md:flex-row">
+        {/* Thumbnail Images */}
+        <div className="flex flex-row md:flex-col gap-4">
+          {Array.isArray(product.images) && product.images.length > 0 ? (
+            product.images.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                onClick={() => setSelectedImage(img)}
+                className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
+                alt={product.name}
+              />
+            ))
+          ) : (
+            <img
+              src="https://via.placeholder.com/300x200?text=No+Image"
+              className="w-20 h-20 object-cover border border-gray-300"
+              alt="No product"
+            />
+          )}
+        </div>
 
-          <div className='flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal sm:w-[18.7%] w-full'>
-            {
-              productData.image.map((item,index) =>(
-                <img src={item} key={index} alt="" className='w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer' onClick={()=>setImage(item)}/>
-              ))
-            }
-          </div>
+        {/* Main Image */}
+        <div className="flex-1 flex items-center justify-center">
+          <img src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"} alt="Main" className="w-full h-[400px] object-contain rounded" />
+        </div>
 
-          <div className='w-full sm:w-[30%]'>
-            <img src={image} alt="" className='w-full h-auto'/>
-          </div>
+        {/* Product Info */}
+        <div className="w-full md:w-1/3 space-y-4">
+          <h1 className="text-3xl font-semibold">{product.name}</h1>
 
-          {/* ------- Product info--------- */}
-          <div className='flex-1'>
-            <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
-
-            <div className='flex items-center gap-1 mt-2'>
-              <img src={assets.star_icon} alt="" className='w-3 5'/>
-              <img src={assets.star_icon} alt="" className='w-3 5'/>
-              <img src={assets.star_icon} alt="" className='w-3 5'/>
-              <img src={assets.star_icon} alt="" className='w-3 5'/>
-              <img src={assets.star_dull_icon} alt="" className='w-3 5'/>
-              <p className='pl-2'>{122}</p>
-            </div>
-
-            <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
-            <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
-
-            <div className='flex flex-col gap-4 my-8'>
-              <p>Select Size</p>
-              <div className='flex gap-2'>
-                {productData.sizes.map((item,index)=> (
-                  <button className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`} key={index} onClick={()=>setSize(item)}>{item}</button>
+          {/* Size Selector */}
+          {sizes.length > 0 && (
+            <div>
+              <h2 className="font-medium mb-2">Select Size:</h2>
+              <div className="flex gap-2">
+                {sizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-4 py-1 border rounded ${selectedSize === size ? "bg-blue-500 text-white" : "border-gray-400"}`}
+                  >
+                    {size}
+                  </button>
                 ))}
               </div>
             </div>
-              
-              <button className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700' onClick={()=>addToCart(productData._id,size)}>ADD TO CART</button>
-              <hr className='mt-8 sm:w-4/5'/>
+          )}
 
-              <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-                <p>100% Original Product.</p>
-                <p>Cash on delivery is available on this product.</p>
-                <p>Easy return and exchange policy within 7 days.</p>
-              </div>
+          {/* Prices */}
+          <div className="space-x-2">
+            <span className="text-lg font-bold text-red-600">₹{sellingPriceNum.toFixed(2)}</span>
+            {hasDiscount && <span className="line-through text-gray-500">₹{actualPriceNum.toFixed(2)}</span>}
+            {hasDiscount && <span className="text-green-600">({discountPercentage}% OFF)</span>}
           </div>
-        </div>
-      </div>
-      {/* ----- Desciption & Review Section------ */}
-      <div className='mt-20'>
-        <div className='flex'>
-            <b className='border px-5 py-3 text-sm'> Description</b>
-            <p className='border px-5 py-3 text-sm'>Reviews (122)</p>
-        </div>
-        <div className='flex flex-col gap-4 border px-6 py-6 text-sm text-gray-500'>
-          <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ex, excepturi eligendi harum magni quibusdam aspernatur reprehenderit porro ducimus quia natus nobis maxime aut, tempore numquam, architecto mollitia non aliquam voluptas?</p>
-          <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Corrupti tempora vel expedita excepturi nostrum quae distinctio suscipit harum non culpa inventore exercitationem provident dolore tempore sunt laborum, dicta velit. Adipisci.</p>
+
+          {/* Product Unit */}
+          {unit && <div className="text-sm text-gray-700">Unit: {unit}</div>}
+
+          {/* Buttons */}
+          <div className="flex gap-4 mt-4">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded">Add to Cart</button>
+            <button className="border px-4 py-2 rounded">Check Delivery</button>
+          </div>
+
+          {/* Short Description */}
+          {/* <p className="text-gray-700 mt-4">
+            {product.description || "No description available."}
+          </p> */}
         </div>
       </div>
 
-      {/* ------ Display related products------  */}
-      <RelatedProducts category={productData.category} subCategory={productData.subCategory}/>
+      {/* Tabs Section */}
+      <div className="mt-10 border-t pt-6">
+        <div className="flex gap-6 border-b pb-2">
+          {[
+            "description",
+            "key ingredients",
+            "how to use"
+          ].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`capitalize px-4 pb-2 ${activeTab === tab ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-4 text-gray-800">
+          {activeTab === "description" && <p>{product.description || "No description available."}</p>}
+          {activeTab === "key ingredients" && <p>{product.key_ingredients || "No key ingredients info."}</p>}
+          {activeTab === "how to use" && <p>{product.how_to_use || "No usage info."}</p>}
+        </div>
+      </div>
     </div>
-  ) : <div className='opacity-0'> </div>
+  );
 }
-
-export default ProductDetails

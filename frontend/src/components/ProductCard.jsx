@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
   const { images, name, actual_price, selling_price } = product;
@@ -18,47 +19,49 @@ const ProductCard = ({ product }) => {
     : 0;
 
   return (
-    <div className="relative bg-white rounded-lg shadow-md overflow-hidden max-w-xs w-full sm:w-72 md:w-80 lg:w-96 group transition-transform duration-300 hover:scale-[1.02]">
-      {/* Discount Badge */}
-      {hasDiscount && (
-        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded z-10">
-          -{discountPercentage}%
+    <Link to={`/product/${product.id}`} className="block">
+      <div className="relative bg-white rounded-lg shadow-md overflow-hidden max-w-xs w-full sm:w-72 md:w-80 lg:w-96 group transition-transform duration-300 hover:scale-[1.02]">
+        {/* Discount Badge */}
+        {hasDiscount && (
+          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded z-10">
+            -{discountPercentage}%
+          </div>
+        )}
+
+        {/* Product Image with lazy-loading and hover zoom */}
+        <div className=" flex justify-center items-center h-48 overflow-hidden">
+          <img
+            src={image}
+            alt={name}
+            loading="lazy"
+            className="h-full w-auto object-contain transform transition-transform duration-300 group-hover:scale-105"
+          />
         </div>
-      )}
 
-      {/* Product Image with lazy-loading and hover zoom */}
-      <div className=" flex justify-center items-center h-48 overflow-hidden">
-        <img
-          src={image}
-          alt={name}
-          loading="lazy"
-          className="h-full w-auto object-contain transform transition-transform duration-300 group-hover:scale-105"
-        />
-      </div>
-
-      {/* Product Info */}
-      <div className="p-4">
+        {/* Product Info */}
+        <div className="p-4">
 <h3 className="text-lg font-medium text-gray-800 line-clamp-2">{name}</h3>
 
-        {/* Prices */}
-       <div className="mt-2 mb-4 flex flex-col">
-  <span className="text-lg font-bold text-gray-900">
-    ₹{sellingPriceNum.toFixed(2)}
-  </span>
-  {hasDiscount && (
-    <span className="text-sm text-gray-400">
-      MRP: <span className="line-through">₹{actualPriceNum.toFixed(2)}</span>
-    </span>
-  )}
-</div>
-
-
-        {/* Add to Cart Button */}
-        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded transition duration-200">
-          Add to Cart
-        </button>
-      </div>
+          {/* Prices */}
+         <div className="mt-2 mb-4 flex flex-col">
+      <span className="text-lg font-bold text-gray-900">
+        ₹{sellingPriceNum.toFixed(2)}
+      </span>
+      {hasDiscount && (
+        <span className="text-sm text-gray-400">
+          MRP: <span className="line-through">₹{actualPriceNum.toFixed(2)}</span>
+        </span>
+      )}
     </div>
+
+
+          {/* Add to Cart Button */}
+          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded transition duration-200">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </Link>
   );
 };
 

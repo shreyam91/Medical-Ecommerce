@@ -51,6 +51,7 @@ const AppRoutes = () => {
       <Route path="/doctors" element={<DoctorPage/>} />
       <Route path="/brand/:brandId" element={<BrandProducts />} />
 
+
       {/* Protected Routes (require login) */}
       {/* <Route path="/profile" element={
         <PrivateRoute>
