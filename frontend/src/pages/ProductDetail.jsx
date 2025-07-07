@@ -6,10 +6,12 @@ export default function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [priceMap, setPriceMap] = useState([]);
   const [activeTab, setActiveTab] = useState("description");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [unit, setUnit] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [deliveryMessage, setDeliveryMessage] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -20,15 +22,16 @@ export default function ProductDetails() {
       })
       .then((data) => {
         setProduct(data);
-        setSelectedImage(Array.isArray(data.images) && data.images.length > 0 ? data.images[0] : null);
-        // Fetch unit from product_price
+        setSelectedImage(data.images?.[0] || null);
+        setSelectedSize(data.sizes?.[0] || null);
+        // Fetch prices
         fetch(`http://localhost:3001/api/product_price`)
           .then((res) => res.json())
           .then((prices) => {
-            const priceObj = Array.isArray(prices) ? prices.find(p => String(p.product_id) === String(data.id)) : null;
-            setUnit(priceObj ? priceObj.unit : "");
+            const productPrices = prices.filter(p => String(p.product_id) === String(data.id));
+            setPriceMap(productPrices);
           })
-          .catch(() => setUnit(""));
+          .catch(() => setPriceMap([]));
         setLoading(false);
       })
       .catch((err) => {
@@ -42,45 +45,66 @@ export default function ProductDetails() {
   if (!product) return <div className="p-10 text-center text-gray-400">Product not found.</div>;
 
   const sizes = product.sizes || [];
-  const actualPriceNum = Number(product.actual_price);
-  const sellingPriceNum = Number(product.selling_price);
-  const hasDiscount = actualPriceNum > sellingPriceNum;
-  const discountPercentage = hasDiscount
-    ? Math.round(((actualPriceNum - sellingPriceNum) / actualPriceNum) * 100)
-    : 0;
+
+  const selectedPrice = priceMap.find(p => p.size === selectedSize);
+  const actualPrice = Number(selectedPrice?.actual_price || product.actual_price || 0);
+  const sellingPrice = Number(selectedPrice?.selling_price || product.selling_price || 0);
+  const hasDiscount = actualPrice > sellingPrice;
+  const discount = hasDiscount ? Math.round(((actualPrice - sellingPrice) / actualPrice) * 100) : 0;
+
+  const handleCheckDelivery = () => {
+    if (pincode.trim().length >= 5) {
+      setDeliveryMessage("✅ Delivered within 5-7 days.");
+    } else {
+      setDeliveryMessage("❌ Enter a valid pincode.");
+    }
+  };
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex gap-6 flex-col md:flex-row">
-        {/* Thumbnail Images */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Thumbnails */}
         <div className="flex flex-row md:flex-col gap-4">
-          {Array.isArray(product.images) && product.images.length > 0 ? (
-            product.images.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                onClick={() => setSelectedImage(img)}
-                className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
-                alt={product.name}
-              />
-            ))
-          ) : (
+          {product.images?.map((img, i) => (
             <img
-              src="https://via.placeholder.com/300x200?text=No+Image"
-              className="w-20 h-20 object-cover border border-gray-300"
-              alt="No product"
+              key={i}
+              src={img}
+              onClick={() => setSelectedImage(img)}
+              className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
+              alt="product-thumbnail"
             />
-          )}
+          ))}
         </div>
 
         {/* Main Image */}
         <div className="flex-1 flex items-center justify-center">
-          <img src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"} alt="Main" className="w-full h-[400px] object-contain rounded" />
+          <img
+            src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"}
+            alt="Main product"
+            className="w-full h-[400px] object-contain rounded"
+          />
         </div>
 
         {/* Product Info */}
         <div className="w-full md:w-1/3 space-y-4">
           <h1 className="text-3xl font-semibold">{product.name}</h1>
+
+          {/* Cause Type Tags */}
+<div>
+  {/* <h2 className="font-medium text-gray-700 mb-2">Cause Type:</h2> */}
+  <div className="flex flex-wrap gap-2">
+    {(product.causes && product.causes.length > 0 ? product.causes : ["Cold", "Cough", "Fever"]).map((cause, i) => (
+      <button
+        key={i}
+        onClick={() => alert(`Clicked on ${cause}`)} // You can handle navigation or filtering here later
+        className="px-3 py-1 rounded-full text-sm border border-blue-500 text-blue-600 hover:bg-blue-100 transition"
+      >
+        {cause}
+      </button>
+    ))}
+  </div>
+</div>
+
 
           {/* Size Selector */}
           {sizes.length > 0 && (
@@ -100,37 +124,53 @@ export default function ProductDetails() {
             </div>
           )}
 
-          {/* Prices */}
-          <div className="space-x-2">
-            <span className="text-lg font-bold text-red-600">₹{sellingPriceNum.toFixed(2)}</span>
-            {hasDiscount && <span className="line-through text-gray-500">₹{actualPriceNum.toFixed(2)}</span>}
-            {hasDiscount && <span className="text-green-600">({discountPercentage}% OFF)</span>}
+          {/* Pricing */}
+          <div className="space-y-1 mt-2">
+            <div className="flex items-center gap-3 text-lg font-semibold text-red-600">
+              ₹{sellingPrice.toFixed(2)}
+              {hasDiscount && (
+                <>
+                  <span className="line-through text-gray-500 text-sm">MRP: ₹{actualPrice.toFixed(2)}</span>
+                  <span className="text-green-600 text-sm">Save: {discount}%</span>
+                </>
+              )}
+            </div>
+            <div className="text-sm text-gray-600">Inclusive of all taxes</div>
+            {/* Product Notes */}
+          <div className="text-xs text-gray-600 mt-4 space-y-1">
+            <p>* This product cannot be returned & refunded or exchanged unless you received a wrong or damaged product.</p>
+            <p>* Country of Origin: India</p>
+            <p>* Delivery charges will be applied at checkout.</p>
           </div>
-
-          {/* Product Unit */}
-          {unit && <div className="text-sm text-gray-700">Unit: {unit}</div>}
-
-          {/* Buttons */}
-          <div className="flex gap-4 mt-4">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded">Add to Cart</button>
-            <button className="border px-4 py-2 rounded">Check Delivery</button>
           </div>
+          
 
-          {/* Short Description */}
-          {/* <p className="text-gray-700 mt-4">
-            {product.description || "No description available."}
-          </p> */}
+          {/* Delivery Check */}
+          <div className="flex gap-2 mt-4">
+            <input
+              type="text"
+              value={pincode}
+              onChange={(e) => setPincode(e.target.value)}
+              placeholder="Enter pincode"
+              className="border px-3 py-2 rounded w-full"
+            />
+            <button onClick={handleCheckDelivery} className="bg-blue-600 text-white px-4 py-2 rounded">
+              Check
+            </button>
+          </div>
+          {deliveryMessage && <div className="text-sm mt-1 text-gray-700">{deliveryMessage}</div>}
+
+          {/* Add to Cart Button */}
+          <button className="bg-green-600 text-white w-full mt-4 py-2 rounded">Add to Cart</button>
+
+          
         </div>
       </div>
 
-      {/* Tabs Section */}
+      {/* Tabs */}
       <div className="mt-10 border-t pt-6">
         <div className="flex gap-6 border-b pb-2">
-          {[
-            "description",
-            "key ingredients",
-            "how to use"
-          ].map((tab) => (
+          {["description", "key benefits", "how to use", "safety or precautions","ingredients", "other information"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -143,8 +183,11 @@ export default function ProductDetails() {
 
         <div className="mt-4 text-gray-800">
           {activeTab === "description" && <p>{product.description || "No description available."}</p>}
-          {activeTab === "key ingredients" && <p>{product.key_ingredients || "No key ingredients info."}</p>}
-          {activeTab === "how to use" && <p>{product.how_to_use || "No usage info."}</p>}
+          {activeTab === "key benefits" && <p>{product.key_benefits || "No key benefits provided."}</p>}
+          {activeTab === "how to use" && <p>{product.how_to_use || "Usage information not available."}</p>}
+          {activeTab === "safety or precautions" && <p>{product.safety_info || "No safety or precaution info."}</p>}
+          {activeTab === "ingredients" && <p>{product.ingredients || "No ingredients found."}</p>}
+          {activeTab === "other info" && <p>{product.other_info || "No additional information."}</p>}
         </div>
       </div>
     </div>

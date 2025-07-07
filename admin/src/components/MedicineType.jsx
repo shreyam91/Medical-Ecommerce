@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import TabletForm from './TabletForm';
-import MedForm from './MedForm';
 import { getProducts, deleteProduct } from '../lib/productApi';
-import UnifiedMedForm from './MedicineForm';
+import MedicineForm from './MedicineForm';
 
 const MedicineType = ({ category }) => {
   const [type, setType] = useState('');
@@ -35,22 +33,7 @@ const MedicineType = ({ category }) => {
   return (
     <div>
       <label className="block font-medium mb-2">Select your type of Medicine here.</label>
-        <UnifiedMedForm/>
-      {/* <select
-        value={type}
-        onChange={(e) => setType(e.target.value)}
-        className="w-full border rounded p-2 mb-6"
-      >
-        <option value="">-- Select Type --</option>
-        <option value="tablet">Tablet / Capsule</option>
-        <option value="med">Syrup / Powder</option>
-        <option value="uni">Syrup / Powder</option>
-      </select> */}
-
-      {/* {type === 'tablet' && <TabletForm category={category} editProduct={editProduct} setEditProduct={setEditProduct} />}
-      {type === 'med' && <MedForm category={category} editProduct={editProduct} setEditProduct={setEditProduct} />} */}
-
-      {/* {type === 'uni' && <UnifiedMedForm category={category} editProduct={editProduct} setEditProduct={setEditProduct} />} */}
+        <MedicineForm category={category} editProduct={editProduct} setEditProduct={setEditProduct}/>
 
       {/* Product List */}
       <div className="mt-8">
