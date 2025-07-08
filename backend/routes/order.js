@@ -5,7 +5,7 @@ const sql = require('../config/supabase');
 // Get all orders
 router.get('/', async (req, res) => {
   try {
-    const orders = await sql`SELECT * FROM orders ORDER BY order_date DESC`;
+    const orders = await sql`SELECT * FROM "order" ORDER BY order_date DESC`;
     res.json(orders);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 // Get order by ID
 router.get('/:id', async (req, res) => {
   try {
-    const [order] = await sql`SELECT * FROM orders WHERE id = ${req.params.id}`;
+    const [order] = await sql`SELECT * FROM "order" WHERE id = ${req.params.id}`;
     if (!order) return res.status(404).json({ error: 'Not found' });
     res.json(order);
   } catch (err) {
@@ -25,11 +25,11 @@ router.get('/:id', async (req, res) => {
 
 // Create order
 router.post('/', async (req, res) => {
-  const { product_name, quantity, ordered_by, is_prescription_required, payment_type, address, state, pin_code, status } = req.body;
+  const { customer_id, status, total_amount, payment_id, address, notes } = req.body;
   try {
     const [order] = await sql`
-      INSERT INTO orders (product_name, quantity, ordered_by, is_prescription_required, payment_type, address, state, pin_code, status)
-      VALUES (${product_name}, ${quantity}, ${ordered_by}, ${is_prescription_required}, ${payment_type}, ${address}, ${state}, ${pin_code}, ${status})
+      INSERT INTO "order" (customer_id, status, total_amount, payment_id, address, notes)
+      VALUES (${customer_id}, ${status}, ${total_amount}, ${payment_id}, ${address}, ${notes})
       RETURNING *`;
     res.status(201).json(order);
   } catch (err) {
@@ -39,10 +39,10 @@ router.post('/', async (req, res) => {
 
 // Update order
 router.put('/:id', async (req, res) => {
-  const { product_name, quantity, ordered_by, is_prescription_required, payment_type, address, state, pin_code, status } = req.body;
+  const { customer_id, status, total_amount, payment_id, address, notes } = req.body;
   try {
     const [order] = await sql`
-      UPDATE orders SET product_name=${product_name}, quantity=${quantity}, ordered_by=${ordered_by}, is_prescription_required=${is_prescription_required}, payment_type=${payment_type}, address=${address}, state=${state}, pin_code=${pin_code}, status=${status}
+      UPDATE "order" SET customer_id=${customer_id}, status=${status}, total_amount=${total_amount}, payment_id=${payment_id}, address=${address}, notes=${notes}, updated_at=NOW()
       WHERE id=${req.params.id} RETURNING *`;
     if (!order) return res.status(404).json({ error: 'Not found' });
     res.json(order);
@@ -54,7 +54,7 @@ router.put('/:id', async (req, res) => {
 // Delete order
 router.delete('/:id', async (req, res) => {
   try {
-    const [order] = await sql`DELETE FROM orders WHERE id=${req.params.id} RETURNING *`;
+    const [order] = await sql`DELETE FROM "order" WHERE id=${req.params.id} RETURNING *`;
     if (!order) return res.status(404).json({ error: 'Not found' });
     res.json({ success: true });
   } catch (err) {

@@ -26,11 +26,11 @@ router.get('/:id', async (req, res) => {
 
 // Create brand
 router.post('/', async (req, res) => {
-  const { name, image_url } = req.body;
+  const { name, logo_url } = req.body;
   try {
     const [brand] = await sql`
-      INSERT INTO brand (name, image_url)
-      VALUES (${name}, ${image_url})
+      INSERT INTO brand (name, logo_url)
+      VALUES (${name}, ${logo_url})
       RETURNING *`;
     res.status(201).json(brand);
   } catch (err) {
@@ -41,10 +41,10 @@ router.post('/', async (req, res) => {
 
 // Update brand
 router.put('/:id', async (req, res) => {
-  const { name, image_url } = req.body;
+  const { name, logo_url } = req.body;
   try {
     const [brand] = await sql`
-      UPDATE brand SET name=${name}, image_url=${image_url}
+      UPDATE brand SET name=${name}, logo_url=${logo_url}
       WHERE id=${req.params.id} RETURNING *`;
     if (!brand) return res.status(404).json({ error: 'Not found' });
     res.json(brand);
@@ -55,10 +55,7 @@ router.put('/:id', async (req, res) => {
 
 // Helper to extract public_id from Cloudinary URL
 function extractCloudinaryPublicId(url) {
-  // Example: https://res.cloudinary.com/demo/image/upload/v1234567890/folder/filename.jpg
-  // public_id is everything after '/upload/v1234567890/' and before the file extension
   if (!url) return null;
-  // Remove version segment if present
   const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
   return matches ? matches[1] : null;
 }
@@ -67,14 +64,14 @@ function extractCloudinaryPublicId(url) {
 router.delete('/:id', async (req, res) => {
   console.log('DELETE /api/brand/:id called with id:', req.params.id);
   try {
-    // Get brand first to access image_url
+    // Get brand first to access logo_url
     const [brand] = await sql`SELECT * FROM brand WHERE id=${req.params.id}`;
     console.log('Fetched brand:', brand);
     if (!brand) return res.status(404).json({ error: 'Not found' });
     // Delete image from Cloudinary if present
-    if (brand.image_url) {
-      const publicId = extractCloudinaryPublicId(brand.image_url);
-      console.log('Deleting brand image:', brand.image_url, 'Extracted publicId:', publicId);
+    if (brand.logo_url) {
+      const publicId = extractCloudinaryPublicId(brand.logo_url);
+      console.log('Deleting brand image:', brand.logo_url, 'Extracted publicId:', publicId);
       if (publicId) {
         try {
           await cloudinary.uploader.destroy(publicId);
