@@ -1,13 +1,12 @@
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS "order" (
     id SERIAL PRIMARY KEY,
-    product_name TEXT NOT NULL,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
-    order_date TIMESTAMP DEFAULT NOW(),
-    ordered_by INTEGER REFERENCES app_user(id) ON DELETE SET NULL,
-    is_prescription_required BOOLEAN DEFAULT FALSE,
-    payment_type TEXT CHECK (payment_type IN ('Cash', 'Card', 'UPI', 'NetBanking', 'COD')) NOT NULL,
-    address TEXT NOT NULL,
-    state TEXT,
-    pin_code VARCHAR(10),
-    status TEXT DEFAULT 'Pending'  -- e.g., Pending, Shipped, Delivered, Cancelled
-);
+    customer_id INTEGER REFERENCES customer(id) ON DELETE SET NULL,
+    order_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    status VARCHAR(50) DEFAULT 'Ordered',
+    total_amount NUMERIC(10,2),
+    payment_id INTEGER REFERENCES payment(id) ON DELETE SET NULL,
+    address TEXT,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+); 

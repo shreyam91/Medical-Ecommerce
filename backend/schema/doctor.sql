@@ -1,14 +1,16 @@
-CREATE TABLE doctor (
+CREATE TABLE IF NOT EXISTS doctor (
     id SERIAL PRIMARY KEY,
-    image_url TEXT,
     name TEXT NOT NULL,
-    phone_number VARCHAR(15) NOT NULL,
+    specialization VARCHAR(100),
+    phone_number VARCHAR(20),
     degree TEXT,
-    address TEXT,
+    image_url TEXT,
     city TEXT,
     state TEXT,
-    pincode VARCHAR(10),
+    pincode INTEGER,
+    address TEXT,
     start_time TIME,
     end_time TIME,
-    specialization TEXT
-);
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+); 

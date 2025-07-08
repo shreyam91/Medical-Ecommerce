@@ -1,10 +1,10 @@
-CREATE TABLE blog (
+CREATE TABLE IF NOT EXISTS blog (
     id SERIAL PRIMARY KEY,
-    image_url TEXT,  -- Cover or thumbnail image
-    title TEXT NOT NULL,
-    short_description TEXT,
-    content JSONB,  -- Rich structured content: headings, images, lists, etc.
-    tags TEXT[],     -- Array of tags (e.g., ['health', 'ayurveda'])
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    author_id INTEGER REFERENCES "user"(id) ON DELETE SET NULL,
+    tags TEXT[],
+    image_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+); 
