@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProducts, deleteProduct, updateProduct } from '../lib/productApi';
+import { getInventories, createInventory, updateInventory, deleteInventory } from '../lib/inventoryApi';
 import { getBrands } from '../lib/brandApi';
 
 const initialData = [
@@ -80,25 +80,19 @@ const InventoryPage = () => {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
   useEffect(() => {
-    getProducts()
-      .then((products) => {
-        const productsWithStatus = products.map((p) => ({
-          ...p,
-          status: getStatusFromQuantity(p.total_quantity),
-        }));
-        setInventory(productsWithStatus);
-      })
+    getInventories()
+      .then(setInventory)
       .catch(() => setInventory([]));
     getBrands().then(setBrands).catch(() => setBrands([]));
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    if (!window.confirm('Are you sure you want to delete this inventory item?')) return;
     try {
-      await deleteProduct(id);
+      await deleteInventory(id);
       setInventory(inventory.filter((item) => item.id !== id));
     } catch (err) {
-      alert('Failed to delete product');
+      alert('Failed to delete inventory item');
     }
   };
 
@@ -109,7 +103,7 @@ const InventoryPage = () => {
       status: getStatusFromQuantity(editingItem.total_quantity),
     };
     try {
-      await updateProduct(updatedItem.id, updatedItem);
+      await updateInventory(updatedItem.id, updatedItem);
       setInventory((prev) =>
         prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
       );

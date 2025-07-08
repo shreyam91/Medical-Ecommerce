@@ -1,18 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getPayments, createPayment, updatePayment, deletePayment } from '../lib/paymentApi';
 
 const PaymentTable = () => {
-  const paymentsData = [
-    { invoiceNumber: 'INV-10293', date: '2025-06-20', amount: 249.99, method: 'Credit Card (Visa)', status: 'Paid' },
-    { invoiceNumber: 'INV-10294', date: '2025-06-21', amount: 99.0, method: 'COD', status: 'Unpaid' },
-    { invoiceNumber: 'INV-10295', date: '2025-06-22', amount: 199.5, method: 'Bank Transfer', status: 'Paid' },
-    { invoiceNumber: 'INV-10296', date: '2025-06-23', amount: 149.0, method: 'UPI', status: 'Refunded' },
-    { invoiceNumber: 'INV-10297', date: '2025-06-24', amount: 189.0, method: 'Credit Card (Visa)', status: 'Paid' },
-    { invoiceNumber: 'INV-10298', date: '2025-06-25', amount: 299.0, method: 'Bank Transfer', status: 'Unpaid' },
-    { invoiceNumber: 'INV-10299', date: '2025-06-26', amount: 179.0, method: 'COD', status: 'Paid' },
-    { invoiceNumber: 'INV-10300', date: '2025-06-27', amount: 89.0, method: 'UPI', status: 'Refunded' },
-  ];
-
-  const [payments, setPayments] = useState(paymentsData);
+  const [payments, setPayments] = useState([]);
   const [filters, setFilters] = useState({
     status: '',
     method: '',
@@ -24,6 +14,10 @@ const PaymentTable = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editRowData, setEditRowData] = useState({ amount: '', method: '', status: '' });
+
+  useEffect(() => {
+    getPayments().then(setPayments).catch(() => setPayments([]));
+  }, []);
 
   const handleFilterChange = (e) => {
     setCurrentPage(1); // reset page on filter change
@@ -67,15 +61,20 @@ const PaymentTable = () => {
 
   const saveEditing = () => {
     const globalIndex = startIndex + editingIndex;
-    const updatedPayments = [...payments];
-    updatedPayments[globalIndex] = {
-      ...updatedPayments[globalIndex],
+    const paymentToUpdate = {
+      ...payments[globalIndex],
       amount: parseFloat(editRowData.amount),
       method: editRowData.method,
       status: editRowData.status,
     };
-    setPayments(updatedPayments);
-    cancelEditing();
+    updatePayment(paymentToUpdate.id, paymentToUpdate)
+      .then(() => {
+        const updatedPayments = [...payments];
+        updatedPayments[globalIndex] = paymentToUpdate;
+        setPayments(updatedPayments);
+        cancelEditing();
+      })
+      .catch(() => alert('Failed to update payment'));
   };
 
   const handleEditChange = (e) => {

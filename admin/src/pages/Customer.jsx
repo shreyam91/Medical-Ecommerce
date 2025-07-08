@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { getCustomers, createCustomer, updateCustomer, deleteCustomer } from '../lib/customerApi';
 
 // Sample customer data (replace with real data or API)
 const initialCustomers = [
@@ -39,23 +40,26 @@ export default function CustomerDetails() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    setTimeout(() => {
-      setCustomers(initialCustomers);
-      setLoading(false);
-    }, 500);
+    getCustomers()
+      .then((data) => {
+        setCustomers(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setCustomers([]);
+        setLoading(false);
+        setError('Failed to fetch customers');
+      });
   }, []);
 
   const closeModal = () => setModal({ type: null, customer: null });
 
-  const deactivateCustomer = (id) => {
-    setCustomers((custs) =>
-      custs.map((c) => (c.id === id ? { ...c, active: false } : c))
-    );
-    closeModal();
-  };
-
-  const deleteCustomer = (id) => {
-    setCustomers((custs) => custs.filter((c) => c.id !== id));
+  // Replace deactivateCustomer and deleteCustomer logic to use updateCustomer and deleteCustomer from API
+  // Example for delete:
+  const deleteCustomerHandler = (id) => {
+    deleteCustomer(id)
+      .then(() => setCustomers((custs) => custs.filter((c) => c.id !== id)))
+      .catch(() => setError('Failed to delete customer'));
     closeModal();
   };
 
@@ -208,8 +212,8 @@ export default function CustomerDetails() {
               }
               onConfirm={() =>
                 modal.type === "deactivate"
-                  ? deactivateCustomer(modal.customer.id)
-                  : deleteCustomer(modal.customer.id)
+                  ? updateCustomer(modal.customer.id, { active: false })
+                  : deleteCustomerHandler(modal.customer.id)
               }
               onCancel={closeModal}
             >

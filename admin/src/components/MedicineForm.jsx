@@ -274,6 +274,8 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
       images: uploadedImageUrls,
     };
 
+    console.log('Submitting product form data:', payload);
+
     try {
       if (editProduct) {
         await updateProduct(editProduct.id, payload);
@@ -328,7 +330,10 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
       )}
 
       <div>
-        <label className="font-medium block mb-1">Product Name</label>
+        <label className="font-medium block mb-1">
+        Product Name 
+        {/* <span className="text-orange-500">*</span> */}
+        </label>
         <input
           type="text"
           name="name"
@@ -342,7 +347,8 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
 
       <div>
         <label htmlFor="brand_id" className="block font-medium mb-1">
-          Brand <span className="text-red-600">*</span>
+          Brand 
+          {/* <span className="text-orange-600">*</span> */}
         </label>
         <select
           id="brand_id"

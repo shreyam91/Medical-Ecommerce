@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { getOrders, createOrder, updateOrder, deleteOrder } from '../lib/orderApi';
 
 const statusOptions = ['Ordered', 'Shipped', 'Delivered', 'Returned', 'Refunded'];
 
@@ -175,10 +176,14 @@ export default function OrdersPro() {
   };
 
   const applyBulkDelete = () => {
-    setOrders(prev => prev.filter(order => !selectedIds.includes(order.id)));
-    setSelectedIds([]);
-    setShowConfirmModal(false);
-    setPendingDelete(false);
+    Promise.all(selectedIds.map(id => deleteOrder(id)))
+      .then(() => {
+        setOrders(prev => prev.filter(order => !selectedIds.includes(order.id)));
+        setSelectedIds([]);
+        setShowConfirmModal(false);
+        setPendingDelete(false);
+      })
+      .catch(() => alert('Failed to delete orders'));
   };
 
   const handleStatusChange = (id, newStatus) => {
@@ -213,17 +218,8 @@ export default function OrdersPro() {
 
   useEffect(() => setCurrentPage(1), [filterStatus, searchTerm, entriesPerPage, dateFrom, dateTo]);
 
-  const fetchOrders = () => {
-    return initialOrders;
-  };
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newOrders = fetchOrders(); // Simulated fetch
-      setOrders(newOrders);
-    }, 60000); // Refresh every 60 seconds
-
-    return () => clearInterval(interval); // Clear interval on unmount
+    getOrders().then(setOrders).catch(() => setOrders([]));
   }, []);
 
   return (
