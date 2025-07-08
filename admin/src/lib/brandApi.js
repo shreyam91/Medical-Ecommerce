@@ -7,10 +7,16 @@ export async function getBrands() {
 }
 
 export async function createBrand(brand) {
+  // Ensure the payload uses logo_url
+  const payload = { ...brand };
+  if (payload.image_url) {
+    payload.logo_url = payload.image_url;
+    delete payload.image_url;
+  }
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(brand),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Failed to create brand');
   return res.json();
