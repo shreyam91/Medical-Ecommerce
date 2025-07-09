@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
+const auth = require('./auth');
+
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: admin only' });
+  }
+  next();
+}
 
 // Get all users (do not return password_hash)
-router.get('/', async (req, res) => {
+router.get('/', auth, requireAdmin, async (req, res) => {
   try {
     const users = await sql`SELECT id, username, email, role, created_at, updated_at FROM "user" ORDER BY created_at DESC`;
     res.json(users);
@@ -13,7 +21,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get user by ID (do not return password_hash)
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const [user] = await sql`SELECT id, username, email, role, created_at, updated_at FROM "user" WHERE id = ${req.params.id}`;
     if (!user) return res.status(404).json({ error: 'Not found' });
@@ -24,7 +32,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create user
-router.post('/', async (req, res) => {
+router.post('/', auth, requireAdmin, async (req, res) => {
   const { username, email, password_hash, role } = req.body;
   try {
     const [user] = await sql`INSERT INTO "user" (username, email, password_hash, role) VALUES (${username}, ${email}, ${password_hash}, ${role}) RETURNING id, username, email, role, created_at, updated_at`;
@@ -35,7 +43,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update user
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, requireAdmin, async (req, res) => {
   const { username, email, password_hash, role } = req.body;
   try {
     const [user] = await sql`UPDATE "user" SET username=${username}, email=${email}, password_hash=${password_hash}, role=${role}, updated_at=NOW() WHERE id=${req.params.id} RETURNING id, username, email, role, created_at, updated_at`;
@@ -47,7 +55,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete user
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const [user] = await sql`DELETE FROM "user" WHERE id=${req.params.id} RETURNING id`;
     if (!user) return res.status(404).json({ error: 'Not found' });

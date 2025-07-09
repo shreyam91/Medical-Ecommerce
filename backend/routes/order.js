@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
+const auth = require('./auth');
+
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: admin only' });
+  }
+  next();
+}
 
 // Get all orders
-router.get('/', async (req, res) => {
+router.get('/', auth, requireAdmin, async (req, res) => {
   try {
     const orders = await sql`SELECT * FROM "order" ORDER BY order_date DESC`;
     res.json(orders);
@@ -13,7 +21,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get order by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const [order] = await sql`SELECT * FROM "order" WHERE id = ${req.params.id}`;
     if (!order) return res.status(404).json({ error: 'Not found' });
@@ -24,7 +32,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create order
-router.post('/', async (req, res) => {
+router.post('/', auth, requireAdmin, async (req, res) => {
   const { customer_id, status, total_amount, payment_id, address, notes } = req.body;
   try {
     const [order] = await sql`
@@ -38,7 +46,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update order
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, requireAdmin, async (req, res) => {
   const { customer_id, status, total_amount, payment_id, address, notes } = req.body;
   try {
     const [order] = await sql`
@@ -52,7 +60,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete order
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const [order] = await sql`DELETE FROM "order" WHERE id=${req.params.id} RETURNING *`;
     if (!order) return res.status(404).json({ error: 'Not found' });

@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
+const auth = require('./auth');
+
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: admin only' });
+  }
+  next();
+}
 
 // Get all categories
-router.get('/', async (req, res) => {
+router.get('/', auth, requireAdmin, async (req, res) => {
   try {
     const categories = await sql`SELECT * FROM category ORDER BY id DESC`;
     res.json(categories);
@@ -13,7 +21,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get category by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const [category] = await sql`SELECT * FROM category WHERE id = ${req.params.id}`;
     if (!category) return res.status(404).json({ error: 'Not found' });
@@ -24,7 +32,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create category
-router.post('/', async (req, res) => {
+router.post('/', auth, requireAdmin, async (req, res) => {
   const { name } = req.body;
   try {
     const [category] = await sql`INSERT INTO category (name) VALUES (${name}) RETURNING *`;
@@ -35,7 +43,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update category
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, requireAdmin, async (req, res) => {
   const { name } = req.body;
   try {
     const [category] = await sql`UPDATE category SET name=${name}, updated_at=NOW() WHERE id=${req.params.id} RETURNING *`;
@@ -47,7 +55,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete category
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const [deleted] = await sql`DELETE FROM category WHERE id=${req.params.id} RETURNING *`;
     if (!deleted) return res.status(404).json({ error: 'Not found' });

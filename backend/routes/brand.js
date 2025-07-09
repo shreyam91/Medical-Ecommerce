@@ -2,6 +2,14 @@ const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
 const cloudinary = require('../config/cloudinary');
+const auth = require('./auth');
+
+function requireAdminOrLimitedAdmin(req, res, next) {
+  if (!req.user || !['admin', 'limited_admin'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Forbidden: insufficient permissions' });
+  }
+  next();
+}
 
 // Get all brands
 router.get('/', async (req, res) => {
@@ -25,7 +33,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create brand
-router.post('/', async (req, res) => {
+router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
   const { name, logo_url } = req.body;
   try {
     const [brand] = await sql`
@@ -40,7 +48,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update brand
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
   const { name, logo_url } = req.body;
   try {
     const [brand] = await sql`
@@ -53,6 +61,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// TODO: Add role-based access control middleware. Allow 'admin' and 'limited_admin' to add/edit brands.
+
 // Helper to extract public_id from Cloudinary URL
 function extractCloudinaryPublicId(url) {
   if (!url) return null;
@@ -61,7 +71,7 @@ function extractCloudinaryPublicId(url) {
 }
 
 // Delete brand
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
   console.log('DELETE /api/brand/:id called with id:', req.params.id);
   try {
     // Get brand first to access logo_url
