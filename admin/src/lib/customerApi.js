@@ -1,13 +1,25 @@
 const API_URL = 'http://localhost:3001/api/customer';
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+}
+
 export async function getCustomers() {
-  const res = await fetch(API_URL);
+  const res = await fetch(API_URL, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch customers');
   return res.json();
 }
 
 export async function getCustomer(id) {
-  const res = await fetch(`${API_URL}/${id}`);
+  const res = await fetch(`${API_URL}/${id}`, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch customer');
   return res.json();
 }
@@ -15,7 +27,7 @@ export async function getCustomer(id) {
 export async function createCustomer(customer) {
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(customer),
   });
   if (!res.ok) throw new Error('Failed to create customer');
@@ -25,7 +37,7 @@ export async function createCustomer(customer) {
 export async function updateCustomer(id, customer) {
   const res = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(customer),
   });
   if (!res.ok) throw new Error('Failed to update customer');
@@ -34,7 +46,9 @@ export async function updateCustomer(id, customer) {
 
 export async function deleteCustomer(id) {
   const res = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE' });
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to delete customer');
   return res.json();
 } 

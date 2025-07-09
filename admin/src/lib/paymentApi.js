@@ -1,13 +1,25 @@
 const API_URL = 'http://localhost:3001/api/payment';
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+}
+
 export async function getPayments() {
-  const res = await fetch(API_URL);
+  const res = await fetch(API_URL, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch payments');
   return res.json();
 }
 
 export async function getPayment(id) {
-  const res = await fetch(`${API_URL}/${id}`);
+  const res = await fetch(`${API_URL}/${id}`, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch payment');
   return res.json();
 }
@@ -15,7 +27,7 @@ export async function getPayment(id) {
 export async function createPayment(payment) {
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payment),
   });
   if (!res.ok) throw new Error('Failed to create payment');
@@ -25,7 +37,7 @@ export async function createPayment(payment) {
 export async function updatePayment(id, payment) {
   const res = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payment),
   });
   if (!res.ok) throw new Error('Failed to update payment');
@@ -34,7 +46,9 @@ export async function updatePayment(id, payment) {
 
 export async function deletePayment(id) {
   const res = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE' });
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to delete payment');
   return res.json();
 } 
