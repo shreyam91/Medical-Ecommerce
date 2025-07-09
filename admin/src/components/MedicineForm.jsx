@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
-import { createProduct, updateProduct } from "../lib/productApi";
+import { createProduct, updateProduct, deleteImage } from "../lib/productApi";
 import { getBrands } from "../lib/brandApi";
 import { getReferenceBooks } from "../lib/referenceBookApi";
 import TagInput from "./TagInput";
 
-const MedicineForm = ({ editProduct, setEditProduct, category }) => {
+const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
+  const imageRef = useRef();
   const typeOptions = [
     { value: "tablet", label: "Tablet" },
-    { value: "ml", label: "Syrup (ml)" },
-    { value: "gm", label: "Powder (gm)" },
+    { value: "ml", label: "Liquid (ml)" },
+    { value: "gm", label: "Gram (gm)" },
   ];
 
   const initial = {
     type: "tablet",
     name: "",
-    brands: [],
     brand_id: "",
     referenceBook: "",
     keyTags: [],
@@ -43,10 +43,11 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
 
   const [form, setForm] = useState(initial);
   const [errors, setErrors] = useState({});
-  const imageRef = useRef();
   const [brandsList, setBrandsList] = useState([]);
   const [booksList, setBooksList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  // Fetch brands & books, initialize on edit
   useEffect(() => {
     getBrands()
       .then(setBrandsList)
@@ -64,30 +65,28 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
             ? "gm"
             : "tablet",
         name: editProduct.name || "",
-        brand_id: editProduct.brand_id || "",
+        brand_id: String(editProduct.brand_id || ""),
         referenceBook: editProduct.reference_books?.[0] || "",
-        keyTags: editProduct.key?.split(",")?.map((s) => s.trim()) || [],
+        keyTags: (editProduct.key || "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s),
         ingredients: editProduct.key_ingredients || "",
         howToUse: editProduct.how_to_use || "",
         safetyPrecaution: editProduct.safety_precaution || "",
         description: editProduct.description || "",
+        benefits: editProduct.key_benefits || "",
         otherInfo: editProduct.other_info || "",
-        gst: editProduct.gst || "",
-        prescriptionRequired: editProduct.prescription_required || false,
+        gst: String(editProduct.gst || ""),
+        prescriptionRequired: Boolean(editProduct.prescription_required),
         strength: editProduct.strength || "",
         prices: [
           {
-            size:
-              editProduct.size ||
-              (editProduct.medicine_type === "Syrup"
-                ? "ml"
-                : editProduct.medicine_type === "Powder"
-                ? "gm"
-                : "tablet"),
-            quantity: editProduct.total_quantity || "",
-            actualPrice: editProduct.actual_price || "",
-            discount: editProduct.discount_percent || "",
-            sellingPrice: editProduct.selling_price || "",
+            size: editProduct.size || editProduct.medicine_type || form.type,
+            quantity: String(editProduct.total_quantity || ""),
+            actualPrice: String(editProduct.actual_price || ""),
+            discount: String(editProduct.discount_percent || ""),
+            sellingPrice: String(editProduct.selling_price || ""),
           },
         ],
         selectedImages: editProduct.images || [],
@@ -95,39 +94,36 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
     }
   }, [editProduct]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = ({ target: { name, value, type, checked } }) => {
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handlePriceChange = (index, field, value) => {
-    const updatedPrices = [...form.prices];
-    updatedPrices[index][field] = value;
+  const handlePriceChange = (idx, field, value) => {
+    const prices = [...form.prices];
+    prices[idx][field] = value;
 
-    const actual = parseFloat(updatedPrices[index].actualPrice) || 0;
-    const discount = parseFloat(updatedPrices[index].discount) || 0;
+    const actual = parseFloat(prices[idx].actualPrice) || 0;
+    const discount = parseFloat(prices[idx].discount) || 0;
+    // Calculate discounted price
+    let discounted = actual > 0 ? actual - (actual * discount) / 100 : 0;
+    // Add GST if available
+    const gst = parseFloat(form.gst) || 0;
+    let sellingWithGst = discounted > 0 ? discounted + (discounted * gst) / 100 : "";
+    prices[idx].sellingPrice = sellingWithGst !== "" ? sellingWithGst.toFixed(2) : "";
 
-    if (!isNaN(actual) && !isNaN(discount)) {
-      const selling = actual - (actual * discount) / 100;
-      updatedPrices[index].sellingPrice = selling.toFixed(2);
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      prices: updatedPrices,
-    }));
+    setForm((prev) => ({ ...prev, prices }));
   };
 
-  const addPriceRow = () => {
+  const addPriceRow = () =>
     setForm((prev) => ({
       ...prev,
       prices: [
         ...prev.prices,
         {
-          size: form.type,
+          size: "",
           quantity: "",
           actualPrice: "",
           discount: "",
@@ -135,211 +131,208 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         },
       ],
     }));
-  };
 
-  const removePriceRow = (index) => {
-    const updated = [...form.prices];
-    updated.splice(index, 1);
-    setForm((prev) => ({ ...prev, prices: updated }));
+  const removePriceRow = (idx) => {
+    if (form.prices.length === 1) return;
+    setForm((prev) => ({
+      ...prev,
+      prices: prev.prices.filter((_, i) => i !== idx),
+    }));
   };
 
   const validateForm = () => {
-    const newErrors = {};
-
-    // Product Name
-    if (!form.name.trim()) newErrors.name = "Product name is required.";
-
-    // Brand
-    if (!form.brand_id) newErrors.brand_id = "Brand is required.";
-
-    // Reference Book
-    // if (!form.referenceBook)
-    //   newErrors.referenceBook = "Reference book is required.";
-
-    // Key Tags
-    if (!form.keyTags || form.keyTags.length === 0)
-      newErrors.keyTags = "At least one key tag is required.";
-
-    // Description
-    if (!form.description.trim())
-      newErrors.description = "Description is required.";
-
-    // Benefits
-    if (!form.benefits.trim())
-      newErrors.benefits = "Key benefits are required.";
-
-    // How to Use
-    if (!form.howToUse.trim())
-      newErrors.howToUse = "How to use is required.";
-
-    // Safety & Precaution
-    if (!form.safetyPrecaution.trim())
-      newErrors.safetyPrecaution = "Safety & Precaution is required.";
-
-    // Key Ingredients
-    if (!form.ingredients.trim())
-      newErrors.ingredients = "Key ingredients are required.";
-
-    // Other Information
-    if (!form.otherInfo.trim())
-      newErrors.otherInfo = "Other information is required.";
-
-    // GST
-    if (!form.gst || ![0, 5, 12, 18].includes(Number(form.gst)))
-      newErrors.gst = "Valid GST is required (0, 5, 12, or 18).";
-
-    // Strength (for tablets)
-    if (form.type === "tablet" && !form.strength)
-      newErrors.strength = "Strength is required for tablets.";
-
-    // Prices
-    if (!form.prices || form.prices.length === 0) {
-      newErrors.prices = "At least one price entry is required.";
-    } else {
-      form.prices.forEach((price, i) => {
-        if (!price.size) newErrors[`size_${i}`] = "Product size is required.";
-        if (!price.quantity) newErrors[`quantity_${i}`] = "Quantity is required.";
-        if (!price.actualPrice || parseFloat(price.actualPrice) <= 0)
-          newErrors[`actualPrice_${i}`] = "Valid actual price is required.";
-        if (price.discount === "" || parseFloat(price.discount) < 0)
-          newErrors[`discount_${i}`] = "Valid discount is required.";
-        if (!price.sellingPrice || parseFloat(price.sellingPrice) <= 0)
-          newErrors[`sellingPrice_${i}`] = "Selling price is required.";
-      });
-    }
-
-    // Prescription Required (checkbox, so always boolean, no need to validate unless required to be true)
-
-    // At least one image required
+    const e = {};
+    if (!form.name.trim()) e.name = "Required";
+    if (!form.brand_id) e.brand_id = "Required";
+    if (!form.keyTags.length) e.keyTags = "Add tags";
+    if (!form.description.trim()) e.description = "Required";
+    if (!form.benefits.trim()) e.benefits = "Required";
+    if (!form.howToUse.trim()) e.howToUse = "Required";
+    if (!form.safetyPrecaution.trim()) e.safetyPrecaution = "Required";
+    if (!form.ingredients.trim()) e.ingredients = "Required";
+    if (!form.otherInfo.trim()) e.otherInfo = "Required";
+    if (!["0", "5", "12", "18"].includes(form.gst)) e.gst = "Select valid GST";
+    if (form.type === "tablet" && !form.strength) e.strength = "Required";
+    form.prices.forEach((p, i) => {
+      if (!p.size) e[`size_${i}`] = "Required";
+      if (!p.quantity) e[`quantity_${i}`] = "Required";
+      if (
+        !p.actualPrice ||
+        isNaN(p.actualPrice) ||
+        parseFloat(p.actualPrice) <= 0
+      )
+        e[`actualPrice_${i}`] = "Enter price";
+      if (p.discount === "" || isNaN(p.discount) || parseFloat(p.discount) < 0)
+        e[`discount_${i}`] = "Invalid";
+      if (!p.sellingPrice) e[`sellingPrice_${i}`] = "Required";
+    });
     if (!form.selectedImages || form.selectedImages.length === 0)
-      newErrors.selectedImages = "At least one image is required.";
+      e.selectedImages = "Select at least one";
+    setErrors(e);
+    return !Object.keys(e).length;
+  };
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleDelete = async () => {
+    if (!editProduct) return;
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    setLoading(true);
+    try {
+     await deleteProduct(editProduct.id);
+toast.success("Product deleted successfully");
+// Add a short delay before unmounting/resetting
+setTimeout(() => {
+  setEditProduct?.(null);
+  if (typeof onDelete === 'function') onDelete();
+}, 500);
+    } catch (err) {
+      toast.error("Failed to delete product");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    setLoading(true);
 
-    let productId = null;
-    let createdProduct = null;
+    let productId,
+      uploadedUrls = [],
+      initialUrls = [];
+
+    if (editProduct && Array.isArray(editProduct.images)) {
+      initialUrls = [...editProduct.images];
+    }
+
     try {
-      // 1. Create product without images
-      const payload = {
-        name: form.name,
+      const common = {
+        name: form.name.trim(),
         category: category || "Ayurvedic",
         medicine_type:
-          form.type === "ml" ? "Syrup" : form.type === "gm" ? "Powder" : "Tablet",
-        brand_id: form.brand_id ? parseInt(form.brand_id, 10) : null,
+          form.type === "ml"
+            ? "Liquid"
+            : form.type === "gm"
+            ? "Gram"
+            : "Tablet",
+        brand_id: parseInt(form.brand_id, 10),
         reference_books: form.referenceBook ? [form.referenceBook] : [],
         key: form.keyTags.join(", "),
-        key_ingredients: form.ingredients,
-        key_benefits: form.benefits,
-        how_to_use: form.howToUse,
-        safety_precaution: form.safetyPrecaution,
-        description: form.description,
-        other_info: form.otherInfo,
-        strength: form.strength,
+        key_ingredients: form.ingredients.trim(),
+        key_benefits: form.benefits.trim(),
+        how_to_use: form.howToUse.trim(),
+        safety_precaution: form.safetyPrecaution.trim(),
+        description: form.description.trim(),
+        other_info: form.otherInfo.trim(),
+        strength: form.strength.trim(),
         gst: parseInt(form.gst, 10),
         prescription_required: form.prescriptionRequired,
         actual_price: parseFloat(form.prices[0].actualPrice),
         selling_price: parseFloat(form.prices[0].sellingPrice),
         discount_percent: parseFloat(form.prices[0].discount),
         total_quantity: parseInt(form.prices[0].quantity, 10),
-        images: [], // initially empty
+        images: [],
       };
+
       if (editProduct) {
-        await updateProduct(editProduct.id, payload);
+        await updateProduct(editProduct.id, { ...common });
         productId = editProduct.id;
-        toast.success("Product updated!");
+        toast.success("Product updated successfully");
       } else {
-        const created = await createProduct(payload);
-        productId = created.id;
-        createdProduct = created;
-        toast.success("Product created!");
+        const pr = await createProduct({ ...common });
+        productId = pr.id;
+        toast.success("Product added successfully");
       }
 
-      // 2. Upload images if any
-      let uploadedImageUrls = [];
-      if (form.selectedImages.length > 0 && typeof form.selectedImages[0] !== "string") {
-        toast.loading("Uploading images...");
-        for (const file of form.selectedImages) {
-          const data = new FormData();
-          data.append("image", file);
-          try {
-            const res = await fetch("http://localhost:3001/api/upload", {
+      for (const img of form.selectedImages) {
+        if (typeof img === "string") {
+          uploadedUrls.push(img);
+        } else {
+          const fd = new FormData();
+          fd.append("image", img);
+          const res = await fetch(
+            `${ "http://localhost:3001/api"}/upload`,
+            {
               method: "POST",
-              body: data,
-            });
-            const json = await res.json();
-            uploadedImageUrls.push(json.imageUrl);
-          } catch {
-            toast.dismiss();
-            toast.error("Image upload failed.");
-            return;
-          }
+              body: fd,
+            }
+          );
+          if (!res.ok) throw new Error("Image upload failed");
+          const js = await res.json();
+          uploadedUrls.push(js.imageUrl);
         }
-        toast.dismiss();
-        toast.success("Images uploaded");
-      } else {
-        uploadedImageUrls = form.selectedImages;
       }
 
-      // 3. Update product with image URLs if any
-      if (uploadedImageUrls.length > 0 && productId) {
-        const updated = await updateProduct(productId, { images: uploadedImageUrls });
+      const finalUrls = Array.from(new Set([...initialUrls, ...uploadedUrls]));
+
+      if (uploadedUrls.length > 0) {
+        await updateProduct(productId, { ...common, images: finalUrls });
+        toast.success("Product images updated successfully");
       }
 
       setForm(initial);
       imageRef.current?.clearImages();
-      setErrors({});
-      setEditProduct(null);
-    } catch {
-      toast.error("Failed to submit.");
+      setEditProduct?.(null);
+    } catch (err) {
+      toast.error(err.message || "Failed to submit product");
+      // Clean up orphaned images
+      for (const url of uploadedUrls) {
+        try {
+          await deleteImage(url);
+        } catch {
+          console.error("Cleanup failed for", url);
+        }
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Toaster />
+      <Toaster position="top-right" />
+      {/* Type selectors */}
       <div className="flex gap-2">
-        {typeOptions.map((opt) => (
+        {typeOptions.map((o) => (
           <button
-            key={opt.value}
+            key={o.value}
             type="button"
-            className={
-              form.type === opt.value
-                ? "active-btn w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3 rounded"
-                : "w-full bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded"
+            className={`w-full font-semibold px-6 py-3 rounded ${
+              form.type === o.value
+                ? "bg-orange-600 text-white"
+                : "bg-green-600 text-white hover:bg-green-700"
+            }`}
+            onClick={() =>
+              setForm((f) => ({
+                ...f,
+                type: o.value,
+                prices: [{ ...f.prices[0], size: "" }],
+              }))
             }
-            onClick={() => setForm((f) => ({ ...f, type: opt.value }))}
           >
-            {opt.label}
+            {o.label}
           </button>
         ))}
       </div>
 
+      {/* Image Uploader */}
       <ImageUploader
         ref={imageRef}
-        onFilesSelected={(newFiles) =>
+        onFilesSelected={(files) =>
           setForm((f) => ({
             ...f,
-            selectedImages: [...(f.selectedImages || []), ...newFiles],
+            selectedImages: [...(f.selectedImages || []), ...files],
           }))
         }
         deferUpload
+        previewUrls={form.selectedImages && form.selectedImages.length > 0 && typeof form.selectedImages[0] === 'string' ? form.selectedImages : undefined}
       />
-
       {errors.selectedImages && (
-        <p className="text-red-500 text-sm">{errors.selectedImages}</p>
+        <p className="text-red-500">{errors.selectedImages}</p>
       )}
 
+      {/* Product Name */}
       <div>
-        <label className="font-medium block mb-1">
-        Product Name 
-        {/* <span className="text-orange-500">*</span> */}
-        </label>
+        <label className="font-medium block mb-1">Product Name</label>
         <input
           type="text"
           name="name"
@@ -351,10 +344,10 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
       </div>
 
+      {/* Brand */}
       <div>
         <label htmlFor="brand_id" className="block font-medium mb-1">
-          Brand 
-          {/* <span className="text-orange-600">*</span> */}
+          Brand
         </label>
         <select
           id="brand_id"
@@ -377,6 +370,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
+      {/* Reference Book */}
       <div>
         <label htmlFor="referenceBook" className="block font-medium mb-1">
           Reference Book
@@ -400,20 +394,22 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
+      {/* Key Tags */}
       <TagInput
         tags={form.keyTags}
         onChange={(keyTags) => setForm((f) => ({ ...f, keyTags }))}
-        placeholder="Write key Eg: Cough, Cold, Fever, Ayurvedic, Homeopathic"
+        placeholder="Write key Eg: Cough, Fever, Ayurvedic, Homeopathic"
       />
       {errors.keyTags && (
         <p className="text-red-500 text-sm">{errors.keyTags}</p>
       )}
 
+      {/* Description */}
       <div>
         <label className="font-medium block mb-1">Description</label>
         <textarea
           name="description"
-          placeholder="Dabur Chyawanprash epitomizes the age-old wisdom of Ayurveda, offering a holistic approach to fortify your immune system and enhance overall well-being."
+          placeholder="Write description of product here."
           className="w-full border rounded p-2"
           rows={2}
           value={form.description}
@@ -424,11 +420,12 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
+      {/* Key Benefits */}
       <div>
         <label className="font-medium block mb-1">Key Benefits</label>
         <textarea
           name="benefits"
-          placeholder="Eg: Immune Boost: Rich in Vitamin C from Amla, it fortifies the immune system."
+          placeholder="key benefits of product Eg: Immune Boost."
           className="w-full border rounded p-2"
           rows={2}
           value={form.benefits}
@@ -439,6 +436,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
+      {/* How to use */}
       <div>
         <label className="font-medium block mb-1">How to use</label>
         <textarea
@@ -454,11 +452,12 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
-       <div>
+      {/* Safety & Precaution */}
+      <div>
         <label className="font-medium block mb-1">Safety & Precaution</label>
         <textarea
           name="safetyPrecaution"
-          placeholder="Eg: Do not consume alcohol after taking this medicine."
+          placeholder="Write Safety & precaution for product."
           className="w-full border rounded p-2"
           rows={2}
           value={form.safetyPrecaution}
@@ -469,11 +468,12 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
-       <div>
+      {/* Key Ingredients */}
+      <div>
         <label className="font-medium block mb-1">Key Ingredients</label>
         <textarea
           name="ingredients"
-          placeholder="Eg: Amla, Tulsi, Hibiscous flower"
+          placeholder="Key Ingredients of product Eg: Amla, Tulsi."
           className="w-full border rounded p-2"
           rows={2}
           value={form.ingredients}
@@ -484,6 +484,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
+      {/* Other Information */}
       <div>
         <label className="font-medium block mb-1">Other Information</label>
         <textarea
@@ -499,8 +500,8 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
+      {/* GST & Strength */}
       <div className="flex gap-4">
-        {/* GST Dropdown */}
         <div className="w-1/2">
           <label htmlFor="gst" className="block font-medium mb-1">
             GST
@@ -519,8 +520,6 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
             <option value={18}>18%</option>
           </select>
         </div>
-
-        {/* Strength Input (only shown for tablets) */}
         {form.type === "tablet" && (
           <div className="w-1/2">
             <label htmlFor="strength" className="block font-medium mb-1">
@@ -541,8 +540,11 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
         )}
       </div>
 
+      {/* Prices per portion of Size */}
       <div>
-        <label className="font-medium block mb-1">Prices per portion of Size</label>
+        <label className="font-medium block mb-1">
+          Prices per portion of Size
+        </label>
         <div className="space-y-2 ">
           {form.prices.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
@@ -550,12 +552,14 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
                 <label className="text-sm">Product Size</label>
                 <input
                   type="text"
-                  placeholder='Eg:100 / 10'
+                  placeholder="Eg: 100"
                   value={item.size}
-                  onChange={(e) => handlePriceChange(index, "size", e.target.value)}
-                  className="border rounded p-1 w-full"
+                  onChange={(e) =>
+                    handlePriceChange(index, "size", e.target.value)
+                  }
+                  className="border rounded p-1 w-full pr-10"
                 />
-                <span className="absolute right-2 top-7 text-gray-600">
+                <span className="absolute right-3 top-7 text-gray-600 pointer-events-none select-none">
                   {form.type}
                 </span>
                 {errors[`size_${index}`] && (
@@ -564,7 +568,6 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
                   </p>
                 )}
               </div>
-
               <div className="w-1/5 relative">
                 <label className="text-sm">Actual Price</label>
                 <span className="absolute left-2 top-7 text-gray-500">₹</span>
@@ -584,7 +587,6 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
                   </p>
                 )}
               </div>
-
               <div className="w-1/5">
                 <label className="text-sm">Discount (%)</label>
                 <input
@@ -602,7 +604,6 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
                   </p>
                 )}
               </div>
-
               <div className="w-1/5 relative">
                 <label className="text-sm">Selling Price</label>
                 <span className="absolute left-2 top-7 text-gray-500">₹</span>
@@ -622,7 +623,6 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
                   </p>
                 )}
               </div>
-
               <div className="w-1/5">
                 <label className="text-sm">Quantity</label>
                 <input
@@ -640,7 +640,6 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
                   </p>
                 )}
               </div>
-
               <button
                 type="button"
                 onClick={() => removePriceRow(index)}
@@ -680,15 +679,31 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
 
       <button
         type="submit"
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded"
+        disabled={loading}
+        className={`w-full bg-green-600 text-white font-semibold px-6 py-3 rounded ${
+          loading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"
+        }`}
       >
-        Submit{" "}
-        {form.type === "tablet"
-          ? "Tablet"
-          : form.type === "ml"
-          ? "Syrup"
-          : "Powder"}
+        {loading
+          ? "Submitting…"
+          : `Submit ${
+              form.type === "tablet"
+                ? "Tablet"
+                : form.type === "ml"
+                ? "Syrup"
+                : "Powder"
+            }`}
       </button>
+      {editProduct && (
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded"
+          disabled={loading}
+        >
+          Delete Product
+        </button>
+      )}
     </form>
   );
 };

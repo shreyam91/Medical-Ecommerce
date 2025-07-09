@@ -70,7 +70,8 @@ const BannerManager = () => {
       const formData = new FormData();
       formData.append("image", compressedFile);
 
-      const baseApiUrl = (process.env.REACT_APP_API_URL?.replace('/banner', '') || 'http://localhost:3001/api');
+      const baseApiUrl = (import.meta.env.VITE_API_URL?.replace('/banner', '') || 'http://localhost:3001/api');
+
       const uploadRes = await fetch(`${baseApiUrl}/upload`, {
         method: "POST",
         body: formData,
@@ -91,7 +92,7 @@ const BannerManager = () => {
     } catch (error) {
       // Cleanup the uploaded image if banner creation failed
       await cleanupUploadedImage(uploadedImageUrl);
-
+      console.error("Banner creation failed:", error); // <== ADD THIS LINE
       toast.error("Failed to add banner.", { id: toastId });
     }
   };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import MedicineType from '../components/MedicineType';
 import BrandForm from '@/components/BrandForm';
 import BannerManager from '@/components/BannerManager';
-import RefrenceBook from '@/components/RefrenceBook';
+import RefrenceBook from '@/components/ReferenceBook';
 import DoctorForm from '@/components/DoctorForm';
 
 const TABS = {

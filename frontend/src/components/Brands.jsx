@@ -120,7 +120,7 @@ const Brands = () => {
               onClick={() => navigate(`/brand/${brand.id}`)}
             >
               <img
-                src={brand.image_url}
+                src={brand.logo_url}
                 alt={brand.name}
                 className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                 loading="lazy"
