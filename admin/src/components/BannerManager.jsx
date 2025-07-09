@@ -22,47 +22,95 @@ const BannerManager = () => {
   };
 
   const handleAddBanner = async () => {
-    if (newBanner) {
-      const formData = new FormData();
-      let compressedFile = newBanner;
-      try {
-        compressedFile = await imageCompression(newBanner, {
-          maxSizeMB: 0.2,
-          maxWidthOrHeight: 1024,
-          useWebWorker: true,
-        });
-      } catch (err) {
-        toast.error('Image compression failed. Uploading original.');
+    if (!preview) {
+      toast.error('Please select an image.');
+      return;
+    }
+    let bannerId = null;
+    let createdBanner = null;
+    try {
+      // 1. Create banner without image
+      let payload = {};
+      if (editBanner) {
+        // For edit, keep existing image_url
+        payload = { image_url: editBanner.image_url };
+      } else {
+        payload = { image_url: '' };
       }
-      formData.append("image", compressedFile);
-      const toastId = toast.loading(editBanner ? "Updating banner..." : "Uploading banner...");
-      try {
-        const res = await fetch("http://localhost:3001/api/upload", {
-          method: "POST",
-          body: formData,
+      let bannerRes;
+      if (editBanner) {
+        bannerRes = await fetch(`http://localhost:3001/api/banner/${editBanner.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
         });
-        const data = await res.json();
-        if (editBanner) {
-          // Update banner in backend
-          const updated = await fetch(`http://localhost:3001/api/banner/${editBanner.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image_url: data.imageUrl }),
-          }).then(r => r.json());
-          setBanners(banners.map(b => b.id === editBanner.id ? updated : b));
-          setEditBanner(null);
-          toast.success("Banner updated successfully!", { id: toastId });
-        } else {
-          // Save banner in backend
-          const created = await createBanner({ image_url: data.imageUrl });
-          setBanners([created, ...banners]);
-          toast.success("Banner uploaded successfully!", { id: toastId });
+        bannerRes = await bannerRes.json();
+        bannerId = editBanner.id;
+      } else {
+        bannerRes = await createBanner(payload);
+        bannerId = bannerRes.id;
+        createdBanner = bannerRes;
+      }
+      // 2. Upload image if newBanner is selected
+      let imageUrl = editBanner ? editBanner.image_url : null;
+      if (newBanner) {
+        const formData = new FormData();
+        let compressedFile = newBanner;
+        try {
+          compressedFile = await imageCompression(newBanner, {
+            maxSizeMB: 0.2,
+            maxWidthOrHeight: 1024,
+            useWebWorker: true,
+          });
+        } catch (err) {
+          toast.error('Image compression failed. Uploading original.');
         }
-        setNewBanner(null);
-        setPreview(null);
-      } catch (error) {
-        toast.error("Upload failed. Please try again.", { id: toastId });
+        formData.append("image", compressedFile);
+        const toastId = toast.loading(editBanner ? "Updating banner..." : "Uploading banner...");
+        try {
+          const res = await fetch("http://localhost:3001/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          imageUrl = data.imageUrl;
+          toast.success("Image uploaded!", { id: toastId });
+        } catch (error) {
+          toast.error("Upload failed. Please try again.", { id: toastId });
+          return;
+        }
       }
+      // 3. Update banner with image URL if needed
+      if (imageUrl && bannerId) {
+        // Fetch current banner
+        const current = await fetch(`http://localhost:3001/api/banner/${bannerId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }).then(r => r.json());
+        const updatedPayload = { ...current, image_url: imageUrl };
+        const updated = await fetch(`http://localhost:3001/api/banner/${bannerId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify(updatedPayload),
+        }).then(r => r.json());
+        if (editBanner) {
+          setBanners(banners.map(b => b.id === bannerId ? updated : b));
+        } else {
+          setBanners([updated, ...banners]);
+        }
+      } else if (!editBanner && createdBanner) {
+        setBanners([createdBanner, ...banners]);
+      }
+      setNewBanner(null);
+      setPreview(null);
+      setEditBanner(null);
+    } catch (error) {
+      toast.error("Failed to add or update banner.");
     }
   };
 
@@ -127,11 +175,14 @@ const BannerManager = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {banners.map((banner) => (
               <div key={banner.id} className="relative border rounded overflow-hidden">
-                <img
-                  src={banner.image_url}
-                  alt={banner.id}
-                  className="w-full h-auto"
-                />
+                {/* Only render image if image_url is non-empty */}
+                {banner.image_url && (
+                  <img
+                    src={banner.image_url}
+                    alt={banner.id}
+                    className="w-full h-auto"
+                  />
+                )}
                 <button
                   onClick={() => handleRemoveBanner(banner.id)}
                   className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"

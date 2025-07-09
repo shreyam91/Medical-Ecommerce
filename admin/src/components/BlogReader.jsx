@@ -77,7 +77,16 @@ const renderBlock = (block, index) => {
 const BlogReader = ({ blog, onBack }) => {
   if (!blog) return <div>No blog to display.</div>;
 
-  const blocks = blog.content?.blocks || [];
+  // Parse content if it's a string
+  let contentObj = blog.content;
+  if (typeof contentObj === 'string') {
+    try {
+      contentObj = JSON.parse(contentObj);
+    } catch (e) {
+      contentObj = { blocks: [] };
+    }
+  }
+  const blocks = contentObj?.blocks || [];
 
   return (
     <div className="fixed inset-0 overflow-auto bg-gray-50 p-8">

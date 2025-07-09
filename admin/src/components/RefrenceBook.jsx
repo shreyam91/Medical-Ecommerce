@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { getBooks, createBook, deleteBook } from '../lib/bookApi';
+import { getReferenceBooks, createReferenceBook, deleteReferenceBook } from '../lib/referenceBookApi';
 
 const RefrenceBook = () => {
   const [bookName, setBookName] = useState("");
@@ -8,7 +8,7 @@ const RefrenceBook = () => {
   const [editBook, setEditBook] = useState(null);
 
   useEffect(() => {
-    getBooks().then(setBookList).catch(() => setBookList([]));
+    getReferenceBooks().then(setBookList).catch(() => setBookList([]));
   }, []);
 
   const handleSubmit = async (e) => {
@@ -16,7 +16,7 @@ const RefrenceBook = () => {
     try {
       if (editBook) {
         // Update book in backend
-        const res = await fetch(`http://localhost:3001/api/book/${editBook.id}`, {
+        const res = await fetch(`http://localhost:3001/api/reference_book/${editBook.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: bookName }),
@@ -26,7 +26,7 @@ const RefrenceBook = () => {
         setEditBook(null);
         toast.success("Book updated successfully!");
       } else {
-        const created = await createBook({ name: bookName });
+        const created = await createReferenceBook({ name: bookName });
         setBookList([created, ...bookList]);
         toast.success("Book added successfully!");
       }
@@ -38,7 +38,7 @@ const RefrenceBook = () => {
 
   const handleRemoveBook = async (id) => {
     try {
-      await deleteBook(id);
+      await deleteReferenceBook(id);
       setBookList(bookList.filter((book) => book.id !== id));
       toast.success("Book removed.");
     } catch {

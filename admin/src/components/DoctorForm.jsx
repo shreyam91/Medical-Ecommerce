@@ -112,29 +112,80 @@ function DoctorForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    const doctorPayload = {
-      image_url: uploadedImageUrl,
-      name: formData.name,
-      phone_number: formData.phone,
-      degree: formData.degree,
-      specialization: formData.specialization,
-      address: formData.address,
-      city: formData.city,
-      state: formData.state,
-      pincode: formData.pincode,
-      start_time: formData.startTime,
-      end_time: formData.endTime,
-    };
+    let doctorId = null;
+    let createdDoctor = null;
     try {
+      // 1. Create doctor without image
+      const doctorPayload = {
+        image_url: editDoctor ? editDoctor.image_url : '',
+        name: formData.name,
+        phone_number: formData.phone,
+        degree: formData.degree,
+        specialization: formData.specialization,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        start_time: formData.startTime,
+        end_time: formData.endTime,
+      };
+      let doctorRes;
       if (editDoctor) {
-        const updated = await updateDoctor(editDoctor.id, doctorPayload);
-        setDoctorList(doctorList.map((d) => (d.id === editDoctor.id ? updated : d)));
-        setEditDoctor(null);
-        toast.success("Doctor updated successfully!");
+        doctorRes = await updateDoctor(editDoctor.id, doctorPayload);
+        doctorId = editDoctor.id;
       } else {
-        const created = await createDoctor(doctorPayload);
-        setDoctorList([created, ...doctorList]);
-        toast.success("Form submitted successfully!");
+        doctorRes = await createDoctor(doctorPayload);
+        doctorId = doctorRes.id;
+        createdDoctor = doctorRes;
+      }
+      // 2. Upload image if selected
+      let imageUrl = editDoctor ? editDoctor.image_url : null;
+      if (imagePreview && typeof imagePreview !== 'string') {
+        const file = document.querySelector('input[type="file"]').files[0];
+        if (file) {
+          const toastId = toast.loading("Uploading image...");
+          let compressedFile = file;
+          try {
+            compressedFile = await imageCompression(file, {
+              maxSizeMB: 0.2,
+              maxWidthOrHeight: 1024,
+              useWebWorker: true,
+            });
+          } catch (err) {
+            toast.error('Image compression failed. Uploading original.');
+          }
+          const formDataImg = new FormData();
+          formDataImg.append("image", compressedFile);
+          try {
+            const res = await fetch("http://localhost:3001/api/upload", {
+              method: "POST",
+              body: formDataImg,
+            });
+            if (!res.ok) throw new Error("Image upload failed");
+            const data = await res.json();
+            imageUrl = data.imageUrl;
+            toast.success("Image uploaded successfully!", { id: toastId });
+          } catch (error) {
+            toast.error("Image upload failed.", { id: toastId });
+            setImagePreview(null);
+            return;
+          }
+        }
+      }
+      // 3. Update doctor with image URL if needed
+      if (imageUrl && doctorId) {
+        // Fetch current doctor
+        const current = await fetch(`http://localhost:3001/api/doctor/${doctorId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }).then(r => r.json());
+        const updatedPayload = { ...current, image_url: imageUrl };
+        const updated = await updateDoctor(doctorId, updatedPayload);
+        setDoctorList(doctorList.map(d => d.id === doctorId ? updated : d));
+      } else if (!editDoctor && createdDoctor) {
+        setDoctorList([createdDoctor, ...doctorList]);
       }
       setFormData({
         name: "",
@@ -150,6 +201,8 @@ function DoctorForm() {
       });
       setImagePreview(null);
       setUploadedImageUrl(null);
+      setEditDoctor(null);
+      toast.success(editDoctor ? "Doctor updated successfully!" : "Form submitted successfully!");
     } catch {
       toast.error("Failed to save doctor.");
     }
@@ -318,44 +371,29 @@ function DoctorForm() {
         </form>
       </div>
 
-      {/* Doctor List Preview */}
-      {doctorList.length > 0 && (
-        <div className="max-w-xl mx-auto mt-10">
-          <h3 className="text-lg font-semibold mb-4">All Doctors</h3>
-          <ul className="space-y-4">
-            {doctorList.map((doc) => (
-              <li key={doc.id} className="flex items-center bg-white p-4 rounded shadow space-x-4">
-                {doc.image_url && (
-                  <img
-                    src={doc.image_url}
-                    alt={doc.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                )}
-                <div className="flex-1">
-                  <h4 className="font-bold">{doc.name}</h4>
-                  <p className="text-gray-600">{doc.degree} - {doc.specialization}</p>
-                  <p className="text-gray-500">{doc.address}, {doc.city}, {doc.state} - {doc.pincode}</p>
-                  <p className="text-gray-500">📞 {doc.phone_number}</p>
-                  <p className="text-gray-500">⏰ {doc.start_time} - {doc.end_time}</p>
-                </div>
-                <button
-                  onClick={() => handleDelete(doc.id)}
-                  className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                >
-                  Remove
-                </button>
-                <button
-                  onClick={() => handleEdit(doc)}
-                  className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2"
-                >
-                  Edit
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Doctor List */}
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold mb-2">All Doctors</h3>
+        <ul className="divide-y divide-gray-200">
+          {doctorList.length === 0 && <li className="text-gray-500">No doctors found.</li>}
+          {doctorList.map((doctor) => (
+            <li key={doctor.id} className="py-2 flex items-center gap-4">
+              {/* Only render image if image_url is non-empty */}
+              {doctor.image_url && (
+                <img
+                  src={doctor.image_url}
+                  alt={doctor.name}
+                  className="w-16 h-16 rounded-full object-cover border"
+                />
+              )}
+              <span className="font-medium">{doctor.name}</span>
+              <span className="text-gray-600">{doctor.specialization}</span>
+              <button className="text-blue-600 hover:underline ml-auto" onClick={() => handleEdit(doctor)}>Edit</button>
+              <button className="text-red-600 hover:underline" onClick={() => handleDelete(doctor.id)}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
     
     </>

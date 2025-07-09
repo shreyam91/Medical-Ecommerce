@@ -25,59 +25,90 @@ const BrandForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!brandName.trim()) {
+      toast.error("Please enter a brand name.");
+      return;
+    }
     if (!image && !editBrand) {
       toast.error("Please upload an image.");
       return;
     }
     setIsUploading(true);
-    let imageUrl = editBrand ? editBrand.image_url : null;
-    if (image) {
-      const toastId = toast.loading("Uploading brand image...");
-      let compressedFile = image;
-      try {
-        compressedFile = await imageCompression(image, {
-          maxSizeMB: 0.2,
-          maxWidthOrHeight: 1024,
-          useWebWorker: true,
-        });
-      } catch (err) {
-        toast.error('Image compression failed. Uploading original.');
-      }
-      const formData = new FormData();
-      formData.append("image", compressedFile);
-      try {
-        const res = await fetch("http://localhost:3001/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (!res.ok) throw new Error("Upload failed");
-        const data = await res.json();
-        imageUrl = data.imageUrl;
-        toast.success("Image uploaded!", { id: toastId });
-      } catch (err) {
-        toast.error("Image upload failed.", { id: toastId });
-        setIsUploading(false);
-        return;
-      }
-    }
+    let brandId = null;
+    let createdBrand = null;
     try {
+      // 1. Create brand without image
+      let payload = { name: brandName, logo_url: editBrand ? editBrand.logo_url : '' };
+      let brandRes;
       if (editBrand) {
-        // Update brand in backend
-        const updated = await fetch(`http://localhost:3001/api/brand/${editBrand.id}`, {
+        brandRes = await fetch(`http://localhost:3001/api/brand/${editBrand.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: brandName, image_url: imageUrl }),
-        }).then(r => r.json());
-        setBrandList(brandList.map(b => b.id === editBrand.id ? updated : b));
-        setEditBrand(null);
-        toast.success("Brand updated successfully!");
+          body: JSON.stringify(payload),
+        });
+        brandRes = await brandRes.json();
+        brandId = editBrand.id;
       } else {
-        const created = await createBrand({ name: brandName, image_url: imageUrl });
-        setBrandList([created, ...brandList]);
-        toast.success("Brand added successfully!");
+        brandRes = await createBrand(payload);
+        brandId = brandRes.id;
+        createdBrand = brandRes;
+      }
+      // 2. Upload image if selected
+      let imageUrl = editBrand ? editBrand.logo_url : null;
+      if (image) {
+        const toastId = toast.loading("Uploading brand image...");
+        let compressedFile = image;
+        try {
+          compressedFile = await imageCompression(image, {
+            maxSizeMB: 0.2,
+            maxWidthOrHeight: 1024,
+            useWebWorker: true,
+          });
+        } catch (err) {
+          toast.error('Image compression failed. Uploading original.');
+        }
+        const formData = new FormData();
+        formData.append("image", compressedFile);
+        try {
+          const res = await fetch("http://localhost:3001/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!res.ok) throw new Error("Upload failed");
+          const data = await res.json();
+          imageUrl = data.imageUrl;
+          toast.success("Image uploaded!", { id: toastId });
+        } catch (err) {
+          toast.error("Image upload failed.", { id: toastId });
+          setIsUploading(false);
+          return;
+        }
+      }
+      // 3. Update brand with image URL if needed
+      if (imageUrl && brandId) {
+        // Fetch current brand
+        const current = await fetch(`http://localhost:3001/api/brand/${brandId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }).then(r => r.json());
+        const updatedPayload = { ...current, logo_url: imageUrl };
+        const updated = await fetch(`http://localhost:3001/api/brand/${brandId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify(updatedPayload),
+        }).then(r => r.json());
+        setBrandList(brandList.map(b => b.id === brandId ? updated : b));
+      } else if (!editBrand && createdBrand) {
+        setBrandList([createdBrand, ...brandList]);
       }
       setBrandName("");
       setImage(null);
+      setEditBrand(null);
     } catch (err) {
       toast.error("Brand creation or update failed.");
     } finally {
@@ -169,11 +200,14 @@ const BrandForm = () => {
                     key={brand.id}
                     className="flex items-center gap-4 bg-white p-3 rounded shadow"
                   >
-                    <img
-                      src={brand.image_url}
-                      alt={brand.name}
-                      className="w-16 h-16 rounded-full object-cover border"
-                    />
+                    {/* Only render image if logo_url is non-empty */}
+                    {brand.logo_url && (
+                      <img
+                        src={brand.logo_url}
+                        alt={brand.name}
+                        className="w-16 h-16 rounded-full object-cover border"
+                      />
+                    )}
                     <div className="flex-1">
                       <p className="font-medium">{brand.name}</p>
                     </div>

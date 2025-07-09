@@ -3,7 +3,7 @@ import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
 import { createProduct, updateProduct } from "../lib/productApi";
 import { getBrands } from "../lib/brandApi";
-import { getBooks } from "../lib/bookApi";
+import { getReferenceBooks } from "../lib/referenceBookApi";
 import TagInput from "./TagInput";
 
 const MedicineForm = ({ editProduct, setEditProduct, category }) => {
@@ -51,7 +51,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
     getBrands()
       .then(setBrandsList)
       .catch(() => setBrandsList([]));
-    getBooks()
+    getReferenceBooks()
       .then(setBooksList)
       .catch(() => setBooksList([]));
 
@@ -153,8 +153,8 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
     if (!form.brand_id) newErrors.brand_id = "Brand is required.";
 
     // Reference Book
-    if (!form.referenceBook)
-      newErrors.referenceBook = "Reference book is required.";
+    // if (!form.referenceBook)
+    //   newErrors.referenceBook = "Reference book is required.";
 
     // Key Tags
     if (!form.keyTags || form.keyTags.length === 0)
@@ -222,67 +222,73 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    let uploadedImageUrls = [];
-
-    if (
-      form.selectedImages.length > 0 &&
-      typeof form.selectedImages[0] !== "string"
-    ) {
-      toast.loading("Uploading images...");
-      for (const file of form.selectedImages) {
-        const data = new FormData();
-        data.append("image", file);
-        try {
-          const res = await fetch("http://localhost:3001/api/upload", {
-            method: "POST",
-            body: data,
-          });
-          const json = await res.json();
-          uploadedImageUrls.push(json.imageUrl);
-        } catch {
-          toast.dismiss();
-          toast.error("Image upload failed.");
-          return;
-        }
-      }
-      toast.dismiss();
-      toast.success("Images uploaded");
-    } else {
-      uploadedImageUrls = form.selectedImages;
-    }
-
-    const payload = {
-      name: form.name,
-      category: category || "Ayurvedic",
-      medicine_type:
-        form.type === "ml" ? "Syrup" : form.type === "gm" ? "Powder" : "Tablet",
-      brand_id: form.brand_id ? parseInt(form.brand_id, 10) : null,
-      reference_books: form.referenceBook ? [form.referenceBook] : [],
-      key: form.keyTags.join(", "),
-      key_ingredients: form.ingredients,
-      how_to_use: form.howToUse,
-      safety_precaution: form.safetyPrecaution,
-      description: form.description,
-      other_info: form.otherInfo,
-      strength: form.strength,
-      gst: parseInt(form.gst, 10),
-      prescription_required: form.prescriptionRequired,
-      actual_price: parseFloat(form.prices[0].actualPrice),
-      selling_price: parseFloat(form.prices[0].sellingPrice),
-      discount_percent: parseFloat(form.prices[0].discount),
-      total_quantity: parseInt(form.prices[0].quantity, 10),
-      images: uploadedImageUrls,
-    };
-
-    console.log('Submitting product form data:', payload);
-
+    let productId = null;
+    let createdProduct = null;
     try {
+      // 1. Create product without images
+      const payload = {
+        name: form.name,
+        category: category || "Ayurvedic",
+        medicine_type:
+          form.type === "ml" ? "Syrup" : form.type === "gm" ? "Powder" : "Tablet",
+        brand_id: form.brand_id ? parseInt(form.brand_id, 10) : null,
+        reference_books: form.referenceBook ? [form.referenceBook] : [],
+        key: form.keyTags.join(", "),
+        key_ingredients: form.ingredients,
+        key_benefits: form.benefits,
+        how_to_use: form.howToUse,
+        safety_precaution: form.safetyPrecaution,
+        description: form.description,
+        other_info: form.otherInfo,
+        strength: form.strength,
+        gst: parseInt(form.gst, 10),
+        prescription_required: form.prescriptionRequired,
+        actual_price: parseFloat(form.prices[0].actualPrice),
+        selling_price: parseFloat(form.prices[0].sellingPrice),
+        discount_percent: parseFloat(form.prices[0].discount),
+        total_quantity: parseInt(form.prices[0].quantity, 10),
+        images: [], // initially empty
+      };
       if (editProduct) {
         await updateProduct(editProduct.id, payload);
+        productId = editProduct.id;
         toast.success("Product updated!");
       } else {
-        await createProduct(payload);
+        const created = await createProduct(payload);
+        productId = created.id;
+        createdProduct = created;
         toast.success("Product created!");
+      }
+
+      // 2. Upload images if any
+      let uploadedImageUrls = [];
+      if (form.selectedImages.length > 0 && typeof form.selectedImages[0] !== "string") {
+        toast.loading("Uploading images...");
+        for (const file of form.selectedImages) {
+          const data = new FormData();
+          data.append("image", file);
+          try {
+            const res = await fetch("http://localhost:3001/api/upload", {
+              method: "POST",
+              body: data,
+            });
+            const json = await res.json();
+            uploadedImageUrls.push(json.imageUrl);
+          } catch {
+            toast.dismiss();
+            toast.error("Image upload failed.");
+            return;
+          }
+        }
+        toast.dismiss();
+        toast.success("Images uploaded");
+      } else {
+        uploadedImageUrls = form.selectedImages;
+      }
+
+      // 3. Update product with image URLs if any
+      if (uploadedImageUrls.length > 0 && productId) {
+        const updated = await updateProduct(productId, { images: uploadedImageUrls });
       }
 
       setForm(initial);
@@ -315,15 +321,15 @@ const MedicineForm = ({ editProduct, setEditProduct, category }) => {
       </div>
 
       <ImageUploader
-  ref={imageRef}
-  onFilesSelected={(newFiles) =>
-    setForm((f) => ({
-      ...f,
-      selectedImages: [...(f.selectedImages || []), ...newFiles],
-    }))
-  }
-  deferUpload
-/>
+        ref={imageRef}
+        onFilesSelected={(newFiles) =>
+          setForm((f) => ({
+            ...f,
+            selectedImages: [...(f.selectedImages || []), ...newFiles],
+          }))
+        }
+        deferUpload
+      />
 
       {errors.selectedImages && (
         <p className="text-red-500 text-sm">{errors.selectedImages}</p>
