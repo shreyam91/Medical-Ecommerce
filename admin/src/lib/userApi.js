@@ -1,13 +1,25 @@
 const API_URL = 'http://localhost:3001/api/user';
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+}
+
 export async function getUsers() {
-  const res = await fetch(API_URL);
+  const res = await fetch(API_URL, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch users');
   return res.json();
 }
 
 export async function getUser(id) {
-  const res = await fetch(`${API_URL}/${id}`);
+  const res = await fetch(`${API_URL}/${id}`, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch user');
   return res.json();
 }
@@ -15,7 +27,7 @@ export async function getUser(id) {
 export async function createUser(user) {
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(user),
   });
   if (!res.ok) throw new Error('Failed to create user');
@@ -25,7 +37,7 @@ export async function createUser(user) {
 export async function updateUser(id, user) {
   const res = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(user),
   });
   if (!res.ok) throw new Error('Failed to update user');
@@ -34,7 +46,9 @@ export async function updateUser(id, user) {
 
 export async function deleteUser(id) {
   const res = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE' });
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to delete user');
   return res.json();
 } 
