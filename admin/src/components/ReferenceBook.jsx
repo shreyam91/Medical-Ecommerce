@@ -1,32 +1,50 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { getReferenceBooks, createReferenceBook, deleteReferenceBook } from '../lib/referenceBookApi';
+import {
+  getReferenceBooks,
+  createReferenceBook,
+  deleteReferenceBook,
+  updateReferenceBook,
+} from "../lib/referenceBookApi";
 
-const RefrenceBook = () => {
+const ReferenceBook = () => {
   const [bookName, setBookName] = useState("");
   const [bookList, setBookList] = useState([]);
   const [editBook, setEditBook] = useState(null);
 
   useEffect(() => {
-    getReferenceBooks().then(setBookList).catch(() => setBookList([]));
+    getReferenceBooks()
+      .then(setBookList)
+      .catch(() => {
+        toast.error("Failed to fetch books.");
+        setBookList([]);
+      });
   }, []);
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const trimmedName = bookName.trim();
+    if (!trimmedName) return;
+
+    const isDuplicate = bookList.some(
+  (book) => book.name.toLowerCase() === trimmedName.toLowerCase() && (!editBook || book.id !== editBook.id)
+);
+
+if (isDuplicate) {
+  toast.error("This book is already present. Duplicate not allowed.");
+  return;
+}
+
     try {
       if (editBook) {
-        // Update book in backend
-        const res = await fetch(`http://localhost:3001/api/reference_book/${editBook.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: bookName }),
-        });
-        const updated = await res.json();
-        setBookList(bookList.map(b => b.id === editBook.id ? updated : b));
-        setEditBook(null);
+        const updated = await updateReferenceBook(editBook.id, { name: trimmedName });
+        setBookList(bookList.map((b) => (b.id === editBook.id ? updated : b)));
         toast.success("Book updated successfully!");
+        setEditBook(null);
       } else {
-        const created = await createReferenceBook({ name: bookName });
+        const created = await createReferenceBook({ name: trimmedName });
         setBookList([created, ...bookList]);
         toast.success("Book added successfully!");
       }
@@ -51,6 +69,11 @@ const RefrenceBook = () => {
     setBookName(book.name);
   };
 
+  const handleCancelEdit = () => {
+    setEditBook(null);
+    setBookName("");
+  };
+
   return (
     <div className="max-w-6xl mx-auto mt-10 p-6">
       <Toaster position="top-right" />
@@ -58,7 +81,7 @@ const RefrenceBook = () => {
         {/* Left: Form */}
         <form onSubmit={handleSubmit} className="md:w-1/2 w-full">
           <label className="block mb-2 text-sm font-medium">
-            Refrence Book Name
+            Reference Book Name
           </label>
           <input
             type="text"
@@ -73,8 +96,18 @@ const RefrenceBook = () => {
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
           >
-            {editBook ? 'Update Book' : 'Submit'}
+            {editBook ? "Update Book" : "Submit"}
           </button>
+
+          {editBook && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="w-full mt-2 bg-gray-400 text-white p-2 rounded hover:bg-gray-500"
+            >
+              Cancel
+            </button>
+          )}
         </form>
 
         {/* Right: Book List */}
@@ -116,4 +149,4 @@ const RefrenceBook = () => {
   );
 };
 
-export default RefrenceBook;
+export default ReferenceBook;

@@ -1,19 +1,33 @@
-const API_URL = 'http://localhost:3001/api/banner';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = `${BASE_URL}/banner`;
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
+}
+
+async function handleResponse(res) {
+  if (!res.ok) {
+    let errorMsg = `Error ${res.status} ${res.statusText}`;
+    try {
+      const errData = await res.json();
+      if (errData.message) errorMsg += `: ${errData.message}`;
+    } catch {
+      // ignore JSON parse errors
+    }
+    throw new Error(errorMsg);
+  }
+  return res.json();
 }
 
 export async function getBanners() {
   const res = await fetch(API_URL, {
     headers: getAuthHeaders(),
   });
-  if (!res.ok) throw new Error('Failed to fetch banners');
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function createBanner(banner) {
@@ -22,8 +36,7 @@ export async function createBanner(banner) {
     headers: getAuthHeaders(),
     body: JSON.stringify(banner),
   });
-  if (!res.ok) throw new Error('Failed to create banner');
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function deleteBanner(id) {
@@ -31,6 +44,5 @@ export async function deleteBanner(id) {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
-  if (!res.ok) throw new Error('Failed to delete banner');
-  return res.json();
-} 
+  return handleResponse(res);
+}

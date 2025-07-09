@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import imageCompression from 'browser-image-compression';
-import { getDoctors, createDoctor, updateDoctor, deleteDoctor } from '../lib/doctorApi';
+import imageCompression from "browser-image-compression";
+import {
+  getDoctors,
+  createDoctor,
+  updateDoctor,
+  deleteDoctor,
+} from "../lib/doctorApi";
 
 function DoctorForm() {
   const [formData, setFormData] = useState({
@@ -16,54 +21,30 @@ function DoctorForm() {
     startTime: "",
     endTime: "",
   });
-
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [doctorList, setDoctorList] = useState([]);
   const [editDoctor, setEditDoctor] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getDoctors().then(setDoctorList).catch(() => setDoctorList([]));
+    getDoctors()
+      .then(setDoctorList)
+      .catch(() => setDoctorList([]));
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = async (e) => {
+  // Preview image but do NOT upload here
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     setImagePreview(URL.createObjectURL(file));
-    const toastId = toast.loading("Uploading image...");
-    let compressedFile = file;
-    try {
-      compressedFile = await imageCompression(file, {
-        maxSizeMB: 0.2,
-        maxWidthOrHeight: 1024,
-        useWebWorker: true,
-      });
-    } catch (err) {
-      toast.error('Image compression failed. Uploading original.');
-    }
-    const formDataImg = new FormData();
-    formDataImg.append("image", compressedFile);
-    try {
-      const res = await fetch("http://localhost:3001/api/upload", {
-        method: "POST",
-        body: formDataImg,
-      });
-      if (!res.ok) throw new Error("Image upload failed");
-      const data = await res.json();
-      setUploadedImageUrl(data.imageUrl);
-      toast.success("Image uploaded successfully!", { id: toastId });
-    } catch (error) {
-      toast.error("Image upload failed.", { id: toastId });
-      setImagePreview(null);
-    }
+    setImageFile(file);
   };
 
   const validateForm = () => {
@@ -79,6 +60,7 @@ function DoctorForm() {
       startTime,
       endTime,
     } = formData;
+
     if (
       !name ||
       !phone ||
@@ -94,30 +76,67 @@ function DoctorForm() {
       toast.error("Please fill in all required fields.");
       return false;
     }
+
     if (!/^\d{10}$/.test(phone)) {
       toast.error("Phone number must be 10 digits.");
       return false;
     }
+
     if (!/^\d{6}$/.test(pincode)) {
       toast.error("Pincode must be 6 digits.");
       return false;
     }
+
     if (startTime >= endTime) {
       toast.error("Start time must be earlier than end time.");
       return false;
     }
+
     return true;
+  };
+
+  const uploadImage = async (file) => {
+    const toastId = toast.loading("Uploading image...");
+    let compressedFile = file;
+    try {
+      compressedFile = await imageCompression(file, {
+        maxSizeMB: 0.2,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
+    } catch (err) {
+      toast.error("Image compression failed. Uploading original.");
+    }
+
+    const formDataImg = new FormData();
+    formDataImg.append("image", compressedFile);
+
+    try {
+      const res = await fetch("http://localhost:3001/api/upload", {
+        method: "POST",
+        body: formDataImg,
+      });
+
+      if (!res.ok) throw new Error("Image upload failed");
+
+      const data = await res.json();
+      toast.success("Image uploaded successfully!", { id: toastId });
+      return data.imageUrl;
+    } catch (error) {
+      toast.error("Image upload failed.", { id: toastId });
+      throw error;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    let doctorId = null;
-    let createdDoctor = null;
+
+    setLoading(true);
+
     try {
-      // 1. Create doctor without image
+      // Prepare doctor data without image_url
       const doctorPayload = {
-        image_url: editDoctor ? editDoctor.image_url : '',
         name: formData.name,
         phone_number: formData.phone,
         degree: formData.degree,
@@ -128,65 +147,39 @@ function DoctorForm() {
         pincode: formData.pincode,
         start_time: formData.startTime,
         end_time: formData.endTime,
+        image_url: editDoctor ? editDoctor.image_url : "", // fallback if no image update
       };
+
       let doctorRes;
+
       if (editDoctor) {
+        // Update doctor first without changing image_url
         doctorRes = await updateDoctor(editDoctor.id, doctorPayload);
-        doctorId = editDoctor.id;
       } else {
+        // Create new doctor without image_url
         doctorRes = await createDoctor(doctorPayload);
-        doctorId = doctorRes.id;
-        createdDoctor = doctorRes;
       }
-      // 2. Upload image if selected
-      let imageUrl = editDoctor ? editDoctor.image_url : null;
-      if (imagePreview && typeof imagePreview !== 'string') {
-        const file = document.querySelector('input[type="file"]').files[0];
-        if (file) {
-          const toastId = toast.loading("Uploading image...");
-          let compressedFile = file;
-          try {
-            compressedFile = await imageCompression(file, {
-              maxSizeMB: 0.2,
-              maxWidthOrHeight: 1024,
-              useWebWorker: true,
-            });
-          } catch (err) {
-            toast.error('Image compression failed. Uploading original.');
-          }
-          const formDataImg = new FormData();
-          formDataImg.append("image", compressedFile);
-          try {
-            const res = await fetch("http://localhost:3001/api/upload", {
-              method: "POST",
-              body: formDataImg,
-            });
-            if (!res.ok) throw new Error("Image upload failed");
-            const data = await res.json();
-            imageUrl = data.imageUrl;
-            toast.success("Image uploaded successfully!", { id: toastId });
-          } catch (error) {
-            toast.error("Image upload failed.", { id: toastId });
-            setImagePreview(null);
-            return;
-          }
+
+      // If user selected an image, upload it now
+      let imageUrl = editDoctor ? editDoctor.image_url : "";
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+
+        // Update doctor with imageUrl
+        const updatedDoctor = { ...doctorRes, image_url: imageUrl };
+        doctorRes = await updateDoctor(doctorRes.id, updatedDoctor);
+      }
+
+      // Update doctor list in state
+      setDoctorList((prevList) => {
+        if (editDoctor) {
+          return prevList.map((d) => (d.id === doctorRes.id ? doctorRes : d));
+        } else {
+          return [doctorRes, ...prevList];
         }
-      }
-      // 3. Update doctor with image URL if needed
-      if (imageUrl && doctorId) {
-        // Fetch current doctor
-        const current = await fetch(`http://localhost:3001/api/doctor/${doctorId}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-        }).then(r => r.json());
-        const updatedPayload = { ...current, image_url: imageUrl };
-        const updated = await updateDoctor(doctorId, updatedPayload);
-        setDoctorList(doctorList.map(d => d.id === doctorId ? updated : d));
-      } else if (!editDoctor && createdDoctor) {
-        setDoctorList([createdDoctor, ...doctorList]);
-      }
+      });
+
+      // Reset form and states
       setFormData({
         name: "",
         phone: "",
@@ -200,36 +193,39 @@ function DoctorForm() {
         endTime: "",
       });
       setImagePreview(null);
-      setUploadedImageUrl(null);
+      setImageFile(null);
       setEditDoctor(null);
-      toast.success(editDoctor ? "Doctor updated successfully!" : "Form submitted successfully!");
-    } catch {
-      toast.error("Failed to save doctor.");
+
+      toast.success(editDoctor ? "Doctor updated successfully!" : "Doctor created successfully!");
+    } catch (error) {
+      toast.error(error.message || "Failed to save doctor.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEdit = (doc) => {
-    setEditDoctor(doc);
+  const handleEdit = (doctor) => {
+    setEditDoctor(doctor);
     setFormData({
-      name: doc.name,
-      phone: doc.phone_number,
-      degree: doc.degree,
-      specialization: doc.specialization,
-      address: doc.address,
-      city: doc.city,
-      state: doc.state,
-      pincode: doc.pincode,
-      startTime: doc.start_time,
-      endTime: doc.end_time,
+      name: doctor.name,
+      phone: doctor.phone_number,
+      degree: doctor.degree,
+      specialization: doctor.specialization,
+      address: doctor.address,
+      city: doctor.city,
+      state: doctor.state,
+      pincode: doctor.pincode,
+      startTime: doctor.start_time,
+      endTime: doctor.end_time,
     });
-    setUploadedImageUrl(doc.image_url || null);
-    setImagePreview(doc.image_url || null);
+    setImagePreview(doctor.image_url || null);
+    setImageFile(null); // Clear file because we only preview URL now
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteDoctor(id);
-      setDoctorList(doctorList.filter((d) => d.id !== id));
+      setDoctorList((prevList) => prevList.filter((d) => d.id !== id));
       toast.success("Doctor removed.");
     } catch {
       toast.error("Failed to remove doctor.");
@@ -237,8 +233,7 @@ function DoctorForm() {
   };
 
   return (
-    <>
-    <div className="min-h-screen p-8 ">
+    <div className="min-h-screen p-8">
       <Toaster position="top-right" />
       <div className="max-w-xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Doctor Form</h2>
@@ -251,7 +246,15 @@ function DoctorForm() {
               onChange={handleImageChange}
               className="w-full"
             />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="mt-2 w-32 h-32 object-cover rounded border"
+              />
+            )}
           </div>
+
           <div>
             <label className="block mb-1 font-medium">Name*</label>
             <input
@@ -262,6 +265,7 @@ function DoctorForm() {
               className="w-full border rounded px-3 py-2"
             />
           </div>
+
           <div>
             <label className="block mb-1 font-medium">Phone Number*</label>
             <input
@@ -272,6 +276,7 @@ function DoctorForm() {
               className="w-full border rounded px-3 py-2"
             />
           </div>
+
           <div>
             <label className="block mb-1 font-medium">Degree*</label>
             <input
@@ -294,7 +299,6 @@ function DoctorForm() {
             />
           </div>
 
-          {/* Address Fields */}
           <div>
             <label className="block mb-1 font-medium">Address*</label>
             <input
@@ -305,6 +309,7 @@ function DoctorForm() {
               className="w-full border rounded px-3 py-2"
             />
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block mb-1 font-medium">City*</label>
@@ -338,7 +343,6 @@ function DoctorForm() {
             </div>
           </div>
 
-          {/* Timing Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 font-medium">Start Time*</label>
@@ -364,39 +368,77 @@ function DoctorForm() {
 
           <button
             type="submit"
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            disabled={loading}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Submit
+            {loading ? (editDoctor ? "Updating..." : "Creating...") : (editDoctor ? "Update Doctor" : "Add Doctor")}
           </button>
+          {editDoctor && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditDoctor(null);
+                setFormData({
+                  name: "",
+                  phone: "",
+                  degree: "",
+                  specialization: "",
+                  address: "",
+                  city: "",
+                  state: "",
+                  pincode: "",
+                  startTime: "",
+                  endTime: "",
+                });
+                setImagePreview(null);
+                setImageFile(null);
+              }}
+              className="ml-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          )}
         </form>
-      </div>
 
-      {/* Doctor List */}
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold mb-2">All Doctors</h3>
-        <ul className="divide-y divide-gray-200">
-          {doctorList.length === 0 && <li className="text-gray-500">No doctors found.</li>}
-          {doctorList.map((doctor) => (
-            <li key={doctor.id} className="py-2 flex items-center gap-4">
-              {/* Only render image if image_url is non-empty */}
-              {doctor.image_url && (
-                <img
-                  src={doctor.image_url}
-                  alt={doctor.name}
-                  className="w-16 h-16 rounded-full object-cover border"
-                />
-              )}
-              <span className="font-medium">{doctor.name}</span>
-              <span className="text-gray-600">{doctor.specialization}</span>
-              <button className="text-blue-600 hover:underline ml-auto" onClick={() => handleEdit(doctor)}>Edit</button>
-              <button className="text-red-600 hover:underline" onClick={() => handleDelete(doctor.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
+        {/* Doctor List */}
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-2">Doctor List</h3>
+          <ul>
+            {doctorList.map((doctor) => (
+              <li key={doctor.id} className="border p-4 rounded mb-2 flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  {doctor.image_url && (
+                    <img
+                      src={doctor.image_url}
+                      alt={doctor.name}
+                      className="w-12 h-12 object-cover rounded-full"
+                    />
+                  )}
+                  <div>
+                    <p className="font-semibold">{doctor.name}</p>
+                    <p className="text-sm text-gray-600">{doctor.specialization}</p>
+                  </div>
+                </div>
+                <div className="space-x-2">
+                  <button
+                    onClick={() => handleEdit(doctor)}
+                    className="bg-yellow-400 px-3 py-1 rounded hover:bg-yellow-500"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(doctor.id)}
+                    className="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
-    
-    </>
   );
 }
 
