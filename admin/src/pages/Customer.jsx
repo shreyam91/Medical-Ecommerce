@@ -24,6 +24,11 @@ const initialCustomers = [
 ];
 
 export default function CustomerDetails() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.role !== 'admin') {
+    return <div className="p-8 text-red-600 font-bold">Access denied</div>;
+  }
+
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

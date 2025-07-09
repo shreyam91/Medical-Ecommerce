@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { getPayments, createPayment, updatePayment, deletePayment } from '../lib/paymentApi';
 
 const PaymentTable = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.role !== 'admin') {
+    return <div className="p-8 text-red-600 font-bold">Access denied</div>;
+  }
+
   const [payments, setPayments] = useState([]);
   const [filters, setFilters] = useState({
     status: '',

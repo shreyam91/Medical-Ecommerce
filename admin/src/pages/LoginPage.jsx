@@ -7,30 +7,34 @@ export default function LoginPage({ onLogin }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-
-    // Mock user
-    const dummyUser = {
-      email: 'doctor@example.com',
-      password: '123456',
-      name: 'Dr. Ayesha Khan',
-    };
-
-    if (email === dummyUser.email && password === dummyUser.password) {
-      setError('');
-      localStorage.setItem('user', JSON.stringify(dummyUser));
+    setError('');
+    try {
+      const res = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Login failed');
+        return;
+      }
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
       if (onLogin) onLogin();
       navigate('/dashboard');
-    } else {
-      setError('Invalid credentials. Please try again.');
+    } catch (err) {
+      setError('Network error. Please try again.');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login to Doctor Portal</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Login to Admin Portal</h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block mb-1 text-gray-600">Email</label>
@@ -40,7 +44,7 @@ export default function LoginPage({ onLogin }) {
               onChange={e => setEmail(e.target.value)}
               required
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-              placeholder="doctor@example.com"
+              placeholder="admin@example.com"
             />
           </div>
           <div>

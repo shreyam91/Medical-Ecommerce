@@ -56,6 +56,11 @@ const initialOrders = [
 ];
 
 export default function OrdersPro() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.role !== 'admin') {
+    return <div className="p-8 text-red-600 font-bold">Access denied</div>;
+  }
+
   const [orders, setOrders] = useState(initialOrders);
   const [filterStatus, setFilterStatus] = useState('All');
   const [entriesPerPage, setEntriesPerPage] = useState(10);

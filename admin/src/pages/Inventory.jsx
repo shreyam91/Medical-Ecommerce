@@ -70,6 +70,11 @@ const getStatusFromQuantity = (total_quantity) => {
 };
 
 const InventoryPage = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.role !== 'admin') {
+    return <div className="p-8 text-red-600 font-bold">Access denied</div>;
+  }
+
   const [inventory, setInventory] = useState([]);
   const [brands, setBrands] = useState([]);
   const [search, setSearch] = useState("");

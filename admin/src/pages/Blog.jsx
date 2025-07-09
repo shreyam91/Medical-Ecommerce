@@ -15,21 +15,23 @@ const Blog = () => {
 
   const handleSave = async (blog) => {
     let updatedBlogs;
+    // Ensure required fields and correct types
     const payload = {
       image_url: blog.banner,
-      title: blog.title,
-      short_description: blog.des,
-      content: blog.content,
-      tags: blog.tags,
-      id: blog.id,
-      date: blog.date,
+      title: blog.title || '',
+      short_description: blog.des || '',
+      content: JSON.stringify(blog.content),
+      tags: Array.isArray(blog.tags) ? blog.tags.map(String) : [],
     };
-    console.log('Blog payload:', payload);
+    if (!payload.title.trim() || !blog.content || !blog.content.blocks || blog.content.blocks.length === 0) {
+      alert('Title and content are required.');
+      return;
+    }
     if (editingBlog) {
       const updated = await updateBlog(blog.id, payload);
       updatedBlogs = blogs.map((b) => (b.id === blog.id ? updated : b));
     } else {
-      const created = await createBlog({ ...payload, date: new Date().toLocaleDateString() });
+      const created = await createBlog(payload);
       updatedBlogs = [created, ...blogs];
     }
     setBlogs(updatedBlogs);
