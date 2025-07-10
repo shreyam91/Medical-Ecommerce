@@ -317,12 +317,27 @@ setTimeout(() => {
       {/* Image Uploader */}
       <ImageUploader
         ref={imageRef}
-        onFilesSelected={(files) =>
-          setForm((f) => ({
-            ...f,
-            selectedImages: [...(f.selectedImages || []), ...files],
-          }))
-        }
+        onFilesSelected={(files) => {
+          setForm((f) => {
+            const existing = f.selectedImages || [];
+            const all = [...existing, ...files];
+            const unique = [];
+            const seen = new Set();
+            for (const img of all) {
+              let key;
+              if (typeof img === "string") {
+                key = img;
+              } else {
+                key = img.name + "_" + img.size;
+              }
+              if (!seen.has(key)) {
+                seen.add(key);
+                unique.push(img);
+              }
+            }
+            return { ...f, selectedImages: unique };
+          });
+        }}
         deferUpload
         previewUrls={form.selectedImages && form.selectedImages.length > 0 && typeof form.selectedImages[0] === 'string' ? form.selectedImages : undefined}
       />
