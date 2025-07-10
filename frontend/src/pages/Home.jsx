@@ -10,13 +10,13 @@ const Home = () => {
   return (
     <>
     <Banner/>
-    <Breadcrumb/>
+    {/* <Breadcrumb/> */}
     <Category/>
       <Brands />
     {/* <div className="min-h-screen flex items-center justify-center">
     </div> */}
-    <Trending/>
-    <DealsOfTheDay />
+    {/* <Trending/> */}
+    {/* <DealsOfTheDay /> */}
     </>
   )
 }

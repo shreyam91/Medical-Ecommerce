@@ -80,7 +80,7 @@ export default function Category() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto p-6 relative">
+    <div className="relative px-4 md:px-10 py-8 max-w-full md:max-w-7xl mx-auto">
       <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-green-700">
         Shop by Health Concern
       </h1>

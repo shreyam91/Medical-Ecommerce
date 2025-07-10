@@ -42,7 +42,7 @@ function App() {
     <>
     <Toaster position="top-right" reverseOrder={false} />
     <CartProvider>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
           <Navbar />
            <GlobalLoader />
           <main className="container mx-auto px-4 py-8">

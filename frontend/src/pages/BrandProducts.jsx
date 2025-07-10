@@ -57,16 +57,16 @@ const BrandProducts = () => {
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left: Filter */}
-        <div className="md:w-1/4 w-full mb-6 md:mb-0">
+        {/* <div className="md:w-1/4 w-full mb-6 md:mb-0">
           <BrandFilterAside
             selectedBrands={selectedBrands}
             onBrandChange={setSelectedBrands}
           />
-        </div>
+        </div> */}
         {/* Right: Main Content */}
         <div className="flex-1">
           <h1 className="text-2xl font-bold mb-2 text-green-700 text-center md:text-left">
-            Products for {brand ? brand.name : 'Brand'}
+            All Products in {brand ? brand.name : 'Brand'} 
           </h1>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="text-center md:text-left text-gray-600">

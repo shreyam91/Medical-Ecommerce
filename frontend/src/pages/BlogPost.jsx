@@ -43,6 +43,16 @@ const BlogPost = () => {
 
   const shareUrl = window.location.href;
 
+  // Parse blog.content if it's a string
+  let parsedContent = blog.content;
+  if (typeof parsedContent === 'string') {
+    try {
+      parsedContent = JSON.parse(parsedContent);
+    } catch (e) {
+      // fallback: leave as string
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 lg:px-12">
       {/* Back Link */}
@@ -109,8 +119,8 @@ const BlogPost = () => {
           />
           <div className="prose max-w-none text-gray-800">
             {/* Render Editor.js block content */}
-            {blog.content && blog.content.blocks && blog.content.blocks.length > 0 ? (
-              blog.content.blocks.map((block, idx) => {
+            {parsedContent && parsedContent.blocks && parsedContent.blocks.length > 0 ? (
+              parsedContent.blocks.map((block, idx) => {
                 switch (block.type) {
                   case 'header':
                     const Tag = `h${block.data.level || 3}`;

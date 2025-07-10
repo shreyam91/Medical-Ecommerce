@@ -1,8 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product }) => {
   const { images, name, actual_price, selling_price } = product;
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   // Fallback image if none provided
   const image =
@@ -10,13 +13,20 @@ const ProductCard = ({ product }) => {
       ? images[0]
       : 'https://via.placeholder.com/300x200?text=No+Image';
 
-  const actualPriceNum = Number(actual_price);
-  const sellingPriceNum = Number(selling_price);
+  const actualPriceNum = Number(actual_price ?? 0);
+  const sellingPriceNum = Number(selling_price ?? 0);
 
   const hasDiscount = actualPriceNum > sellingPriceNum;
   const discountPercentage = hasDiscount
     ? Math.round(((actualPriceNum - sellingPriceNum) / actualPriceNum) * 100)
     : 0;
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    addToCart(product);
+    // You can replace alert with a toast/snackbar if you have one
+    alert('Added to cart!');
+  };
 
   return (
     <Link to={`/product/${product.id}`} className="block">
@@ -44,10 +54,14 @@ const ProductCard = ({ product }) => {
 
           {/* Prices */}
          <div className="mt-2 mb-4 flex flex-col">
-      <span className="text-lg font-bold text-gray-900">
-        ₹{sellingPriceNum.toFixed(2)}
-      </span>
-      {hasDiscount && (
+      {sellingPriceNum > 0 ? (
+        <span className="text-lg font-bold text-gray-900">
+          ₹{sellingPriceNum.toFixed(2)}
+        </span>
+      ) : (
+        <span className="text-lg font-bold text-gray-500">N/A</span>
+      )}
+      {hasDiscount && actualPriceNum > 0 && (
         <span className="text-sm text-gray-400">
           MRP: <span className="line-through">₹{actualPriceNum.toFixed(2)}</span>
         </span>
@@ -56,7 +70,10 @@ const ProductCard = ({ product }) => {
 
 
           {/* Add to Cart Button */}
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded transition duration-200">
+          <button
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded transition duration-200"
+            onClick={handleAddToCart}
+          >
             Add to Cart
           </button>
         </div>
