@@ -88,7 +88,7 @@ export default function CheckoutPage() {
 
   const getGSTAmount = () => {
     return cartItems.reduce((total, item) => {
-      const gstRate = GST_RATES[item.category] || 0.12; // Default to 12% if category not found
+      const gstRate = GST_RATES[item.category] || 0.12; 
       return total + (item.price * item.quantity * gstRate);
     }, 0);
   };
@@ -100,8 +100,9 @@ export default function CheckoutPage() {
 
   const getFinalTotal = () => {
     const subtotal = getDiscountedSubtotal();
-    const gst = getGSTAmount();
-    return subtotal + gst + SHIPPING_COST;
+    // const gst = getGSTAmount();
+    // return subtotal + gst + SHIPPING_COST;
+    return subtotal + SHIPPING_COST;
   };
 
   const isFormValid =
@@ -243,7 +244,7 @@ export default function CheckoutPage() {
             <input
               name="state"
               type="text"
-              placeholder="State/Province"
+              placeholder="State"
               value={form.state}
               onChange={handleInput}
               className="w-full border p-2 rounded"
@@ -271,39 +272,39 @@ export default function CheckoutPage() {
                 <li key={item.id} className="flex justify-between py-2">
                   <div>
                     <span>{item.name} × {item.quantity}</span>
-                    <p className="text-sm text-gray-500">{item.category} (GST: {GST_RATES[item.category] * 100}%)</p>
+                    {/* <p className="text-sm text-gray-500">{item.category} (GST: {GST_RATES[item.category] * 100}%)</p> */}
                   </div>
                   <span>₹{item.price * item.quantity}</span>
                 </li>
               ))}
             </ul>
 
-            {appliedPromo.discount > 0 && (
+            {/* {appliedPromo.discount > 0 && (
               <div className="text-green-600 mt-2">
                 <p>Promo <strong>{appliedPromo.code}</strong> applied ({appliedPromo.description})</p>
               </div>
-            )}
+            )} */}
 
             <div className="space-y-2 mt-4 pt-4 border-t">
               <div className="flex justify-between text-gray-600">
-                <span>Subtotal</span>
+                <span>Subtotal:</span>
                 <span>₹{getSubtotal().toFixed(2)}</span>
               </div>
               
-              {appliedPromo.discount > 0 && (
+              {/* {appliedPromo.discount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Discount</span>
                   <span>-₹{(getSubtotal() * appliedPromo.discount).toFixed(2)}</span>
                 </div>
-              )}
+              )} */}
 
-              <div className="flex justify-between text-gray-600">
+              {/* <div className="flex justify-between text-gray-600">
                 <span>GST</span>
                 <span>₹{getGSTAmount().toFixed(2)}</span>
-              </div>
+              </div> */}
 
               <div className="flex justify-between text-gray-600">
-                <span>Shipping</span>
+                <span>Shipping Cost:</span>
                 <span>₹{SHIPPING_COST.toFixed(2)}</span>
               </div>
 

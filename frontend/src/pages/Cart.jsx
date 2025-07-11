@@ -184,7 +184,17 @@ export default function Cart() {
           />
           <div className="flex-grow text-center sm:text-left">
             <h3 className="font-semibold text-sm sm:text-base">{item.name}</h3>
-            <p className="text-gray-600 text-sm">₹{item.price}</p>
+            <div className="text-gray-600 text-sm flex items-center gap-2">
+              <span className="font-bold text-gray-900">₹{Number(item.price).toFixed(2)}</span>
+              {item.actual_price && Number(item.actual_price) > Number(item.price) && (
+                <>
+                  <span className="line-through text-gray-400 text-xs">₹{Number(item.actual_price).toFixed(2)}</span>
+                  <span className="text-green-600 text-xs font-semibold ml-1">
+                    -{Math.round(((Number(item.actual_price) - Number(item.price)) / Number(item.actual_price)) * 100)}%
+                  </span>
+                </>
+              )}
+            </div>
             <div className="flex justify-center sm:justify-start items-center gap-2 mt-2">
               <button
                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -217,17 +227,35 @@ export default function Cart() {
         <h2 className="text-lg sm:text-xl font-semibold">Order Summary</h2>
 
         <div className="space-y-2 text-sm sm:text-base">
+          {/* Show total actual price (MRP) if any item has a discount */}
+          {cartItems.some(item => item.actual_price && Number(item.actual_price) > Number(item.price)) && (
+            <div className="flex justify-between">
+              <span>Total MRP</span>
+              <span className="line-through text-gray-400">₹{cartItems.reduce((sum, item) => sum + (Number(item.actual_price) * item.quantity || 0), 0).toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span>Subtotal ({getTotalItems()} items)</span>
             <span>₹{getSubtotal()}</span>
           </div>
-
-          {/* {appliedPromo && (
+          {/* Show total discount if any */}
+          {cartItems.some(item => item.actual_price && Number(item.actual_price) > Number(item.price)) && (
             <div className="flex justify-between text-green-600">
-              <span>Discount ({appliedPromo.code})</span>
-              <span>-₹{Math.round(getDiscount())}</span>
+              <span>Total Discount</span>
+              <span>
+                -₹{(
+                  cartItems.reduce((sum, item) => sum + ((Number(item.actual_price) - Number(item.price)) * item.quantity || 0), 0)
+                ).toFixed(2)}
+                {(() => {
+                  const totalActual = cartItems.reduce((sum, item) => sum + (Number(item.actual_price) * item.quantity || 0), 0);
+                  const totalDiscount = cartItems.reduce((sum, item) => sum + ((Number(item.actual_price) - Number(item.price)) * item.quantity || 0), 0);
+                  return totalActual > 0 && totalDiscount > 0
+                    ? ` (-${Math.round((totalDiscount / totalActual) * 100)}%)`
+                    : '';
+                })()}
+              </span>
             </div>
-          )} */}
+          )}
 
           <div className="border-t pt-2">
             <div className="flex justify-between font-semibold">
