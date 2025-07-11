@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import toast, { Toaster } from "react-hot-toast";
+
 
 const ProductCard = ({ product }) => {
   const { images, name, actual_price, selling_price } = product;
@@ -23,12 +25,19 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = (e) => {
     e.preventDefault();
-    addToCart(product);
-    // You can replace alert with a toast/snackbar if you have one
-    alert('Added to cart!');
+    // Add price, image, and actual_price fields for cart compatibility
+    addToCart({
+      ...product,
+      price: sellingPriceNum,
+      image: image,
+      actual_price: actualPriceNum,
+    });
+    toast.success("Added to cart!");
   };
 
   return (
+    <>
+          <Toaster position="top-right" />
     <Link to={`/product/${product.id}`} className="block">
       <div className="relative bg-white rounded-lg shadow-md overflow-hidden max-w-xs w-full sm:w-72 md:w-80 lg:w-96 group transition-transform duration-300 hover:scale-[1.02]">
         {/* Discount Badge */}
@@ -71,7 +80,7 @@ const ProductCard = ({ product }) => {
 
           {/* Add to Cart Button */}
           <button
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded transition duration-200"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded transition duration-200 cursor-pointer"
             onClick={handleAddToCart}
           >
             Add to Cart
@@ -79,6 +88,7 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
     </Link>
+    </>
   );
 };
 

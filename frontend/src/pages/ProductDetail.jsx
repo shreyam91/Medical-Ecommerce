@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -101,8 +103,17 @@ export default function ProductDetails() {
     setPrescriptionFile(file);
   };
 
+  // Remove prescription file
+  const handleRemovePrescription = () => {
+    setPrescriptionFile(null);
+    setPrescriptionError("");
+  };
+
+  const { addToCart } = useCart();
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      <Toaster position="top-right" />
       <div className="flex flex-col md:flex-row gap-6">
         {/* Thumbnails */}
         <div className="flex flex-row md:flex-col gap-4">
@@ -195,10 +206,29 @@ export default function ProductDetails() {
                 type="file"
                 accept="image/*,application/pdf"
                 onChange={handlePrescriptionChange}
-                className="block mb-2"
+                className="block mb-2 p-1"
               />
               {prescriptionFile && (
-                <div className="text-green-700 text-sm mb-1">Selected: {prescriptionFile.name}</div>
+                <div className="mb-2 flex items-center gap-3">
+                  {/* Preview if image */}
+                  {prescriptionFile.type.startsWith('image/') && (
+                    <img
+                      src={URL.createObjectURL(prescriptionFile)}
+                      alt="Prescription Preview"
+                      className="w-20 h-20 object-contain border rounded shadow"
+                    />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-green-700 text-sm">{prescriptionFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={handleRemovePrescription}
+                      className="text-red-600 text-xs underline mt-1 self-start hover:text-red-800"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
               )}
               {prescriptionError && (
                 <div className="text-red-600 text-sm mb-1">{prescriptionError}</div>
@@ -243,14 +273,34 @@ export default function ProductDetails() {
 
           {/* Add to Cart Button */}
           <button
-            className="bg-green-600 text-white w-full mt-4 py-2 rounded disabled:opacity-60"
-            disabled={product.prescription_required && !prescriptionFile}
+            className="bg-green-600 text-white w-full mt-4 py-2 rounded disabled:opacity-60 cursor-pointer"
+            disabled={
+              (product.prescription_required && !prescriptionFile) ||
+              (sizes.length > 0 && !selectedSize)
+            }
             onClick={() => {
               if (product.prescription_required && !prescriptionFile) {
                 setPrescriptionError("Please upload a prescription to add this product to cart.");
                 return;
               }
-              // Add to cart logic here
+              if (sizes.length > 0 && !selectedSize) {
+                toast.error("Please select a size before adding to cart.");
+                return;
+              }
+              // Compose cart item
+              const image = Array.isArray(product.images) && product.images.length > 0
+                ? product.images[0]
+                : "https://via.placeholder.com/300x200?text=No+Image";
+              addToCart({
+                id: product.id,
+                name: product.name,
+                price: sellingPrice,
+                actual_price: actualPrice,
+                image,
+                size: selectedSize,
+                quantity,
+              });
+              toast.success("Added to cart!");
             }}
           >
             Add to Cart
