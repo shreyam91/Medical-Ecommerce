@@ -8,6 +8,23 @@ import {
   deleteDoctor,
 } from "../lib/doctorApi";
 
+const defaultSchedule = {
+  morningStart: "",
+  morningEnd: "",
+  eveningStart: "",
+  eveningEnd: "",
+};
+
+const allDays = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
 function DoctorForm() {
   const [formData, setFormData] = useState({
     name: "",
@@ -18,9 +35,11 @@ function DoctorForm() {
     city: "",
     state: "",
     pincode: "",
-    startTime: "",
-    endTime: "",
+    rating: "",
+    daysAvailable: [],
+    schedules: Object.fromEntries(allDays.map((day) => [day, { ...defaultSchedule }])),
   });
+
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [doctorList, setDoctorList] = useState([]);
@@ -38,11 +57,22 @@ function DoctorForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Preview image but do NOT upload here
+  const handleScheduleChange = (day, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      schedules: {
+        ...prev.schedules,
+        [day]: {
+          ...prev.schedules[day],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setImagePreview(URL.createObjectURL(file));
     setImageFile(file);
   };
@@ -57,8 +87,9 @@ function DoctorForm() {
       city,
       state,
       pincode,
-      startTime,
-      endTime,
+      rating,
+      daysAvailable,
+      schedules,
     } = formData;
 
     if (
@@ -70,8 +101,7 @@ function DoctorForm() {
       !city ||
       !state ||
       !pincode ||
-      !startTime ||
-      !endTime
+      !rating
     ) {
       toast.error("Please fill in all required fields.");
       return false;
@@ -87,9 +117,37 @@ function DoctorForm() {
       return false;
     }
 
-    if (startTime >= endTime) {
-      toast.error("Start time must be earlier than end time.");
+    if (
+      rating !== "" &&
+      (isNaN(rating) || parseFloat(rating) < 0 || parseFloat(rating) > 5)
+    ) {
+      toast.error("Rating must be a number between 0 and 5.");
       return false;
+    }
+
+    if (!daysAvailable.length) {
+      toast.error("Select at least one available day.");
+      return false;
+    }
+
+    for (const day of daysAvailable) {
+      const sched = schedules[day];
+      if (
+        sched.morningStart &&
+        sched.morningEnd &&
+        sched.morningStart >= sched.morningEnd
+      ) {
+        toast.error(`${day}: Morning start must be before end.`);
+        return false;
+      }
+      if (
+        sched.eveningStart &&
+        sched.eveningEnd &&
+        sched.eveningStart >= sched.eveningEnd
+      ) {
+        toast.error(`${day}: Evening start must be before end.`);
+        return false;
+      }
     }
 
     return true;
@@ -104,7 +162,7 @@ function DoctorForm() {
         maxWidthOrHeight: 1024,
         useWebWorker: true,
       });
-    } catch (err) {
+    } catch {
       toast.error("Image compression failed. Uploading original.");
     }
 
@@ -133,9 +191,15 @@ function DoctorForm() {
     if (!validateForm()) return;
 
     setLoading(true);
-
     try {
-      // Prepare doctor data without image_url
+      const schedules = formData.daysAvailable.map((day) => ({
+        day_of_week: day,
+        morning_start_time: formData.schedules[day].morningStart,
+        morning_end_time: formData.schedules[day].morningEnd,
+        evening_start_time: formData.schedules[day].eveningStart,
+        evening_end_time: formData.schedules[day].eveningEnd,
+      }));
+
       const doctorPayload = {
         name: formData.name,
         phone_number: formData.phone,
@@ -145,41 +209,31 @@ function DoctorForm() {
         city: formData.city,
         state: formData.state,
         pincode: formData.pincode,
-        start_time: formData.startTime,
-        end_time: formData.endTime,
-        image_url: editDoctor ? editDoctor.image_url : "", // fallback if no image update
+        rating: parseFloat(formData.rating) || 0,
+        image_url: editDoctor ? editDoctor.image_url : "",
+        schedules,
       };
 
       let doctorRes;
-
       if (editDoctor) {
-        // Update doctor first without changing image_url
         doctorRes = await updateDoctor(editDoctor.id, doctorPayload);
       } else {
-        // Create new doctor without image_url
         doctorRes = await createDoctor(doctorPayload);
       }
 
-      // If user selected an image, upload it now
-      let imageUrl = editDoctor ? editDoctor.image_url : "";
       if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
-
-        // Update doctor with imageUrl
+        const imageUrl = await uploadImage(imageFile);
         const updatedDoctor = { ...doctorRes, image_url: imageUrl };
         doctorRes = await updateDoctor(doctorRes.id, updatedDoctor);
       }
 
-      // Update doctor list in state
-      setDoctorList((prevList) => {
-        if (editDoctor) {
-          return prevList.map((d) => (d.id === doctorRes.id ? doctorRes : d));
-        } else {
-          return [doctorRes, ...prevList];
-        }
+      setDoctorList((prev) => {
+        return editDoctor
+          ? prev.map((d) => (d.id === doctorRes.id ? doctorRes : d))
+          : [doctorRes, ...prev];
       });
 
-      // Reset form and states
+      // Reset form
       setFormData({
         name: "",
         phone: "",
@@ -189,14 +243,15 @@ function DoctorForm() {
         city: "",
         state: "",
         pincode: "",
-        startTime: "",
-        endTime: "",
+        rating: "",
+        daysAvailable: [],
+        schedules: Object.fromEntries(allDays.map((day) => [day, { ...defaultSchedule }])),
       });
       setImagePreview(null);
       setImageFile(null);
       setEditDoctor(null);
 
-      toast.success(editDoctor ? "Doctor updated successfully!" : "Doctor created successfully!");
+      toast.success(editDoctor ? "Doctor updated!" : "Doctor added!");
     } catch (error) {
       toast.error(error.message || "Failed to save doctor.");
     } finally {
@@ -205,6 +260,19 @@ function DoctorForm() {
   };
 
   const handleEdit = (doctor) => {
+    const scheduleMap = Object.fromEntries(
+      allDays.map((day) => [day, { ...defaultSchedule }])
+    );
+
+    doctor.schedules.forEach((s) => {
+      scheduleMap[s.day_of_week] = {
+        morningStart: s.morning_start_time || "",
+        morningEnd: s.morning_end_time || "",
+        eveningStart: s.evening_start_time || "",
+        eveningEnd: s.evening_end_time || "",
+      };
+    });
+
     setEditDoctor(doctor);
     setFormData({
       name: doctor.name,
@@ -215,20 +283,21 @@ function DoctorForm() {
       city: doctor.city,
       state: doctor.state,
       pincode: doctor.pincode,
-      startTime: doctor.start_time,
-      endTime: doctor.end_time,
+      rating: doctor.rating?.toString() || "",
+      daysAvailable: doctor.schedules.map((s) => s.day_of_week),
+      schedules: scheduleMap,
     });
     setImagePreview(doctor.image_url || null);
-    setImageFile(null); // Clear file because we only preview URL now
+    setImageFile(null);
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteDoctor(id);
-      setDoctorList((prevList) => prevList.filter((d) => d.id !== id));
+      setDoctorList((prev) => prev.filter((d) => d.id !== id));
       toast.success("Doctor removed.");
     } catch {
-      toast.error("Failed to remove doctor.");
+      toast.error("Failed to delete doctor.");
     }
   };
 
@@ -237,7 +306,7 @@ function DoctorForm() {
       <Toaster position="top-right" />
       <div className="max-w-xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Doctor Form</h2>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block mb-1 font-medium">Upload Image</label>
             <input
@@ -263,6 +332,7 @@ function DoctorForm() {
               value={formData.name}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
+              disabled={loading}
             />
           </div>
 
@@ -274,6 +344,7 @@ function DoctorForm() {
               value={formData.phone}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
+              disabled={loading}
             />
           </div>
 
@@ -285,6 +356,7 @@ function DoctorForm() {
               value={formData.degree}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
+              disabled={loading}
             />
           </div>
 
@@ -296,6 +368,7 @@ function DoctorForm() {
               value={formData.specialization}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
+              disabled={loading}
             />
           </div>
 
@@ -307,128 +380,166 @@ function DoctorForm() {
               value={formData.address}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
+              disabled={loading}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block mb-1 font-medium">City*</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">State*</label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">Pincode*</label>
-              <input
-                type="text"
-                name="pincode"
-                value={formData.pincode}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-              />
-            </div>
+          <div>
+            <label className="block mb-1 font-medium">City*</label>
+            <input
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              disabled={loading}
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium">Start Time*</label>
-              <input
-                type="time"
-                name="startTime"
-                value={formData.startTime}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">End Time*</label>
-              <input
-                type="time"
-                name="endTime"
-                value={formData.endTime}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-              />
-            </div>
+          <div>
+            <label className="block mb-1 font-medium">State*</label>
+            <input
+              type="text"
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Pincode*</label>
+            <input
+              type="text"
+              name="pincode"
+              value={formData.pincode}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Rating (0-5)</label>
+            <input
+              type="number"
+              name="rating"
+              min="0"
+              max="5"
+              step="0.1"
+              value={formData.rating}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Days Available & Timings*</label>
+            {allDays.map((day) => {
+              const selected = formData.daysAvailable.includes(day);
+              return (
+                <div key={day} className="border p-2 rounded mb-2">
+                  <label className="flex items-center space-x-2 mb-1">
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => {
+                        setFormData((prev) => {
+                          const updated = selected
+                            ? prev.daysAvailable.filter((d) => d !== day)
+                            : [...prev.daysAvailable, day];
+                          return { ...prev, daysAvailable: updated };
+                        });
+                      }}
+                    />
+                    <span className="font-semibold">{day}</span>
+                  </label>
+                  {selected && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="time"
+                        value={formData.schedules[day].morningStart}
+                        onChange={(e) => handleScheduleChange(day, "morningStart", e.target.value)}
+                        className="border rounded px-2 py-1"
+                        placeholder="Morning Start"
+                      />
+                      <input
+                        type="time"
+                        value={formData.schedules[day].morningEnd}
+                        onChange={(e) => handleScheduleChange(day, "morningEnd", e.target.value)}
+                        className="border rounded px-2 py-1"
+                        placeholder="Morning End"
+                      />
+                      <input
+                        type="time"
+                        value={formData.schedules[day].eveningStart}
+                        onChange={(e) => handleScheduleChange(day, "eveningStart", e.target.value)}
+                        className="border rounded px-2 py-1"
+                        placeholder="Evening Start"
+                      />
+                      <input
+                        type="time"
+                        value={formData.schedules[day].eveningEnd}
+                        onChange={(e) => handleScheduleChange(day, "eveningEnd", e.target.value)}
+                        className="border rounded px-2 py-1"
+                        placeholder="Evening End"
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
           >
-            {loading ? (editDoctor ? "Updating..." : "Creating...") : (editDoctor ? "Update Doctor" : "Add Doctor")}
+            {loading ? "Saving..." : editDoctor ? "Update Doctor" : "Add Doctor"}
           </button>
-          {editDoctor && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditDoctor(null);
-                setFormData({
-                  name: "",
-                  phone: "",
-                  degree: "",
-                  specialization: "",
-                  address: "",
-                  city: "",
-                  state: "",
-                  pincode: "",
-                  startTime: "",
-                  endTime: "",
-                });
-                setImagePreview(null);
-                setImageFile(null);
-              }}
-              className="ml-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-          )}
         </form>
 
-        {/* Doctor List */}
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-2">Doctor List</h3>
+        <h2 className="text-xl font-bold mt-12 mb-4">Doctors List</h2>
+        {doctorList.length === 0 ? (
+          <p>No doctors available.</p>
+        ) : (
           <ul>
             {doctorList.map((doctor) => (
-              <li key={doctor.id} className="border p-4 rounded mb-2 flex items-center justify-between">
+              <li
+                key={doctor.id}
+                className="border p-4 mb-4 rounded flex justify-between items-center"
+              >
                 <div className="flex items-center space-x-4">
                   {doctor.image_url && (
                     <img
                       src={doctor.image_url}
                       alt={doctor.name}
-                      className="w-12 h-12 object-cover rounded-full"
+                      className="w-16 h-16 object-cover rounded"
                     />
                   )}
                   <div>
-                    <p className="font-semibold">{doctor.name}</p>
-                    <p className="text-sm text-gray-600">{doctor.specialization}</p>
+                    <h3 className="font-semibold">{doctor.name}</h3>
+                    <p>Phone: {doctor.phone_number}</p>
+                    <p>Specialization: {doctor.specialization}</p>
+                    <p>Rating: {doctor.rating ?? "N/A"}</p>
+                    <p>Status: {doctor.is_available ? "Available" : "Not Available"}</p>
                   </div>
                 </div>
                 <div className="space-x-2">
                   <button
                     onClick={() => handleEdit(doctor)}
-                    className="bg-yellow-400 px-3 py-1 rounded hover:bg-yellow-500"
+                    className="text-blue-600 hover:underline"
+                    disabled={loading}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(doctor.id)}
-                    className="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600"
+                    className="text-red-600 hover:underline"
+                    disabled={loading}
                   >
                     Delete
                   </button>
@@ -436,7 +547,7 @@ function DoctorForm() {
               </li>
             ))}
           </ul>
-        </div>
+        )}
       </div>
     </div>
   );
