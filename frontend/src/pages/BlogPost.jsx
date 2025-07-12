@@ -68,7 +68,7 @@ const BlogPost = () => {
       {/* Meta Row */}
       <div className="flex flex-wrap justify-between items-center text-sm text-gray-500 border-b pb-4 mb-6 gap-2">
         <div className="flex gap-4 items-center flex-wrap">
-          <span>{new Date(blog.created_at).toDateString()}</span>
+          {/* <span>{new Date(blog.created_at).toDateString()}</span> */}
           {blog.tags && blog.tags.length > 0 && (
             <span className="flex gap-2 flex-wrap">
               {blog.tags.map((tag, idx) => (

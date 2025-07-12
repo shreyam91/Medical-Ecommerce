@@ -117,7 +117,7 @@ const Blog = () => {
                   </h2>
                 </Link>
                 <div className="flex items-center justify-between text-sm text-gray-500 mt-1">
-                  <span>{new Date(created_at).toDateString()}</span>
+                  {/* <span>{new Date(created_at).toDateString()}</span> */}
                   <span className="flex gap-2 flex-wrap">
                     {tags && tags.length > 0
                       ? tags.map((tag, idx) => (
