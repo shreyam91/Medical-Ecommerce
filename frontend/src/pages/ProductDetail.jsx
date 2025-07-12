@@ -114,27 +114,50 @@ export default function ProductDetails() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <Toaster position="top-right" />
+      {/* Responsive Images Section */}
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Thumbnails */}
-        <div className="flex flex-row md:flex-col gap-4">
-          {(Array.isArray(product.images) ? product.images : []).map((img, i) => (
+        {/* Mobile view: main image + thumbnails below */}
+        <div className="block md:hidden">
+          <div className="flex items-center justify-center mb-4">
             <img
-              key={i}
-              src={img}
-              onClick={() => setSelectedImage(img)}
-              className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
-              alt="product-thumbnail"
+              src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"}
+              alt="Main product"
+              className="w-full h-[300px] object-contain rounded"
             />
-          ))}
+          </div>
+          <div className="flex overflow-x-auto gap-4">
+            {(Array.isArray(product.images) ? product.images : []).map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                onClick={() => setSelectedImage(img)}
+                className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
+                alt="product-thumbnail"
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Main Image */}
-        <div className="flex-1 flex items-center justify-center">
-          <img
-            src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"}
-            alt="Main product"
-            className="w-full h-[400px] object-contain rounded"
-          />
+        {/* Desktop view: thumbnails left, main image right */}
+        <div className="hidden md:flex flex-row gap-6 w-full">
+          <div className="flex flex-col gap-4">
+            {(Array.isArray(product.images) ? product.images : []).map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                onClick={() => setSelectedImage(img)}
+                className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
+                alt="product-thumbnail"
+              />
+            ))}
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <img
+              src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"}
+              alt="Main product"
+              className="w-full h-[400px] object-contain rounded"
+            />
+          </div>
         </div>
 
         {/* Product Info */}
@@ -238,12 +261,12 @@ export default function ProductDetails() {
 
           {/* Pricing */}
           <div className="space-y-1 mt-2">
-            <div className="flex items-center gap-3 text-lg font-semibold text-red-600">
+            <div className="flex items-center gap-3 text-lg font-semibold text-green-600">
               ₹{sellingPrice.toFixed(2)}
               {hasDiscount && (
                 <>
                   <span className="line-through text-gray-500 text-sm">MRP: ₹{actualPrice.toFixed(2)}</span>
-                  <span className="text-green-600 text-sm">Save: {discount}%</span>
+                  <span className="text-red-700 text-sm">Save: {discount}%</span>
                 </>
               )}
             </div>
@@ -252,7 +275,7 @@ export default function ProductDetails() {
             <div className="text-xs text-gray-600 mt-4 space-y-1">
               <p>* This product cannot be returned & refunded or exchanged unless you received a wrong or damaged product.</p>
               <p>* Country of Origin: India</p>
-              <p>* Delivery charges will be applied at checkout.</p>
+              {/* <p>* Delivery charges will be applied at checkout.</p> */}
             </div>
           </div>
 
@@ -276,31 +299,23 @@ export default function ProductDetails() {
             className="bg-green-600 text-white w-full mt-4 py-2 rounded disabled:opacity-60 cursor-pointer"
             disabled={
               (product.prescription_required && !prescriptionFile) ||
-              (sizes.length > 0 && !selectedSize)
+              !selectedSize
             }
             onClick={() => {
               if (product.prescription_required && !prescriptionFile) {
-                setPrescriptionError("Please upload a prescription to add this product to cart.");
+                setPrescriptionError("Please upload prescription to proceed.");
                 return;
               }
-              if (sizes.length > 0 && !selectedSize) {
-                toast.error("Please select a size before adding to cart.");
-                return;
-              }
-              // Compose cart item
-              const image = Array.isArray(product.images) && product.images.length > 0
-                ? product.images[0]
-                : "https://via.placeholder.com/300x200?text=No+Image";
               addToCart({
                 id: product.id,
                 name: product.name,
-                price: sellingPrice,
-                actual_price: actualPrice,
-                image,
                 size: selectedSize,
+                price: sellingPrice,
                 quantity,
+                prescriptionFile,
+                image: selectedImage,
               });
-              toast.success("Added to cart!");
+              toast.success("Product added to cart");
             }}
           >
             Add to Cart
@@ -308,34 +323,67 @@ export default function ProductDetails() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mt-5 border-t pt-2">
-        <div className="flex gap-2 border-b pb-1">
+      {/* Tabs Section */}
+      <div className="mt-5 border-t pt-4">
+        {/* Desktop Tabs */}
+        <div className="hidden md:flex gap-4 border-b pb-2">
           {[
             { key: "description", label: "description" },
             { key: "key_benefits", label: "key benefits" },
             { key: "how_to_use", label: "how to use" },
             { key: "safety_precaution", label: "safety or precautions" },
             { key: "key_ingredients", label: "ingredients" },
-            { key: "other_info", label: "other information" }
+            { key: "other_info", label: "other information" },
           ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`capitalize px-4 pb-2 ${activeTab === tab.key ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"}`}
+              className={`capitalize px-4 pb-2 font-medium ${
+                activeTab === tab.key
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-600 hover:text-blue-600"
+              }`}
             >
               {tab.label}
             </button>
           ))}
         </div>
 
-        <div className="mt-2 text-gray-800">
+        {/* Desktop Tab Content */}
+        <div className="hidden md:block mt-3 text-gray-800 leading-relaxed">
           {activeTab === "description" && <p>{product.description || "No description available."}</p>}
           {activeTab === "key_benefits" && <p>{product.key_benefits || "No key benefits provided."}</p>}
           {activeTab === "how_to_use" && <p>{product.how_to_use || "Usage information not available."}</p>}
           {activeTab === "safety_precaution" && <p>{product.safety_precaution || "No safety or precaution info."}</p>}
           {activeTab === "key_ingredients" && <p>{product.key_ingredients || "No ingredients found."}</p>}
           {activeTab === "other_info" && <p>{product.other_info || "No additional information."}</p>}
+        </div>
+
+        {/* Mobile Accordion Tabs */}
+        <div className="md:hidden mt-4 space-y-2">
+          {[
+            { key: "description", label: "Description", content: product.description },
+            { key: "key_benefits", label: "Key Benefits", content: product.key_benefits },
+            { key: "how_to_use", label: "How to Use", content: product.how_to_use },
+            { key: "safety_precaution", label: "Safety or Precautions", content: product.safety_precaution },
+            { key: "key_ingredients", label: "Ingredients", content: product.key_ingredients },
+            { key: "other_info", label: "Other Information", content: product.other_info },
+          ].map((tab) => (
+            <div key={tab.key} className="border rounded">
+              <button
+                onClick={() => setActiveTab(activeTab === tab.key ? "" : tab.key)}
+                className="w-full flex justify-between items-center px-4 py-2 font-medium bg-gray-100"
+              >
+                <span>{tab.label}</span>
+                <span>{activeTab === tab.key ? "▲" : "▼"}</span>
+              </button>
+              {activeTab === tab.key && (
+                <div className="px-4 py-3 text-sm text-gray-700 whitespace-pre-line">
+                  {tab.content || "Not available."}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -22,6 +22,7 @@ import Contact from '../pages/Contact';
 import UserProfile from '../pages/UserProfile';
 import DoctorPage from '../pages/DoctorPage';
 import BrandProducts from '../pages/BrandProducts';
+import NotFound from '../pages/NotFound';
 
 const AppRoutes = () => {
   return (
@@ -50,6 +51,7 @@ const AppRoutes = () => {
       <Route path="/profile" element={<UserProfile/>} />
       <Route path="/doctors" element={<DoctorPage/>} />
       <Route path="/brand/:brandId" element={<BrandProducts />} />
+      <Route path="*" element={<NotFound />} />
 
 
       {/* Protected Routes (require login) */}

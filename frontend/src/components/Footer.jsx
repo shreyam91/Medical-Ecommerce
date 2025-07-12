@@ -63,7 +63,7 @@ const Footer = () => {
         </div>
 
         {/* Newsletter */}
-        <div>
+        {/* <div>
           <h3 className="text-base sm:text-lg font-semibold mb-3 text-black">Stay Updated</h3>
           <p className="text-sm text-gray-500 mb-2">
             Subscribe to our newsletter for the latest offers.
@@ -81,22 +81,21 @@ const Footer = () => {
               Subscribe
             </button>
           </form>
-        </div>
+        </div> */}
       </div>
 
       {/* Bottom note */}
-      <div className="text-center text-gray-700 text-xs pt-8 px-4 leading-relaxed">
-        &copy; {new Date().getFullYear()} HerbalMG. All rights reserved. <br />
+      <div className="text-center text-gray-700 text-xs pt-8 px-4  font-bold leading-relaxed">
+        &copy; {new Date().getFullYear()} HerbalMG. All rights reserved. 
         Dispensed in accordance with the Drugs and Cosmetics Act, 1940 & Rules, 1945.
-        <br />
-        Crafted with 🧡 by{" "}
+        Crafted by{" "}
         <a
           href="https://portfolio-shreyam91s-projects.vercel.app/"
           className="text-green-500 hover:underline"
           target="_blank"
           rel="noopener noreferrer"
         >
-          @Shreyam
+          @Developer
         </a>
       </div>
     </footer>
