@@ -1,54 +1,55 @@
 import React, { useState, useEffect } from "react";
 import { getInventories, createInventory, updateInventory, deleteInventory } from '../lib/inventoryApi';
 import { getBrands } from '../lib/brandApi';
+import { getProducts } from '../lib/productApi';
 
-const initialData = [
-  {
-    id: 1,
-    name: "Paracetamol 500mg",
-    quantity: 120,
-    status: "In Stock",
-    category: "Pain Relief",
-    brand: "Kapiva",
-    expiry: "2026-05-01",
-  },
-  {
-    id: 2,
-    name: "Amoxicillin 250mg",
-    quantity: 0,
-    status: "Out of Stock",
-    category: "Antibiotics",
-    brand: "Patanjali",
-    expiry: "2025-01-01",
-  },
-  {
-    id: 3,
-    name: "Ibuprofen 400mg",
-    quantity: 40,
-    status: "Low Stock",
-    category: "Pain Relief",
-    brand: "Kapiva",
-    expiry: "2025-08-10",
-  },
-  {
-    id: 4,
-    name: "Cetirizine",
-    quantity: 200,
-    status: "In Stock",
-    category: "Allergy",
-    brand: "Kapiva",
-    expiry: "2026-03-01",
-  },
-  {
-    id: 5,
-    name: "Cough Syrup",
-    quantity: 10,
-    status: "Low Stock",
-    category: "Cold",
-    brand: "Patanjali",
-    expiry: "2025-07-01",
-  },
-];
+// const initialData = [
+//   {
+//     id: 1,
+//     name: "Paracetamol 500mg",
+//     quantity: 120,
+//     status: "In Stock",
+//     category: "Pain Relief",
+//     brand: "Kapiva",
+//     expiry: "2026-05-01",
+//   },
+//   {
+//     id: 2,
+//     name: "Amoxicillin 250mg",
+//     quantity: 0,
+//     status: "Out of Stock",
+//     category: "Antibiotics",
+//     brand: "Patanjali",
+//     expiry: "2025-01-01",
+//   },
+//   {
+//     id: 3,
+//     name: "Ibuprofen 400mg",
+//     quantity: 40,
+//     status: "Low Stock",
+//     category: "Pain Relief",
+//     brand: "Kapiva",
+//     expiry: "2025-08-10",
+//   },
+//   {
+//     id: 4,
+//     name: "Cetirizine",
+//     quantity: 200,
+//     status: "In Stock",
+//     category: "Allergy",
+//     brand: "Kapiva",
+//     expiry: "2026-03-01",
+//   },
+//   {
+//     id: 5,
+//     name: "Cough Syrup",
+//     quantity: 10,
+//     status: "Low Stock",
+//     category: "Cold",
+//     brand: "Patanjali",
+//     expiry: "2025-07-01",
+//   },
+// ];
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -77,6 +78,7 @@ const InventoryPage = () => {
 
   const [inventory, setInventory] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [brandFilter, setBrandFilter] = useState("All");
   const [editingItem, setEditingItem] = useState(null);
@@ -85,10 +87,33 @@ const InventoryPage = () => {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
   useEffect(() => {
-    getInventories()
-      .then(setInventory)
-      .catch(() => setInventory([]));
-    getBrands().then(setBrands).catch(() => setBrands([]));
+    // Fetch inventory, products, and brands in parallel
+    Promise.all([
+      getInventories().catch(() => []),
+      getProducts().catch(() => []),
+      getBrands().catch(() => []),
+    ]).then(([inventoryData, productsData, brandsData]) => {
+      console.log('Fetched inventory:', inventoryData);
+      console.log('Fetched products:', productsData);
+      console.log('Fetched brands:', brandsData);
+      setProducts(productsData);
+      setBrands(brandsData);
+      // Merge inventory with product and brand info
+      const brandMap = Object.fromEntries(brandsData.map(b => [b.id, b.name]));
+      const productMap = Object.fromEntries(productsData.map(p => [p.id, p]));
+      const merged = inventoryData.map(item => {
+        const product = productMap[item.product_id] || {};
+        return {
+          ...item,
+          name: product.name || 'Unknown',
+          category: product.category || 'Unknown',
+          brand: brandMap[product.brand_id] || 'Unknown',
+          total_quantity: item.quantity ?? product.total_quantity ?? 0,
+        };
+      });
+      console.log('Merged inventory:', merged);
+      setInventory(merged);
+    });
   }, []);
 
   const handleDelete = async (id) => {

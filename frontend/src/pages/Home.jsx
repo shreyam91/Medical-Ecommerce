@@ -6,9 +6,11 @@ import Category from '../components/Category'
 import Banner from '../components/Banner'
 import DealsOfTheDay from '../components/DealsOfTheDay'
 import Trending from '../components/Trending'
+import Type from '../components/Type'
 const Home = () => {
   return (
     <>
+    <Type/>
     <Banner/>
     {/* <Breadcrumb/> */}
     <Category/>

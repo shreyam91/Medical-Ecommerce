@@ -80,7 +80,7 @@ export default function Banner() {
   if (!banners.length) return <div className="h-[300px] md:h-[500px] flex items-center justify-center text-gray-400">No banners available</div>;
 
   return (
-    <div className="relative w-full overflow-hidden" ref={bannerRef}>
+    <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden" ref={bannerRef}>
       {/* Slides */}
       <div
         className="flex transition-transform duration-700 ease-in-out"
@@ -91,7 +91,7 @@ export default function Banner() {
             key={banner.id}
             src={banner.image_url}
             alt={banner.alt || "Banner"}
-            className="w-full flex-shrink-0 object-cover h-[300px] md:h-[500px]"
+            className="w-screen min-w-0 flex-shrink-0 object-cover h-[300px] md:h-[500px]"
           />
         ))}
       </div>
@@ -101,7 +101,7 @@ export default function Banner() {
         <button
           onClick={prevSlide}
           aria-label="Previous Slide"
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 text-white p-3 rounded-full hover:bg-opacity-70"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-opacity-40 text-white p-3 rounded-full hover:bg-opacity-70 text-4xl"
         >
           &#8592;
         </button>
@@ -112,7 +112,7 @@ export default function Banner() {
         <button
           onClick={nextSlide}
           aria-label="Next Slide"
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 text-white p-3 rounded-full hover:bg-opacity-70"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2  bg-opacity-40 text-white p-3 rounded-full hover:bg-opacity-70 text-4xl"
         >
           &#8594;
         </button>
