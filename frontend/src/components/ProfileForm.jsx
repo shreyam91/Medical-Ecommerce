@@ -4,11 +4,12 @@ import toast from "react-hot-toast";
 
 export default function ProfileForm() {
   const [user, setUser] = useState({
-    firstName: "John",
-    lastName: "Doe",
+    fullName: "John Doe",
     email: "john@example.com",
     contact: "9876543210",
-    address: "123 Main St",
+    house_number: "123 Main St",
+    area: "Kurla",
+    landmark: "Apollo Hospital",
     state: "Maharashtra",
     city: "Mumbai",
     pinCode: "400001",
@@ -17,14 +18,9 @@ export default function ProfileForm() {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const validateEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const validatePhone = (phone) =>
-    /^[6-9]\d{9}$/.test(phone);
-
-  const validatePinCode = (pin) =>
-    /^\d{6}$/.test(pin);
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePhone = (phone) => /^[6-9]\d{9}$/.test(phone);
+  const validatePinCode = (pin) => /^\d{6}$/.test(pin);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,12 +32,8 @@ export default function ProfileForm() {
   const handleSave = (e) => {
     e.preventDefault();
 
-    if (!user.firstName || user.firstName.trim().length < 2) {
-      toast.error("First name must be at least 2 characters.");
-      return;
-    }
-    if (!user.lastName || user.lastName.trim().length < 2) {
-      toast.error("Last name must be at least 2 characters.");
+    if (!user.fullName || user.fullName.trim().length < 3) {
+      toast.error("Full name must be at least 3 characters.");
       return;
     }
     if (!user.email || !validateEmail(user.email)) {
@@ -52,8 +44,16 @@ export default function ProfileForm() {
       toast.error("Please enter a valid 10-digit Indian contact number.");
       return;
     }
-    if (!user.address || user.address.trim().length < 5) {
-      toast.error("Address must be at least 5 characters.");
+    if (!user.house_number || user.house_number.trim().length < 5) {
+      toast.error("House number must be at least 5 characters.");
+      return;
+    }
+    if (!user.area || user.area.trim().length < 2) {
+      toast.error("Area must be at least 2 characters.");
+      return;
+    }
+    if (!user.landmark || user.landmark.trim().length < 2) {
+      toast.error("Landmark must be at least 2 characters.");
       return;
     }
     if (!user.state || user.state.trim().length < 2) {
@@ -78,40 +78,21 @@ export default function ProfileForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="min-h-screen  py-10 px-4">
       <div className="max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 bg-white shadow-md rounded-md">
         <h2 className="text-2xl font-semibold mb-6">User Profile</h2>
         <form onSubmit={handleSave} noValidate>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* First Name */}
-            <div>
-              <label htmlFor="firstName" className="block text-gray-700 mb-1 font-medium">
-                First Name
+            {/* Full Name */}
+            <div className="col-span-1 md:col-span-2">
+              <label htmlFor="fullName" className="block text-gray-700 mb-1 font-medium">
+                Full Name
               </label>
               <input
-                id="firstName"
-                name="firstName"
+                id="fullName"
+                name="fullName"
                 type="text"
-                value={user.firstName}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            {/* Last Name */}
-            <div>
-              <label htmlFor="lastName" className="block text-gray-700 mb-1 font-medium">
-                Last Name
-              </label>
-              <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                value={user.lastName}
+                value={user.fullName}
                 onChange={handleChange}
                 readOnly={!isEditing}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
@@ -160,16 +141,54 @@ export default function ProfileForm() {
               />
             </div>
 
-            {/* Address (Full Width) */}
-            <div className="col-span-1 md:col-span-2">
-              <label htmlFor="address" className="block text-gray-700 mb-1 font-medium">
-                Address
+            {/* House Number */}
+            <div>
+              <label htmlFor="house_number" className="block text-gray-700 mb-1 font-medium">
+                House Number
               </label>
-              <textarea
-                id="address"
-                name="address"
+              <input
+                id="house_number"
+                name="house_number"
                 type="text"
-                value={user.address}
+                value={user.house_number}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Area */}
+            <div>
+              <label htmlFor="area" className="block text-gray-700 mb-1 font-medium">
+                Area
+              </label>
+              <input
+                id="area"
+                name="area"
+                type="text"
+                value={user.area}
+                onChange={handleChange}
+                readOnly={!isEditing}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  isEditing ? "border-blue-500 focus:ring-blue-300" : "border-gray-300"
+                }`}
+                required
+              />
+            </div>
+
+            {/* Landmark */}
+            <div>
+              <label htmlFor="landmark" className="block text-gray-700 mb-1 font-medium">
+                Landmark
+              </label>
+              <input
+                id="landmark"
+                name="landmark"
+                type="text"
+                value={user.landmark}
                 onChange={handleChange}
                 readOnly={!isEditing}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
@@ -263,7 +282,7 @@ export default function ProfileForm() {
               <button
                 type="button"
                 onClick={handleEdit}
-                className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+                className="bg-orange-600 text-white px-5 py-2 rounded hover:bg-orange-700"
               >
                 Edit
               </button>

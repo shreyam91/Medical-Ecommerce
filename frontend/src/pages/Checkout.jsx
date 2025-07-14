@@ -20,8 +20,10 @@ export default function CheckoutPage() {
     name: '',
     email: '',
     phone: '',
-    address: '',
-    zip: '',
+    house_number: '',
+    area:'',
+    landmark:'',
+    pincode: '',
     city: '',
     state: '',
     country: '',
@@ -109,8 +111,10 @@ export default function CheckoutPage() {
     form.name &&
     form.email &&
     form.phone &&
-    form.address &&
-    form.zip &&
+    form.house_number &&
+    form.area &&
+    form.landmark &&
+    form.pincode &&
     form.city &&
     form.state &&
     form.country &&
@@ -202,22 +206,45 @@ export default function CheckoutPage() {
             className="w-full border p-2 rounded"
             required
           />
-          <textarea
-            name="address"
-            placeholder="Full Address"
+          <input
+            name="house_number"
+            placeholder="House no. / Apartment"
             value={form.address}
             onChange={handleInput}
             className="w-full border p-2 rounded"
-            rows={3}
             required
           />
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <input
-                name="zip"
+                name="area"
+                type="text"
+                placeholder="Area / locality"
+                value={form.area}
+                onChange={handlePincodeChange}
+                className="w-full border p-2 rounded"
+                required
+              />
+            </div>
+            <input
+              name="landmark"
+              type="text"
+              placeholder="Landmark"
+              value={form.landmark}
+              onChange={handleInput}
+              className="w-full border p-2 rounded"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <input
+                name="pincode"
                 type="text"
                 placeholder="PIN Code"
-                value={form.zip}
+                value={form.pincode}
                 onChange={handlePincodeChange}
                 className="w-full border p-2 rounded"
                 required

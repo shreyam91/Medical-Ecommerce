@@ -329,11 +329,11 @@ export default function ProductDetails() {
         <div className="hidden md:flex gap-4 border-b pb-2">
           {[
             { key: "description", label: "description" },
-            { key: "key_benefits", label: "key benefits" },
-            { key: "how_to_use", label: "how to use" },
-            { key: "safety_precaution", label: "safety or precautions" },
-            { key: "key_ingredients", label: "ingredients" },
-            { key: "other_info", label: "other information" },
+            // { key: "key_benefits", label: "key benefits" },
+            { key: "key_ingredients", label: "key ingredients" },
+            { key: "how_to_use", label: "Dosage" },
+            { key: "safety_precaution", label: "dietary & lifestyle advice" },
+            // { key: "other_info", label: "other information" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -360,31 +360,21 @@ export default function ProductDetails() {
         </div>
 
         {/* Mobile Accordion Tabs */}
-        <div className="md:hidden mt-4 space-y-2">
-          {[
-            { key: "description", label: "Description", content: product.description },
-            { key: "key_benefits", label: "Key Benefits", content: product.key_benefits },
-            { key: "how_to_use", label: "How to Use", content: product.how_to_use },
-            { key: "safety_precaution", label: "Safety or Precautions", content: product.safety_precaution },
-            { key: "key_ingredients", label: "Ingredients", content: product.key_ingredients },
-            { key: "other_info", label: "Other Information", content: product.other_info },
-          ].map((tab) => (
-            <div key={tab.key} className="border rounded">
-              <button
-                onClick={() => setActiveTab(activeTab === tab.key ? "" : tab.key)}
-                className="w-full flex justify-between items-center px-4 py-2 font-medium bg-gray-100"
-              >
-                <span>{tab.label}</span>
-                <span>{activeTab === tab.key ? "▲" : "▼"}</span>
-              </button>
-              {activeTab === tab.key && (
-                <div className="px-4 py-3 text-sm text-gray-700 whitespace-pre-line">
-                  {tab.content || "Not available."}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <div className="block md:hidden mt-4 space-y-6 text-gray-800 leading-relaxed whitespace-pre-line">
+    {[
+      { label: "Description", content: product.description },
+      { label: "Key Ingredients", content: product.key_ingredients },
+      // { label: "Key Benefits", content: product.key_benefits },
+      { label: "Dosage", content: product.how_to_use },
+      { label: "Dietary & Lifestyle Advice", content: product.safety_precaution },
+      // { label: "Other Information", content: product.other_info },
+    ].map((section) => (
+      <div key={section.label} className="border-b pb-4">
+        <h2 className="text-lg font-semibold mb-1">{section.label}</h2>
+        <p>{section.content || "Not available."}</p>
+      </div>
+    ))}
+  </div>
       </div>
     </div>
   );
