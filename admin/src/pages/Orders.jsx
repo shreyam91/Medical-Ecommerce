@@ -79,7 +79,6 @@ export default function OrdersPro() {
   const [visibleColumns, setVisibleColumns] = useState({
     srNo: true,
     orderId: true,
-    invoiceId: true,
     customerName: true,
     date: true,
     price: true,
@@ -314,7 +313,7 @@ export default function OrdersPro() {
               </th>
               {visibleColumns.srNo && <th className="border px-2 py-2">Sr No</th>}
               {visibleColumns.orderId && <th className="border px-2 py-2">Order ID</th>}
-              {visibleColumns.invoiceId && <th className="border px-2 py-2">Invoice ID</th>}
+              {/* {visibleColumns.invoiceId && <th className="border px-2 py-2">Invoice ID</th>} */}
               {visibleColumns.customerName && <th className="border px-2 py-2">Customer</th>}
               {visibleColumns.date && (
   <th
@@ -350,7 +349,7 @@ export default function OrdersPro() {
                 </td>
                 {visibleColumns.srNo && <td className="border px-2 py-1 text-center">{(currentPage - 1) * entriesPerPage + idx + 1}</td>}
                 {visibleColumns.orderId && <td className="border px-2 py-1">{order.id}</td>}
-                {visibleColumns.invoiceId && <td className="border px-2 py-1">{order.invoiceId}</td>}
+                {/* {visibleColumns.invoiceId && <td className="border px-2 py-1">{order.invoiceId}</td>} */}
                 {visibleColumns.customerName && <td className="border px-2 py-1">{order.customerName}</td>}
                 {visibleColumns.date && (
   <td className="border px-3 py-2 whitespace-nowrap min-w-[120px]">
@@ -454,7 +453,7 @@ export default function OrdersPro() {
 
       <div className="space-y-2 text-sm">
         <p><strong>Order ID:</strong> {showDetailsOrder.id}</p>
-        <p><strong>Invoice ID:</strong> {showDetailsOrder.invoiceId}</p>
+        {/* <p><strong>Invoice ID:</strong> {showDetailsOrder.invoiceId}</p> */}
         <p><strong>Customer:</strong> {showDetailsOrder.customerName}</p>
         <p><strong>Date:</strong> {showDetailsOrder.date}</p>
         <p><strong>Price:</strong> ₹{showDetailsOrder.price.toFixed(2)}</p>

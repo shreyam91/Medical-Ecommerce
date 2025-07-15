@@ -142,10 +142,10 @@ export default function DeliveryStatusTable() {
           <thead className="bg-blue-100 sticky top-0">
             <tr className="text-left text-gray-700">
               <th className="border p-2">Sr. No.</th>
-              <th className="border p-2">Invoice</th>
-              <th className="border p-2">Customer ID</th>
-              <th className="border p-2">Customer Name</th>
+              {/* <th className="border p-2">Invoice</th> */}
+              {/* <th className="border p-2">Customer ID</th> */}
               <th className="border p-2">Order ID</th>
+              <th className="border p-2">Customer Name</th>
               <th className="border p-2">Location</th>
               <th className="border p-2">Order Date</th>
               <th className="border p-2">Delivery Date</th>
@@ -160,10 +160,10 @@ export default function DeliveryStatusTable() {
                 className={`hover:bg-gray-100 ${isDelayed(item.status, item.orderDate) ? 'border-l-4 border-red-500' : ''}`}
               >
                 <td className="border p-2">{(currentPage - 1) * rowsPerPage + index + 1}</td>
-                <td className="border p-2">{item.invoice}</td>
-                <td className="border p-2">{item.customer.id}</td>
-                <td className="border p-2">{item.customer.name}</td>
+                {/* <td className="border p-2">{item.invoice}</td> */}
+                {/* <td className="border p-2">{item.customer.id}</td> */}
                 <td className="border p-2">{item.orderId}</td>
+                <td className="border p-2">{item.customer.name}</td>
                 <td className="border p-2">{item.city}, {item.pincode}</td>
                 <td className="border p-2">{new Date(item.orderDate).toLocaleDateString()}</td>
                 <td className="border p-2">
