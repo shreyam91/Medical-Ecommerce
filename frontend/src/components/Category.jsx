@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-// Static data can be memoized to avoid recreation on each render
 const data = [
   { id: 1, title: "Diabetes", imageUrl: "/assets/diabetes.svg", link: "/categories/diabetes" },
   { id: 2, title: "Skin Care", imageUrl: "/assets/skin.svg", link: "/categories/derma-care" },
@@ -83,7 +82,7 @@ export default function Category() {
                   className="w-16 h-16 object-cover mr-4"
                   loading="lazy"
                 />
-                <p className="text-md font-medium text-gray-800">{title}</p>
+                <p className="text-md font-semibold text-gray-800">{title}</p>
               </a>
             ))}
       </div>

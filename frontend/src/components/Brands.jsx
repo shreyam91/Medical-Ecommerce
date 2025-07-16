@@ -85,8 +85,8 @@ const Brands = () => {
 
   return (
     <div className="relative px-4 md:px-10 py-8 max-w-full md:max-w-7xl mx-auto">
-<h1 className="text-xl text-center sm:text-2xl md:text-3xl font-bold mb-6 text-green-700">
-        Shop by Brands
+<h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-green-700">
+        Our Top Brands
       </h1>
 
       {/* Scrollable area */}

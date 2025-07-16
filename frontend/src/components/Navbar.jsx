@@ -234,13 +234,13 @@ export default function NavbarMain() {
             </div>
 
             <div className="flex items-center gap-4">
-              <Link to="/doctors">
+              {/* <Link to="/doctors">
                 <NavbarButton variant="secondary">
                   <div className="flex items-center gap-2 text-l">
                     Near By Doctor <FaUserDoctor />
                   </div>
                 </NavbarButton>
-              </Link>
+              </Link> */}
 
               <Link to="/cart">
                 <NavbarButton variant="secondary">

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../components/Breadcrumb'
 import Brands from '../components/Brands'
 import Category from '../components/Category'
-import Banner from '../components/Banner'
+import Banner, { BannerAd, BannerEndOne, BannerEndTwo } from '../components/Banner'
 import DealsOfTheDay from '../components/DealsOfTheDay'
 import Trending from '../components/Trending'
 import Type from '../components/Type'
@@ -36,18 +36,19 @@ const Home = () => {
   return (
     <>
       <Type/>
-      <Banner/>
+      {/* <Banner/> */}
       {/* <Breadcrumb/> */}
       <Category/>
       <Brands />
+      <BannerAd/>
       {/* <div className="min-h-screen flex items-center justify-center">
       </div> */}
-      <Trending/>
-      <DealsOfTheDay />
+      {/* <Trending/> */}
+      {/* <DealsOfTheDay /> */}
       {/* Blog Section */}
       <div className="my-10">
   <div className="flex justify-between items-center mb-6">
-    <h2 className="text-2xl font-bold text-green-700">Read our Blogs</h2>
+    <h2 className="text-2xl font-bold text-green-700">Discover Ayurveda</h2>
     <Link to="/blog" className='text-md font-semibold text-blue-600 cursor-pointer hover:underline'> See all</Link>
     {/* <h2 className="text-md font-semibold text-blue-600 cursor-pointer hover:underline">See all</h2> */}
   </div>
@@ -74,6 +75,9 @@ const Home = () => {
     <div className="text-gray-400">No blogs available.</div>
   )}
 </div>
+
+<BannerEndOne/>
+<BannerEndTwo/>
 
     </>
   );
