@@ -8,45 +8,31 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-white text-black pt-6 pb-6 mt-16 border-t-2 border-green-700 rounded-t-2xl">
-      {/* Top Section */}
-      <div className="container mx-auto px-4 mb-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-green-600">HerbalMG</h2>
-          <p className="text-sm sm:text-base text-gray-900 md:max-w-2xl">
+    <footer className="bg-white text-black pt-6 pb-6 mt-16 border-t-2 border-green-700 ">
+      <div className="container mx-auto px-4 space-y-6">
+
+        {/* Row 1: Logo and Description side by side */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h2 className="text-2xl font-bold text-green-600">HerbalMG</h2>
+          <p className="text-sm sm:text-base text-gray-900 max-w-3xl">
             HerbalMG is your trusted online medical store, offering genuine medicines,
             health supplements, and wellness products — delivered with care and convenience.
           </p>
         </div>
-      </div>
 
-      {/* Links Section */}
-      <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {/* Company */}
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold mb-3 text-green-800">Company</h3>
-          <ul className="space-y-2 text-sm sm:text-base text-gray-700">
-            <li><Link to="/about-us" className="hover:text-orange-600">About</Link></li>
-            <li><Link to="/contact" className="hover:text-orange-600">Contact</Link></li>
-            <li><Link to="/blog" className="hover:text-orange-600">Blogs</Link></li>
-          </ul>
-        </div>
+        {/* Row 2: Links and Social Media */}
+        <div className="flex flex-wrap justify-between items-center gap-4  pt-4">
+          {/* Navigation Links */}
+          <div className="flex flex-wrap gap-4 text-sm sm:text-base font-medium">
+            <Link to="/about-us" className="hover:text-orange-600 hover:underline">About</Link>
+            <Link to="/terms-and-conditions" className="hover:text-orange-600 hover:underline">Terms & Conditions</Link>
+            <Link to="/privacy-policy" className="hover:text-orange-600 hover:underline">Privacy Policy</Link>
+            <Link to="/return-and-refund-policy" className="hover:text-orange-600 hover:underline">Return & Refund Policy</Link>
+            <Link to="/faq" className="hover:text-orange-600 hover:underline">FAQs</Link>
+          </div>
 
-        {/* Policies */}
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold mb-3 text-green-800">Policies</h3>
-          <ul className="space-y-2 text-sm sm:text-base text-gray-700">
-            <li><Link to="/terms-and-conditions" className="hover:text-orange-600">Terms & Conditions</Link></li>
-            <li><Link to="/privacy-policy" className="hover:text-orange-600">Privacy Policy</Link></li>
-            <li><Link to="/return-and-refund-policy" className="hover:text-orange-600">Return & Refund Policy</Link></li>
-            <li><Link to="/faq" className="hover:text-orange-600">FAQs</Link></li>
-          </ul>
-        </div>
-
-        {/* Social Media */}
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold mb-3 text-black">Follow Us</h3>
-          <div className="flex space-x-4 text-xl sm:text-2xl">
+          {/* Social Media Icons */}
+          <div className="flex space-x-4 text-xl sm:text-2xl mt-2 sm:mt-0">
             <a href="#" target="_blank" aria-label="Facebook">
               <FaFacebookF className="text-[#1877F2] hover:text-black transition" />
             </a>
@@ -62,41 +48,20 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Newsletter */}
-        {/* <div>
-          <h3 className="text-base sm:text-lg font-semibold mb-3 text-black">Stay Updated</h3>
-          <p className="text-sm text-gray-500 mb-2">
-            Subscribe to our newsletter for the latest offers.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="px-3 py-2 w-full text-black rounded-md sm:rounded-l-md focus:outline-none border border-gray-300"
-            />
-            <button
-              type="submit"
-              className="bg-green-500 px-4 py-2 rounded-md sm:rounded-r-md text-white hover:bg-orange-600"
-            >
-              Subscribe
-            </button>
-          </form>
-        </div> */}
-      </div>
-
-      {/* Bottom note */}
-      <div className="text-center text-gray-700 text-xs pt-8 px-4  font-bold leading-relaxed">
-        &copy; {new Date().getFullYear()} HerbalMG. All rights reserved. 
-        Dispensed in accordance with the Drugs and Cosmetics Act, 1940 & Rules, 1945.
-        Crafted by{" "}
-        <a
-          href="https://portfolio-shreyam91s-projects.vercel.app/"
-          className="text-green-500 hover:underline"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          @Developer
-        </a>
+        {/* Row 3: Bottom Note */}
+        <div className="text-center text-gray-700 text-xs font-bold leading-relaxed pt-4 ">
+          &copy; {new Date().getFullYear()} HerbalMG. All rights reserved. 
+          Dispensed in accordance with the Drugs and Cosmetics Act, 1940 & Rules, 1945.
+          Crafted by{" "}
+          <a
+            href="https://portfolio-shreyam91s-projects.vercel.app/"
+            className="text-green-500 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            @Developer
+          </a>
+        </div>
       </div>
     </footer>
   );
