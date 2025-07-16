@@ -85,9 +85,9 @@ const Trending = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold"> Trending Now </h2>
+    <div className="mt-2">
+      <div className="text- mb-6">
+        <h2 className="text-3xl font-bold"> Explore our Top Products </h2>
         {/* <p className="text-gray-600 mt-1">
           ⏳ Time left today: <span className="font-mono text-red-600">{countdown}</span>
         </p> */}

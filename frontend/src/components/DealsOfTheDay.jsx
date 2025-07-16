@@ -85,12 +85,12 @@ const DealsOfTheDay = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold">🔥 Deals of the Day</h2>
-        <p className="text-gray-600 mt-1">
+    <div className="mt-5">
+      <div className=" mb-6">
+        <h2 className="text-3xl font-bold">🔥 Maximum Discount</h2>
+        {/* <p className="text-gray-600 mt-1">
           ⏳ Time left today: <span className="font-mono text-red-600">{countdown}</span>
-        </p>
+        </p> */}
       </div>
 
       <div className="relative">

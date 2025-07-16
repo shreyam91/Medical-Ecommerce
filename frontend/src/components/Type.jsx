@@ -19,7 +19,7 @@ export default function Type() {
   }, []);
 
   return (
-    <div className="px-4 md:px-8 lg:px-10 py-4 max-w-7xl mx-auto">
+    <div className=" py-4 max-w-7xl mx-auto">
       {/* Mobile: Horizontal Scroll */}
 <div className="sm:hidden overflow-x-auto scrollbar-hide">
         <div className="flex space-x-4 snap-x snap-mandatory scroll-pl-4">

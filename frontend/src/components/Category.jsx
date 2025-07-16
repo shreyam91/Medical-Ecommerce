@@ -22,7 +22,7 @@ export default function Category() {
   }, []);
 
   return (
-    <div className="px-4 md:px-10 py-8 max-w-7xl mx-auto">
+    <div className=" py-8 max-w-7xl mx-auto">
       <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-green-700">
         Shop by Health Concern
       </h1>

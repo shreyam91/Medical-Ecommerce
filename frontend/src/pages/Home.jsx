@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../components/Breadcrumb'
 import Brands from '../components/Brands'
 import Category from '../components/Category'
-import Banner, { BannerAd, BannerEndOne, BannerEndTwo } from '../components/Banner'
+import Banner, { BannerAd, BannerEndOne, BannerEndThree, BannerEndTwo } from '../components/Banner'
 import DealsOfTheDay from '../components/DealsOfTheDay'
 import Trending from '../components/Trending'
 import Type from '../components/Type'
@@ -36,15 +36,20 @@ const Home = () => {
   return (
     <>
       <Type/>
-      {/* <Banner/> */}
+      <Banner/>
       {/* <Breadcrumb/> */}
       <Category/>
-      <Brands />
       <BannerAd/>
       {/* <div className="min-h-screen flex items-center justify-center">
       </div> */}
-      {/* <Trending/> */}
-      {/* <DealsOfTheDay /> */}
+      <Trending/>
+      <DealsOfTheDay />
+      <BannerEndThree/>
+            <Brands />
+
+                  <DealsOfTheDay />
+
+
       {/* Blog Section */}
       <div className="my-10">
   <div className="flex justify-between items-center mb-6">
