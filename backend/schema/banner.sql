@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS banner (
     image_url TEXT NOT NULL,
     link TEXT,
     status VARCHAR(50) DEFAULT 'active',
+    type VARCHAR(50),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 ); 

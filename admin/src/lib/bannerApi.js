@@ -46,3 +46,12 @@ export async function deleteBanner(id) {
   });
   return handleResponse(res);
 }
+
+export async function getProducts() {
+  const baseApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+  const res = await fetch(`${baseApiUrl}/product`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error(`Failed to fetch products: ${res.statusText}`);
+  return res.json();
+}

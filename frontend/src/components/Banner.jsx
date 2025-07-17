@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // export default function Banner() {
 //   const [banners, setBanners] = useState([]);
@@ -163,120 +163,160 @@ import { Link } from 'react-router-dom';
 // }
 
 
-export function BannerAd() {
-  const backgroundImageUrl = 'https://source.unsplash.com/1600x900/?nature,water';
+export function Banners({ banners }) {
+  const [bannerData, setBannerData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Move here to fix hook order
+
+  useEffect(() => {
+    if (banners && banners.length > 0) {
+      setBannerData(banners[0]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    fetch('http://localhost:3001/api/banner')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch banners');
+        return res.json();
+      })
+      .then(data => {
+        // Default: show the first ad banner
+        const ad = data.find(b => b.type === 'ad');
+        setBannerData(ad || null);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [banners]);
+
+  if (loading) {
+    return <div className="h-[150px] flex items-center justify-center bg-gray-100">Loading banner...</div>;
+  }
+  if (error) {
+    return <div className="h-[150px] flex items-center justify-center text-red-500">{error}</div>;
+  }
+  if (!bannerData) {
+    return <div className="h-[150px] flex items-center justify-center text-gray-400">No banner available</div>;
+  }
+
+  // Debug: log the image URL
+  console.log('Banner image URL:', bannerData.image_url);
+
+  // If product_id exists, link to product page; else, use link or just show image
+  const handleClick = () => {
+    if (bannerData.product_id) {
+      navigate(`/product/${bannerData.product_id}`);
+    } else if (bannerData.link) {
+      window.open(bannerData.link, '_blank', 'noopener');
+    }
+  };
 
   return (
-    <Link
-      to="/explore"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Explore the beauty of nature with us"
+    <div
+      className="relative w-full h-[20vh] md:h-[30vh] mt-2 rounded-2xl overflow-hidden cursor-pointer"
+      role="banner"
+      onClick={handleClick}
     >
-      <div
-        className="relative w-full h-[20vh] md:h-[30vh] bg-cover bg-center mt-2 rounded-2xl overflow-hidden"
-        style={{ backgroundImage: `url(${backgroundImageUrl})` }}
-        role="banner"
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            here we are showing our Ad
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl">
-            Explore the beauty of nature with us
-          </p>
-        </div>
-      </div>
-    </Link>
+      <img
+        src={bannerData.image_url}
+        alt={bannerData.title || 'Banner'}
+        className="w-full h-full object-cover"
+        style={{ minHeight: '100%', minWidth: '100%' }}
+      />
+    </div>
   );
 }
 
-export function BannerEndThree() {
-  const backgroundImageUrl = 'https://source.unsplash.com/1600x900/?nature,water';
+// export function BannerEndThree() {
+//   const backgroundImageUrl = 'https://source.unsplash.com/1600x900/?nature,water';
 
-  return (
-    <Link
-      to="/explore"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Explore the beauty of nature with us"
-    >
-      <div
-        className="relative w-full h-[20vh] md:h-[30vh] bg-cover bg-center mt-4 rounded-2xl overflow-hidden"
-        style={{ backgroundImage: `url(${backgroundImageUrl})` }}
-        role="banner"
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            Contact with us using Whatsapp
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl">
-            Explore the beauty of nature with us
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-
-export function BannerEndOne() {
-  const backgroundImageUrl = 'https://source.unsplash.com/1600x900/?nature,water';
-
-  return (
-    <Link
-      to="/explore"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Explore the beauty of nature with us"
-    >
-      <div
-        className="relative w-full h-[20vh] md:h-[30vh] bg-cover bg-center mt-2 rounded-2xl overflow-hidden"
-        style={{ backgroundImage: `url(${backgroundImageUrl})` }}
-        role="banner"
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            Here we show some pharmacy details
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl">
-            Explore the beauty of nature with us
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
+//   return (
+//     <Link
+//       to="/explore"
+//       target="_blank"
+//       rel="noopener noreferrer"
+//       aria-label="Explore the beauty of nature with us"
+//     >
+//       <div
+//         className="relative w-full h-[20vh] md:h-[30vh] bg-cover bg-center mt-4 rounded-2xl overflow-hidden"
+//         style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+//         role="banner"
+//       >
+//         <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
+//           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+//             Contact with us using Whatsapp
+//           </h1>
+//           <p className="text-base sm:text-lg md:text-xl lg:text-2xl">
+//             Explore the beauty of nature with us
+//           </p>
+//         </div>
+//       </div>
+//     </Link>
+//   );
+// }
 
 
+// export function BannerEndOne() {
+//   const backgroundImageUrl = 'https://source.unsplash.com/1600x900/?nature,water';
 
-export function BannerEndTwo() {
-  const backgroundImageUrl = 'https://source.unsplash.com/1600x900/?nature,water';
+//   return (
+//     <Link
+//       to="/explore"
+//       target="_blank"
+//       rel="noopener noreferrer"
+//       aria-label="Explore the beauty of nature with us"
+//     >
+//       <div
+//         className="relative w-full h-[20vh] md:h-[30vh] bg-cover bg-center mt-2 rounded-2xl overflow-hidden"
+//         style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+//         role="banner"
+//       >
+//         <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
+//           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+//             Here we show some pharmacy details
+//           </h1>
+//           <p className="text-base sm:text-lg md:text-xl lg:text-2xl">
+//             Explore the beauty of nature with us
+//           </p>
+//         </div>
+//       </div>
+//     </Link>
+//   );
+// }
 
-  return (
-    <Link
-      to="/explore"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Explore the beauty of nature with us"
-    >
-      <div
-        className="relative w-full h-[20vh] md:h-[30vh] bg-cover bg-center mt-2 rounded-2xl overflow-hidden"
-        style={{ backgroundImage: `url(${backgroundImageUrl})` }}
-        role="banner"
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            Contact with us using Whatsapp
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl">
-            Explore the beauty of nature with us
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
+
+
+// export function BannerEndTwo() {
+//   const backgroundImageUrl = 'https://source.unsplash.com/1600x900/?nature,water';
+
+//   return (
+//     <Link
+//       to="/explore"
+//       target="_blank"
+//       rel="noopener noreferrer"
+//       aria-label="Explore the beauty of nature with us"
+//     >
+//       <div
+//         className="relative w-full h-[20vh] md:h-[30vh] bg-cover bg-center mt-2 rounded-2xl overflow-hidden"
+//         style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+//         role="banner"
+//       >
+//         <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
+//           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+//             Contact with us using Whatsapp
+//           </h1>
+//           <p className="text-base sm:text-lg md:text-xl lg:text-2xl">
+//             Explore the beauty of nature with us
+//           </p>
+//         </div>
+//       </div>
+//     </Link>
+//   );
+// }
 
 
 
@@ -289,7 +329,8 @@ const images = [
   '/images/img6.jpg',
 ];
 
-export default function Banner () {
+export default function BannerTop ({ banners }) {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(getItemsPerPage());
 
@@ -298,7 +339,17 @@ export default function Banner () {
   const mouseStartX = useRef(null);
   const isDragging = useRef(false);
 
-  const totalPages = Math.ceil(images.length / itemsPerPage);
+  // Only use dummy images if banners prop is not provided at all
+  let bannersToShow;
+  if (banners === undefined) {
+    bannersToShow = images.map(src => ({ image_url: src }));
+  } else if (Array.isArray(banners) && banners.length > 0) {
+    bannersToShow = banners;
+  } else {
+    bannersToShow = [];
+  }
+
+  const totalPages = bannersToShow.length > 0 ? Math.ceil(bannersToShow.length / itemsPerPage) : 1;
 
   function getItemsPerPage() {
     return window.innerWidth < 640 ? 1 : 3;
@@ -368,7 +419,15 @@ export default function Banner () {
   };
 
   const startIndex = currentPage * itemsPerPage;
-  const visibleImages = images.slice(startIndex, startIndex + itemsPerPage);
+  const visibleBanners = bannersToShow.slice(startIndex, startIndex + itemsPerPage);
+
+  if (Array.isArray(banners) && banners.length === 0) {
+    return (
+      <div className="w-full max-w-6xl mx-auto py-6 text-center text-gray-400">
+        No top banners available.
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-6xl mx-auto py-6">
@@ -383,15 +442,27 @@ export default function Banner () {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       >
-        {visibleImages.map((src, idx) => (
-          <img
-            key={idx}
-            src={src}
-            alt={`Slide ${startIndex + idx + 1}`}
-            className="w-full h-44 sm:h-60 md:h-50 object-cover rounded shadow pointer-events-none"
-            draggable={false}
-          />
-        ))}
+        {visibleBanners.map((banner, idx) => {
+          console.log('Banner:', banner); // Debug: log each banner
+          const handleClick = () => {
+            console.log('Clicked banner:', banner); // Debug: log click event
+            if (banner.product_id) {
+              navigate(`/product/${banner.product_id}`);
+            } else if (banner.link) {
+              window.open(banner.link, '_blank', 'noopener');
+            }
+          };
+          return (
+            <img
+              key={banner.id || idx}
+              src={banner.image_url}
+              alt={banner.title || `Slide ${startIndex + idx + 1}`}
+              className="w-full h-44 sm:h-60 md:h-50 object-cover rounded shadow cursor-pointer"
+              draggable={false}
+              onClick={handleClick}
+            />
+          );
+        })}
       </div>
 
       {/* Pagination Dots */}

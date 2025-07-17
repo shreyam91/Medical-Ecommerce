@@ -40,24 +40,27 @@ router.get('/:id', async (req, res) => {
 
 // Create banner
 router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { image_url } = req.body;
+  const { image_url, type, title, link, product_id } = req.body;
+  const status = req.body.status || 'active';
   try {
     const [banner] = await sql`
-      INSERT INTO banner (image_url)
-      VALUES (${image_url})
+      INSERT INTO banner (image_url, type, title, link, status, product_id)
+      VALUES (${image_url}, ${type}, ${title}, ${link}, ${status}, ${product_id})
       RETURNING *`;
     res.status(201).json(banner);
   } catch (err) {
+    console.error('Error creating banner:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
 // Update banner
 router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { image_url } = req.body;
+  const { image_url, type, title, link, product_id } = req.body;
+  const status = req.body.status || 'active';
   try {
     const [banner] = await sql`
-      UPDATE banner SET image_url=${image_url}
+      UPDATE banner SET image_url=${image_url}, type=${type}, title=${title}, link=${link}, status=${status}, product_id=${product_id}, updated_at=NOW()
       WHERE id=${req.params.id} RETURNING *`;
     if (!banner) return res.status(404).json({ error: 'Not found' });
     res.json(banner);
