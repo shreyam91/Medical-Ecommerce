@@ -87,7 +87,7 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem("cart");
-    return savedCart ? JSON.parse(savedCart) : initialCartItems;
+    return savedCart ? JSON.parse(savedCart) : [];
   });
 
   const [appliedPromo, setAppliedPromo] = useState(() => {
