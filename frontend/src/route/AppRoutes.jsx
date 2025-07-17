@@ -23,6 +23,9 @@ import UserProfile from '../pages/UserProfile';
 import DoctorPage from '../pages/DoctorPage';
 import BrandProducts from '../pages/BrandProducts';
 import NotFound from '../pages/NotFound';
+import HomeoPathic from '../pages/HomeoPathic';
+import Unani from '../pages/Unani';
+import Ayurvedic from '../pages/Ayurvedic';
 
 const AppRoutes = () => {
   return (
@@ -47,6 +50,10 @@ const AppRoutes = () => {
       <Route path="/blog/:id" element={<BlogPost />} />
       <Route path="/offers" element={<Offers />} />
       <Route path="/contact" element={<Contact/>} />
+      <Route path="/homeopathic" element={<HomeoPathic/>} />
+
+      <Route path="/unani" element={<Unani/>} />
+      <Route path='/ayurvedic' element={<Ayurvedic/>} />
 
       <Route path="/profile" element={<UserProfile/>} />
       <Route path="/doctors" element={<DoctorPage/>} />
