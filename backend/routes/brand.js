@@ -34,11 +34,11 @@ router.get('/:id', async (req, res) => {
 
 // Create brand
 router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { name, logo_url } = req.body;
+  const { name, logo_url, banner_url } = req.body;
   try {
     const [brand] = await sql`
-      INSERT INTO brand (name, logo_url)
-      VALUES (${name}, ${logo_url})
+      INSERT INTO brand (name, logo_url, banner_url)
+      VALUES (${name}, ${logo_url}, ${banner_url})
       RETURNING *`;
     res.status(201).json(brand);
   } catch (err) {
@@ -49,10 +49,10 @@ router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
 
 // Update brand
 router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { name, logo_url } = req.body;
+  const { name, logo_url, banner_url } = req.body;
   try {
     const [brand] = await sql`
-      UPDATE brand SET name=${name}, logo_url=${logo_url}
+      UPDATE brand SET name=${name}, logo_url=${logo_url}, banner_url=${banner_url}
       WHERE id=${req.params.id} RETURNING *`;
     if (!brand) return res.status(404).json({ error: 'Not found' });
     res.json(brand);
@@ -74,11 +74,11 @@ function extractCloudinaryPublicId(url) {
 router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
   console.log('DELETE /api/brand/:id called with id:', req.params.id);
   try {
-    // Get brand first to access logo_url
+    // Get brand first to access logo_url and banner_url
     const [brand] = await sql`SELECT * FROM brand WHERE id=${req.params.id}`;
     console.log('Fetched brand:', brand);
     if (!brand) return res.status(404).json({ error: 'Not found' });
-    // Delete image from Cloudinary if present
+    // Delete logo image from Cloudinary if present
     if (brand.logo_url) {
       const publicId = extractCloudinaryPublicId(brand.logo_url);
       console.log('Deleting brand image:', brand.logo_url, 'Extracted publicId:', publicId);
@@ -87,6 +87,18 @@ router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
           await cloudinary.uploader.destroy(publicId);
         } catch (cloudErr) {
           console.error('Cloudinary delete error:', cloudErr);
+        }
+      }
+    }
+    // Delete banner image from Cloudinary if present
+    if (brand.banner_url) {
+      const publicId = extractCloudinaryPublicId(brand.banner_url);
+      console.log('Deleting brand banner:', brand.banner_url, 'Extracted publicId:', publicId);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (cloudErr) {
+          console.error('Cloudinary delete error (banner):', cloudErr);
         }
       }
     }

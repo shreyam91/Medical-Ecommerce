@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard'; // Ensure the path is correct
 // import BrandFilterAside from '../components/BrandFilterAside'; // Uncomment if needed
 
+import {Banners} from '../components/Banner'
+
 const BrandProducts = () => {
   const { brandId } = useParams();
   const [products, setProducts] = useState([]);
@@ -68,6 +70,17 @@ const BrandProducts = () => {
     );
 
   return (
+    <>
+    {/* Show brand banner if available */}
+    {brand && brand.banner_url && (
+      <div className="w-full max-w-6xl mx-auto mt-4">
+        <img
+          src={brand.banner_url}
+          alt={brand.name + ' banner'}
+          className="w-full h-48 object-cover rounded shadow mb-6"
+        />
+      </div>
+    )}
     <div className="max-w-6xl mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left: Filter Sidebar - Uncomment if needed */}
@@ -126,6 +139,7 @@ const BrandProducts = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

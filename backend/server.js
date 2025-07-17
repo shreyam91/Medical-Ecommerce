@@ -95,7 +95,7 @@ app.get('/api/postgres-test', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`Backend server running at http://localhost:${PORT}`);
 });
 
