@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
+import Style from "../components/Style";
+import Trending from "../components/Trending";
+
+import badges from '../assets/badges.svg';
+import brands from '../assets/brands.svg';
+import order from '../assets/order.svg';
+import products from '../assets/products.svg';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -18,6 +25,15 @@ export default function ProductDetails() {
   const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [prescriptionError, setPrescriptionError] = useState("");
 
+
+
+  const icons = [
+  { img: badges, title: 'Genuine & Authentic Product' },
+  { img: brands, title: '100+ Top Brands' },
+  { img: order, title: 'Fast & Safe Delivery' },
+  { img: products, title: '1000+ Products' },
+];
+
   useEffect(() => {
     setLoading(true);
     fetch(`http://localhost:3001/api/product/${id}`)
@@ -27,12 +43,16 @@ export default function ProductDetails() {
       })
       .then((data) => {
         setProduct(data);
-        setSelectedImage((Array.isArray(data.images) ? data.images[0] : null) || null);
+        setSelectedImage(
+          (Array.isArray(data.images) ? data.images[0] : null) || null
+        );
         // Fetch prices
         fetch(`http://localhost:3001/api/product_price`)
           .then((res) => res.json())
           .then((prices) => {
-            const productPrices = prices.filter(p => String(p.product_id) === String(data.id));
+            const productPrices = prices.filter(
+              (p) => String(p.product_id) === String(data.id)
+            );
             setPriceMap(productPrices);
             if (productPrices.length > 0) {
               setSelectedSize(productPrices[0].size);
@@ -52,18 +72,29 @@ export default function ProductDetails() {
       });
   }, [id]);
 
-  if (loading) return <div className="p-10 text-center">Loading product...</div>;
-  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
-  if (!product) return <div className="p-10 text-center text-gray-400">Product not found.</div>;
+  if (loading)
+    return <div className="p-10 text-center">Loading product...</div>;
+  if (error)
+    return <div className="p-10 text-center text-red-500">{error}</div>;
+  if (!product)
+    return (
+      <div className="p-10 text-center text-gray-400">Product not found.</div>
+    );
 
   // Sizes/units come from priceMap
-  const sizes = priceMap.map(p => p.size).filter(Boolean);
+  const sizes = priceMap.map((p) => p.size).filter(Boolean);
 
-  const selectedPrice = priceMap.find(p => p.size === selectedSize);
-  const actualPrice = Number(selectedPrice?.actual_price || product.actual_price || 0);
-  const sellingPrice = Number(selectedPrice?.selling_price || product.selling_price || 0);
+  const selectedPrice = priceMap.find((p) => p.size === selectedSize);
+  const actualPrice = Number(
+    selectedPrice?.actual_price || product.actual_price || 0
+  );
+  const sellingPrice = Number(
+    selectedPrice?.selling_price || product.selling_price || 0
+  );
   const hasDiscount = actualPrice > sellingPrice;
-  const discount = hasDiscount ? Math.round(((actualPrice - sellingPrice) / actualPrice) * 100) : 0;
+  const discount = hasDiscount
+    ? Math.round(((actualPrice - sellingPrice) / actualPrice) * 100)
+    : 0;
 
   const handleCheckDelivery = () => {
     if (pincode.trim().length >= 5) {
@@ -75,20 +106,34 @@ export default function ProductDetails() {
 
   // Helper for reference books
   const renderReferenceBooks = () => {
-    if (!product.reference_books || product.reference_books.length === 0) return null;
+    if (!product.reference_books || product.reference_books.length === 0)
+      return null;
     return (
       <div className="mt-2 flex items-center text-sm">
-        <span className="font-medium text-gray-700 mr-1">Reference Book{product.reference_books.length > 1 ? 's' : ''}:</span>
+        <span className="font-medium text-gray-700 mr-1">
+          Reference Book{product.reference_books.length > 1 ? "s" : ""}:
+        </span>
         {product.reference_books.map((ref, i) => {
-          const isUrl = typeof ref === 'string' && (ref.startsWith('http://') || ref.startsWith('https://'));
+          const isUrl =
+            typeof ref === "string" &&
+            (ref.startsWith("http://") || ref.startsWith("https://"));
           return (
             <span key={i} className="text-blue-700">
               {isUrl ? (
-                <a href={ref} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-500">{ref}</a>
+                <a
+                  href={ref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-blue-500"
+                >
+                  {ref}
+                </a>
               ) : (
                 ref
               )}
-              {i < product.reference_books.length - 1 && <span className="text-gray-500">, </span>}
+              {i < product.reference_books.length - 1 && (
+                <span className="text-gray-500">, </span>
+              )}
             </span>
           );
         })}
@@ -112,6 +157,7 @@ export default function ProductDetails() {
   const { addToCart } = useCart();
 
   return (
+    <>
     <div className="p-6 max-w-6xl mx-auto">
       <Toaster position="top-right" />
       {/* Responsive Images Section */}
@@ -120,40 +166,58 @@ export default function ProductDetails() {
         <div className="block md:hidden">
           <div className="flex items-center justify-center mb-4">
             <img
-              src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"}
+              src={
+                selectedImage ||
+                "https://via.placeholder.com/300x200?text=No+Image"
+              }
               alt="Main product"
               className="w-full h-[300px] object-contain rounded"
             />
           </div>
           <div className="flex overflow-x-auto gap-4">
-            {(Array.isArray(product.images) ? product.images : []).map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                onClick={() => setSelectedImage(img)}
-                className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
-                alt="product-thumbnail"
-              />
-            ))}
+            {(Array.isArray(product.images) ? product.images : []).map(
+              (img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  onClick={() => setSelectedImage(img)}
+                  className={`w-20 h-20 object-cover cursor-pointer border ${
+                    selectedImage === img
+                      ? "border-blue-500"
+                      : "border-gray-300"
+                  }`}
+                  alt="product-thumbnail"
+                />
+              )
+            )}
           </div>
         </div>
 
         {/* Desktop view: thumbnails left, main image right */}
         <div className="hidden md:flex flex-row gap-6 w-full">
           <div className="flex flex-col gap-4">
-            {(Array.isArray(product.images) ? product.images : []).map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                onClick={() => setSelectedImage(img)}
-                className={`w-20 h-20 object-cover cursor-pointer border ${selectedImage === img ? "border-blue-500" : "border-gray-300"}`}
-                alt="product-thumbnail"
-              />
-            ))}
+            {(Array.isArray(product.images) ? product.images : []).map(
+              (img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  onClick={() => setSelectedImage(img)}
+                  className={`w-20 h-20 object-cover cursor-pointer border ${
+                    selectedImage === img
+                      ? "border-blue-500"
+                      : "border-gray-300"
+                  }`}
+                  alt="product-thumbnail"
+                />
+              )
+            )}
           </div>
           <div className="flex-1 flex items-center justify-center">
             <img
-              src={selectedImage || "https://via.placeholder.com/300x200?text=No+Image"}
+              src={
+                selectedImage ||
+                "https://via.placeholder.com/300x200?text=No+Image"
+              }
               alt="Main product"
               className="w-full h-[400px] object-contain rounded"
             />
@@ -165,20 +229,34 @@ export default function ProductDetails() {
           <h1 className="text-3xl font-semibold">{product.name}</h1>
 
           {/* Key Tags */}
-          {product.key && Array.isArray(product.key) && product.key.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {product.key.map((tag, i) => (
-                <span key={i} className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-300">{tag}</span>
-              ))}
-            </div>
-          )}
-          {product.key && typeof product.key === 'string' && product.key.trim() && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {product.key.split(',').map((tag, i) => (
-                <span key={i} className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-300">{tag.trim()}</span>
-              ))}
-            </div>
-          )}
+          {product.key &&
+            Array.isArray(product.key) &&
+            product.key.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {product.key.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-300"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          {product.key &&
+            typeof product.key === "string" &&
+            product.key.trim() && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {product.key.split(",").map((tag, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-300"
+                  >
+                    {tag.trim()}
+                  </span>
+                ))}
+              </div>
+            )}
 
           {/* Reference Books */}
           {renderReferenceBooks()}
@@ -192,7 +270,11 @@ export default function ProductDetails() {
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`px-4 py-1 border rounded ${selectedSize === size ? "bg-blue-500 text-white" : "border-gray-400"}`}
+                    className={`px-4 py-1 border rounded ${
+                      selectedSize === size
+                        ? "bg-blue-500 text-white"
+                        : "border-gray-400"
+                    }`}
                   >
                     {size}
                   </button>
@@ -206,7 +288,7 @@ export default function ProductDetails() {
             <span className="font-medium">Quantity:</span>
             <button
               className="px-2 py-1 border rounded text-lg"
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               aria-label="Decrease quantity"
             >
               -
@@ -214,7 +296,7 @@ export default function ProductDetails() {
             <span className="w-8 text-center">{quantity}</span>
             <button
               className="px-2 py-1 border rounded text-lg"
-              onClick={() => setQuantity(q => q + 1)}
+              onClick={() => setQuantity((q) => q + 1)}
               aria-label="Increase quantity"
             >
               +
@@ -224,7 +306,9 @@ export default function ProductDetails() {
           {/* Prescription Required */}
           {product.prescription_required && (
             <div className="mt-4">
-              <div className="text-red-600 font-medium mb-2">* Prescription required for this product</div>
+              <div className="text-red-600 font-medium mb-2">
+                * Prescription required for this product
+              </div>
               <input
                 type="file"
                 accept="image/*,application/pdf"
@@ -234,7 +318,7 @@ export default function ProductDetails() {
               {prescriptionFile && (
                 <div className="mb-2 flex items-center gap-3">
                   {/* Preview if image */}
-                  {prescriptionFile.type.startsWith('image/') && (
+                  {prescriptionFile.type.startsWith("image/") && (
                     <img
                       src={URL.createObjectURL(prescriptionFile)}
                       alt="Prescription Preview"
@@ -242,7 +326,9 @@ export default function ProductDetails() {
                     />
                   )}
                   <div className="flex flex-col">
-                    <span className="text-green-700 text-sm">{prescriptionFile.name}</span>
+                    <span className="text-green-700 text-sm">
+                      {prescriptionFile.name}
+                    </span>
                     <button
                       type="button"
                       onClick={handleRemovePrescription}
@@ -254,7 +340,9 @@ export default function ProductDetails() {
                 </div>
               )}
               {prescriptionError && (
-                <div className="text-red-600 text-sm mb-1">{prescriptionError}</div>
+                <div className="text-red-600 text-sm mb-1">
+                  {prescriptionError}
+                </div>
               )}
             </div>
           )}
@@ -265,19 +353,41 @@ export default function ProductDetails() {
               ₹{sellingPrice.toFixed(2)}
               {hasDiscount && (
                 <>
-                  <span className="line-through text-gray-500 text-sm">MRP: ₹{actualPrice.toFixed(2)}</span>
-                  <span className="text-red-700 text-sm">Save: {discount}%</span>
+                  <span className="line-through text-gray-500 text-sm">
+                    MRP: ₹{actualPrice.toFixed(2)}
+                  </span>
+                  <span className="text-red-700 text-sm">
+                    Save: {discount}%
+                  </span>
                 </>
               )}
             </div>
             <div className="text-sm text-gray-600">Inclusive of all taxes</div>
             {/* Product Notes */}
             <div className="text-xs text-gray-600 mt-4 space-y-1">
-              <p>* This product cannot be returned & refunded or exchanged unless you received a wrong or damaged product.</p>
+              <p>
+                * 10 Capsules per products.
+              </p>
+              <p>
+                * Company
+              </p>
               <p>* Country of Origin: India</p>
-              {/* <p>* Delivery charges will be applied at checkout.</p> */}
+              <p>* Delivery charges will be applied at checkout.</p>
             </div>
           </div>
+
+              
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+      {icons.map((item, index) => (
+        <div key={index} className="flex flex-col items-center w-24">
+          <img src={item.img} alt={item.title} className="w-12 h-12 mb-2" />
+          <h3 className="text-sm font-medium text-gray-800">{item.title}</h3>
+        </div>
+      ))}
+    </div>
+ 
+
+
 
           {/* Delivery Check */}
           <div className="flex gap-2 mt-4">
@@ -288,11 +398,16 @@ export default function ProductDetails() {
               placeholder="Enter pincode"
               className="border px-3 py-2 rounded w-full"
             />
-            <button onClick={handleCheckDelivery} className="bg-blue-600 text-white px-4 py-2 rounded">
+            <button
+              onClick={handleCheckDelivery}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
               Check
             </button>
           </div>
-          {deliveryMessage && <div className="text-sm mt-1 text-gray-700">{deliveryMessage}</div>}
+          {deliveryMessage && (
+            <div className="text-sm mt-1 text-gray-700">{deliveryMessage}</div>
+          )}
 
           {/* Add to Cart Button */}
           <button
@@ -351,31 +466,54 @@ export default function ProductDetails() {
 
         {/* Desktop Tab Content */}
         <div className="hidden md:block mt-3 text-gray-800 leading-relaxed">
-          {activeTab === "description" && <p>{product.description || "No description available."}</p>}
-          {activeTab === "key_benefits" && <p>{product.key_benefits || "No key benefits provided."}</p>}
-          {activeTab === "how_to_use" && <p>{product.how_to_use || "Usage information not available."}</p>}
-          {activeTab === "safety_precaution" && <p>{product.safety_precaution || "No safety or precaution info."}</p>}
-          {activeTab === "key_ingredients" && <p>{product.key_ingredients || "No ingredients found."}</p>}
-          {activeTab === "other_info" && <p>{product.other_info || "No additional information."}</p>}
+          {activeTab === "description" && (
+            <p>{product.description || "No description available."}</p>
+          )}
+          {activeTab === "key_benefits" && (
+            <p>{product.key_benefits || "No key benefits provided."}</p>
+          )}
+          {activeTab === "how_to_use" && (
+            <p>{product.how_to_use || "Usage information not available."}</p>
+          )}
+          {activeTab === "safety_precaution" && (
+            <p>
+              {product.safety_precaution || "No safety or precaution info."}
+            </p>
+          )}
+          {activeTab === "key_ingredients" && (
+            <p>{product.key_ingredients || "No ingredients found."}</p>
+          )}
+          {activeTab === "other_info" && (
+            <p>{product.other_info || "No additional information."}</p>
+          )}
         </div>
 
         {/* Mobile Accordion Tabs */}
         <div className="block md:hidden mt-4 space-y-6 text-gray-800 leading-relaxed whitespace-pre-line">
-    {[
-      { label: "Description", content: product.description },
-      { label: "Key Ingredients", content: product.key_ingredients },
-      // { label: "Key Benefits", content: product.key_benefits },
-      { label: "Dosage", content: product.how_to_use },
-      { label: "Dietary & Lifestyle Advice", content: product.safety_precaution },
-      // { label: "Other Information", content: product.other_info },
-    ].map((section) => (
-      <div key={section.label} className="border-b pb-4">
-        <h2 className="text-lg font-semibold mb-1">{section.label}</h2>
-        <p>{section.content || "Not available."}</p>
-      </div>
-    ))}
-  </div>
+          {[
+            { label: "Description", content: product.description },
+            { label: "Key Ingredients", content: product.key_ingredients },
+            // { label: "Key Benefits", content: product.key_benefits },
+            { label: "Dosage", content: product.how_to_use },
+            {
+              label: "Dietary & Lifestyle Advice",
+              content: product.safety_precaution,
+            },
+            // { label: "Other Information", content: product.other_info },
+          ].map((section) => (
+            <div key={section.label} className="border-b pb-4">
+              <h2 className="text-lg font-semibold mb-1">{section.label}</h2>
+              <p>{section.content || "Not available."}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
+
+    <Trending/>
+
+    <Style/>  
+
+    </>
   );
 }
