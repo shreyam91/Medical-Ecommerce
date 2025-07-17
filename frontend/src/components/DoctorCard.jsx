@@ -66,7 +66,7 @@ export default function DoctorCard({ doctor, onSelect }) {
   return (
     <div
       onClick={() => onSelect(doctor)}
-      className="bg-white shadow-md hover:shadow-lg transition rounded-xl p-5 flex flex-col gap-4 cursor-pointer"
+      className="bg-white shadow-md hover:shadow-lg transition rounded-xl p-5 flex flex-col gap-4 border-t"
     >
       {/* Image + Name + Degree */}
       <div className="flex items-center gap-4">
@@ -78,11 +78,13 @@ export default function DoctorCard({ doctor, onSelect }) {
 
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-semibold text-gray-800">{doctor.name}</h2>
-          {doctor.degree && (
-            <span className="text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full mt-1 inline-block">
-              {doctor.degree}
-            </span>
-          )}
+
+          {doctor.specialization && (
+        <div className="items-center text-sm text-indigo-600 mt-1 gap-1 px-2 py-0.5 bg-blue-100 rounded-full inline-block">
+          {doctor.specialization}
+        </div>
+      )}
+          
           <div className="mt-2">
             <RatingStars rating={doctor.rating || 0} />
           </div>
@@ -90,12 +92,14 @@ export default function DoctorCard({ doctor, onSelect }) {
       </div>
 
       {/* Specialization */}
-      {doctor.specialization && (
-        <div className="flex items-center text-sm text-indigo-600 mt-1 gap-1">
-          <FaUserMd className="text-indigo-500" />
-          {doctor.specialization}
-        </div>
-      )}
+      
+
+      {doctor.degree && (
+            <span className="text-sm  text-blue-700 px-2 py-0.5  mt-1 inline-block">
+                        {/* <FaUserMd className="text-indigo-500" /> */}
+              {doctor.degree}
+            </span>
+          )}
 
       {/* Address */}
       <div className="flex items-start text-sm text-gray-600 gap-2">
@@ -117,18 +121,29 @@ export default function DoctorCard({ doctor, onSelect }) {
         {/* Timings */}
         <div className="flex items-start gap-2">
           <FaClock className="text-purple-500 mt-0.5" />
-          <div>
+          <div className="w-full">
             {Array.isArray(schedules) && schedules.length > 0 ? (
-              schedules.map((sch, idx) => (
-                <div key={idx} className="mb-1">
-                  <span className="font-medium text-gray-800 mr-2">{sch.day_of_week}:</span>
-                  <span>
-                    {formatTimeWithSeconds(sch.morning_start_time)} - {formatTimeWithSeconds(sch.morning_end_time)}
-                    <span className="text-gray-400 mx-1">|</span>
-                    {formatTimeWithSeconds(sch.evening_start_time)} - {formatTimeWithSeconds(sch.evening_end_time)}
-                  </span>
-                </div>
-              ))
+              <div className="flex flex-col gap-2 overflow-y-auto max-h-40 pr-1">
+                {schedules.map((sch, idx) => (
+                  <div key={idx} className="bg-gray-50 rounded p-2 border border-gray-200">
+                    <div>
+                      <span className="font-medium text-gray-800 mr-2">{sch.day_of_week}:</span>
+                      {sch.morning_start_time && sch.morning_end_time && (
+                        <span>
+                          {formatTimeWithSeconds(sch.morning_start_time)} - {formatTimeWithSeconds(sch.morning_end_time)}
+                        </span>
+                      )}
+                    </div>
+                    {sch.evening_start_time && sch.evening_end_time && (
+                      <div className="pl-16">
+                        <span>
+                          {formatTimeWithSeconds(sch.evening_start_time)} - {formatTimeWithSeconds(sch.evening_end_time)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             ) : (
               <span className="italic text-gray-400">No schedule available</span>
             )}

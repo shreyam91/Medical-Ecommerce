@@ -525,7 +525,10 @@ function DoctorForm() {
                     <p>Phone: {doctor.phone_number}</p>
                     <p>Specialization: {doctor.specialization}</p>
                     <p>Rating: {doctor.rating ?? "N/A"}</p>
-                    <p>Status: {doctor.is_available ? "Available" : "Not Available"}</p>
+                    {/* <p>Status: {doctor.is_available ? "Available" : "Not Available"}</p> */}
+                    {/* <p>Days: {doctor.schedule}</p> */}
+                  
+    
                   </div>
                 </div>
                 <div className="space-x-2">
