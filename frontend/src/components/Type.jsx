@@ -1,17 +1,48 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./LogoCircles.css";
 
-
 const data = [
-  { id: 1, title: "Ayurvedic Medicine", imageUrl: "/assets/med.svg", bgcolor: "bg-red-100", link: "/categories/diabetes" },
-  { id: 2, title: "Homeopathic Medicine", imageUrl: "/assets/medicine.svg", bgcolor: "bg-yellow-100", link: "/categories/derma-care" },
-  { id: 3, title: "Unani Medicine", imageUrl: "/assets/medi.svg", bgcolor: "bg-green-100", link: "/categories/eye-care" },
-  { id: 4, title: "Prescription", imageUrl: "/assets/prescription.svg", bgcolor: "bg-blue-100", link: "/categories/joint-care" },
-  { id: 5, title: "Near by Doctor", imageUrl: "/assets/doctor.svg", bgcolor: "bg-purple-100", link: "/doctors" },
+  {
+    id: 1,
+    title: "Ayurvedic Medicine",
+    imageUrl: "/assets/med.svg",
+    bgcolor: "bg-red-100",
+    link: "/ayurvedic",
+  },
+  {
+    id: 2,
+    title: "Homeopathic Medicine",
+    imageUrl: "/assets/medicine.svg",
+    bgcolor: "bg-yellow-100",
+    link: "/homeopathic",
+  },
+  {
+    id: 3,
+    title: "Unani Medicine",
+    imageUrl: "/assets/medi.svg",
+    bgcolor: "bg-green-100",
+    link: "/unani",
+  },
+  {
+    id: 4,
+    title: "Prescription",
+    imageUrl: "/assets/prescription.svg",
+    bgcolor: "bg-blue-100",
+    link: "/categories/joint-care",
+  },
+  {
+    id: 5,
+    title: "Near by Doctor",
+    imageUrl: "/assets/doctor.svg",
+    bgcolor: "bg-purple-100",
+    link: "/doctors",
+  },
 ];
 
 export default function Type() {
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -19,9 +50,9 @@ export default function Type() {
   }, []);
 
   return (
-    <div className=" py-4 max-w-7xl mx-auto">
+    <div className="py-4 max-w-7xl mx-auto">
       {/* Mobile: Horizontal Scroll */}
-<div className="sm:hidden overflow-x-auto scrollbar-hide">
+      <div className="sm:hidden overflow-x-auto scrollbar-hide">
         <div className="flex space-x-4 snap-x snap-mandatory scroll-pl-4">
           {loading
             ? Array.from({ length: 5 }).map((_, idx) => (
@@ -34,10 +65,10 @@ export default function Type() {
                 </div>
               ))
             : data.map(({ id, title, imageUrl, link, bgcolor }) => (
-                <a
-                  href={link}
+                <div
                   key={id}
-                  className={`flex items-center ${bgcolor} rounded-md shadow-md min-w-[180px] px-4 py-3 snap-start hover:shadow-lg transition duration-300`}
+                  onClick={() => navigate(link)}
+                  className={`cursor-pointer flex items-center ${bgcolor} rounded-md shadow-md min-w-[180px] px-4 py-3 snap-start hover:shadow-lg transition duration-300`}
                 >
                   <img
                     src={imageUrl}
@@ -46,7 +77,7 @@ export default function Type() {
                     loading="lazy"
                   />
                   <p className="text-sm font-medium text-gray-800">{title}</p>
-                </a>
+                </div>
               ))}
         </div>
       </div>
@@ -64,10 +95,10 @@ export default function Type() {
               </div>
             ))
           : data.map(({ id, title, imageUrl, link, bgcolor }) => (
-              <a
-                href={link}
+              <div
                 key={id}
-                className={`flex items-center ${bgcolor} rounded-md shadow-md px-4 py-4 hover:shadow-lg transition duration-300`}
+                onClick={() => navigate(link)}
+                className={`cursor-pointer flex items-center ${bgcolor} rounded-md shadow-md px-4 py-4 hover:shadow-lg transition duration-300`}
               >
                 <img
                   src={imageUrl}
@@ -76,7 +107,7 @@ export default function Type() {
                   loading="lazy"
                 />
                 <p className="text-base font-semibold text-gray-800">{title}</p>
-              </a>
+              </div>
             ))}
       </div>
     </div>
