@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
@@ -9,6 +9,76 @@ import badges from '../assets/badges.svg';
 import brands from '../assets/brands.svg';
 import order from '../assets/order.svg';
 import products from '../assets/products.svg';
+import { ProductCardScrollable } from "../components/ProductCard";
+
+
+const productSimilar = [
+  {
+    id: 1,
+    name: 'Stylish Shoes',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 99.99,
+    sellingPrice: 59.99
+  },
+  {
+    id: 2,
+    name: 'Casual Jacket',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 120.00,
+    sellingPrice: 85.00
+  },
+  {
+    id: 3,
+    name: 'Wrist Watch',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 250.00,
+    sellingPrice: 180.00
+  },
+  {
+    id: 4,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 5,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 6,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 7,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 8,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 9,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  }
+];  
+
+
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -24,6 +94,27 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [prescriptionError, setPrescriptionError] = useState("");
+
+  const scrollRef = useRef(null);
+
+  // Auto-scroll logic
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    let scrollAmount = 0;
+
+    const scrollInterval = setInterval(() => {
+      if (!scrollContainer) return;
+      scrollContainer.scrollBy({ left: 1, behavior: 'smooth' });
+      scrollAmount += 1;
+
+      if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+        scrollAmount = 0;
+        scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+      }
+    }, 20); // Adjust speed (lower = faster)
+
+    return () => clearInterval(scrollInterval);
+  }, []);
 
 
 
@@ -510,7 +601,30 @@ export default function ProductDetails() {
       </div>
     </div>
 
-    <Trending/>
+    {/* <Trending/> */}
+
+    {/* ----------  */}
+            <div className="">
+          <h1 className="text-2xl font-bold mb-4">Similar Products</h1>
+          <div className="flex overflow-x-auto gap-4">
+            {productSimilar.map((product) => (
+              <ProductCardScrollable key={product.id} {...product} />
+            ))}
+          </div>
+        </div>
+        {/* ---------------  */}
+
+        {/* ----------  */}
+            <div className="mt-2">
+          <h1 className="text-2xl font-bold mb-4">People also Preferred this Product</h1>
+          <div className="flex overflow-x-auto gap-4">
+            {productSimilar.map((product) => (
+              <ProductCardScrollable key={product.id} {...product} />
+            ))}
+          </div>
+        </div>
+        {/* ---------------  */}
+    {/* <Trending/> */}
 
     <Style/>  
 

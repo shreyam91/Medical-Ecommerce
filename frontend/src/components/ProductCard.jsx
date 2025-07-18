@@ -91,3 +91,20 @@ const ProductCard = ({ product }) => {
 };
 
 export default ProductCard;
+
+
+export const ProductCardScrollable = ({ image, name, actualPrice, sellingPrice }) => {
+  return (
+    <div className="w-64 p-4 bg-white rounded-lg shadow-md flex-shrink-0 transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
+      <img src={image} alt={name} className="h-40 w-full object-cover rounded-md mb-4" />
+      <h2 className="text-lg font-semibold">{name}</h2>
+      <div className="flex items-center gap-2 my-2">
+        <span className="text-gray-500 line-through text-sm">₹{actualPrice}</span>
+        <span className="text-red-600 font-bold">₹{sellingPrice}</span>
+      </div>
+      <button className="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200 w-full">
+        Add to Cart
+      </button>
+    </div>
+  );
+};

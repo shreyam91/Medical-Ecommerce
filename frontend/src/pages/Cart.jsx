@@ -1,7 +1,75 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import DealsOfTheDay from "../components/DealsOfTheDay";
+import { ProductCardScrollable } from "../components/ProductCard";
+
+const productSimilar = [
+  {
+    id: 1,
+    name: 'Stylish Shoes',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 99.99,
+    sellingPrice: 59.99
+  },
+  {
+    id: 2,
+    name: 'Casual Jacket',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 120.00,
+    sellingPrice: 85.00
+  },
+  {
+    id: 3,
+    name: 'Wrist Watch',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 250.00,
+    sellingPrice: 180.00
+  },
+  {
+    id: 4,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 5,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 6,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 7,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 8,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  },
+  {
+    id: 9,
+    name: 'Sunglasses',
+    image: 'https://via.placeholder.com/200',
+    actualPrice: 70.00,
+    sellingPrice: 45.00
+  }
+];  
+
 
 export default function Cart() {
   const {
@@ -18,6 +86,27 @@ export default function Cart() {
     getTotal,
     getTotalItems,
   } = useCart();
+
+  const scrollRef = useRef(null);
+  
+    // Auto-scroll logic
+    useEffect(() => {
+      const scrollContainer = scrollRef.current;
+      let scrollAmount = 0;
+  
+      const scrollInterval = setInterval(() => {
+        if (!scrollContainer) return;
+        scrollContainer.scrollBy({ left: 1, behavior: 'smooth' });
+        scrollAmount += 1;
+  
+        if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+          scrollAmount = 0;
+          scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+      }, 20); // Adjust speed (lower = faster)
+  
+      return () => clearInterval(scrollInterval);
+    }, []);
 
   const [promoInput, setPromoInput] = useState("");
 
@@ -40,7 +129,16 @@ export default function Cart() {
           Continue Shopping
         </Link>
 
-        <DealsOfTheDay/>
+        {/* ----------  */}
+            <div className="mt-2">
+          <h1 className="text-2xl font-bold mb-4">Frequently Bought from Customers </h1>
+          <div className="flex overflow-x-auto gap-4">
+            {productSimilar.map((product) => (
+              <ProductCardScrollable key={product.id} {...product} />
+            ))}
+          </div>
+        </div>
+        {/* ---------------  */}
       </div>
     );
   }
@@ -168,7 +266,7 @@ export default function Cart() {
 
 <>
 
-<div className="max-w-6xl mx-auto p-4 sm:p-6">
+<div className="max-w-6xl mx-auto sm:p-6">
   <h1 className="text-2xl sm:text-3xl font-bold text-green-700 mb-6 sm:mb-8 text-center sm:text-left">
     Your Cart
   </h1>
@@ -315,7 +413,18 @@ export default function Cart() {
   </div>
 </div>
 
-<DealsOfTheDay/>
+{/* <DealsOfTheDay/> */}
+
+{/* ----------  */}
+            <div className="mt-2">
+          <h1 className="text-2xl font-bold mb-4">Frequently Bought from Customers </h1>
+          <div className="flex overflow-x-auto gap-4">
+            {productSimilar.map((product) => (
+              <ProductCardScrollable key={product.id} {...product} />
+            ))}
+          </div>
+        </div>
+        {/* ---------------  */}
 
 </>
 
