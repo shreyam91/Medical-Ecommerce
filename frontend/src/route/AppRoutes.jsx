@@ -26,6 +26,8 @@ import NotFound from '../pages/NotFound';
 import HomeoPathic from '../pages/HomeoPathic';
 import Unani from '../pages/Unani';
 import Ayurvedic from '../pages/Ayurvedic';
+import Search from '../pages/Search';
+import RequestProduct from '../pages/RequestProduct';
 
 const AppRoutes = () => {
   return (
@@ -59,6 +61,9 @@ const AppRoutes = () => {
       <Route path="/doctors" element={<DoctorPage/>} />
       <Route path="/brand/:brandId" element={<BrandProducts />} />
       <Route path="*" element={<NotFound />} />
+
+      <Route path="/search" element={<Search />} />
+      <Route path="/request-product" element={<RequestProduct />} />
 
 
       {/* Protected Routes (require login) */}
