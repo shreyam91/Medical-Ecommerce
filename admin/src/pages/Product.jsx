@@ -4,13 +4,15 @@ import BrandForm from '@/components/BrandForm';
 import BannerManager from '@/components/BannerManager';
 import RefrenceBook from '@/components/ReferenceBook';
 import DoctorForm from '@/components/DoctorForm';
+import Diseases from '@/components/Diseases';
 
 const TABS = {
   PRODUCT: 'Product',
   BRAND: 'Brand',
   BOOKS: 'Books',
   BANNER: 'Banner',
-  DOCTOR: 'Doctors'
+  DOCTOR: 'Doctors',
+  DISEASE: 'Disease'
 };
 
 const Product = () => {
@@ -67,6 +69,13 @@ const Product = () => {
           <div>
             <h2 className="text-2xl font-semibold mb-6">Doctors</h2>
             <DoctorForm />
+          </div>
+        );
+        case TABS.DISEASE:
+        return (
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Doctors</h2>
+            <Diseases />
           </div>
         );
       default:
