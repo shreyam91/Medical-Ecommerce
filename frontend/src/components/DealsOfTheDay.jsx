@@ -132,10 +132,10 @@ const DealsOfTheDay = () => {
                   className="w-full h-40 object-cover rounded mb-4"
                 />
                 <h3 className="text-lg font-semibold">{product.name}</h3>
-                <p className="text-gray-500 line-through">${product.originalPrice}</p>
+                <p className="text-gray-500 line-through">₹{product.originalPrice}</p>
                 <p className="text-red-600 font-medium">{product.discountPercent}% OFF</p>
                 <p className="text-xl font-bold text-green-600 mb-3">
-                  Now: ${discountedPrice}
+                  Now: ₹{discountedPrice}
                 </p>
                 <button
                   onClick={() => handleAddToCart(product)}

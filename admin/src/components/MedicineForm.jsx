@@ -10,6 +10,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
   const imageRef = useRef();
   const typeOptions = [
     { value: "tablet", label: "Tablet" },
+    { value: "capsule", label: "Capsule" },
     { value: "ml", label: "Liquid (ml)" },
     { value: "gm", label: "Gram (gm)" },
   ];

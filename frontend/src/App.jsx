@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { CartProvider } from "./context/CartContext";
 import AppRoutes from "./route/AppRoutes";
@@ -25,7 +25,7 @@ function App() {
   if (loading) {
     return (
       
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-50">
         <img
           src="/logo.png"
           alt="Logo"
@@ -39,10 +39,10 @@ function App() {
   }
 
   return (
-    <>
+    <div>
     <Toaster position="top-right" reverseOrder={false} />
     <CartProvider>
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen">
           <Navbar />
            <GlobalLoader />
           <main className="container mx-auto px-4 py-8">
@@ -61,7 +61,7 @@ function App() {
       >
         <FaWhatsapp size={24} />
       </a>
-    </>
+    </div>
   );
 }
 

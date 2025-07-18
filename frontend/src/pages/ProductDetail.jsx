@@ -5,10 +5,10 @@ import toast, { Toaster } from "react-hot-toast";
 import Style from "../components/Style";
 import Trending from "../components/Trending";
 
-import badges from '../assets/badges.svg';
-import brands from '../assets/brands.svg';
-import order from '../assets/order.svg';
-import products from '../assets/products.svg';
+import badges from '/assets/badges.svg';
+import brands from '/assets/brands.svg';
+import order from '/assets/order.svg';
+import products from '/assets/products.svg';
 import { ProductCardScrollable } from "../components/ProductCard";
 
 
