@@ -5,6 +5,8 @@ import BannerManager from '@/components/BannerManager';
 import RefrenceBook from '@/components/ReferenceBook';
 import DoctorForm from '@/components/DoctorForm';
 import Diseases from '@/components/Diseases';
+import MainCategory from '@/components/MainCategory';
+import SubCategory from '@/components/SubCategory';
 
 const TABS = {
   PRODUCT: 'Product',
@@ -12,7 +14,9 @@ const TABS = {
   BOOKS: 'Books',
   BANNER: 'Banner',
   DOCTOR: 'Doctors',
-  DISEASE: 'Disease'
+  DISEASE: 'Disease',
+  MAINCATEGORY: 'Main Category',
+  SUBCATEGORY: 'Sub Category'
 };
 
 const Product = () => {
@@ -74,8 +78,22 @@ const Product = () => {
         case TABS.DISEASE:
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-6">Doctors</h2>
+            <h2 className="text-2xl font-semibold mb-6">Disease</h2>
             <Diseases />
+          </div>
+        );
+        case TABS.MAINCATEGORY:
+        return (
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Main Category</h2>
+            <MainCategory />
+          </div>
+        );
+        case TABS.SUBCATEGORY:
+        return (
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Sub Category</h2>
+            <SubCategory />
           </div>
         );
       default:
