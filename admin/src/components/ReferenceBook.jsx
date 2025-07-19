@@ -11,6 +11,7 @@ const ReferenceBook = () => {
   const [bookName, setBookName] = useState("");
   const [bookList, setBookList] = useState([]);
   const [editBook, setEditBook] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getReferenceBooks()
@@ -21,26 +22,30 @@ const ReferenceBook = () => {
       });
   }, []);
 
-  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const trimmedName = bookName.trim();
     if (!trimmedName) return;
 
     const isDuplicate = bookList.some(
-  (book) => book.name.toLowerCase() === trimmedName.toLowerCase() && (!editBook || book.id !== editBook.id)
-);
+      (book) =>
+        book.name.toLowerCase() === trimmedName.toLowerCase() &&
+        (!editBook || book.id !== editBook.id)
+    );
 
-if (isDuplicate) {
-  toast.error("This book is already present. Duplicate not allowed.");
-  return;
-}
+    if (isDuplicate) {
+      toast.error("This book is already present. Duplicate not allowed.");
+      return;
+    }
 
     try {
       if (editBook) {
-        const updated = await updateReferenceBook(editBook.id, { name: trimmedName });
-        setBookList(bookList.map((b) => (b.id === editBook.id ? updated : b)));
+        const updated = await updateReferenceBook(editBook.id, {
+          name: trimmedName,
+        });
+        setBookList(
+          bookList.map((b) => (b.id === editBook.id ? updated : b))
+        );
         toast.success("Book updated successfully!");
         setEditBook(null);
       } else {
@@ -94,9 +99,9 @@ if (isDuplicate) {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+            className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
           >
-            {editBook ? "Update Book" : "Submit"}
+            {editBook ? "Update Book" : "Add Book"}
           </button>
 
           {editBook && (
@@ -111,38 +116,46 @@ if (isDuplicate) {
         </form>
 
         {/* Right: Book List */}
-        <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50">
+        <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50 max-h-96 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4">All Books</h2>
-          {bookList.length === 0 ? (
-            <p className="text-gray-500">No books added yet.</p>
-          ) : (
-            <div className="max-h-[240px] overflow-y-auto pr-2">
-              <ul className="space-y-4">
-                {bookList.map((book) => (
-                  <li
-                    key={book.id}
-                    className="flex items-center gap-4 bg-white p-3 rounded shadow"
+
+          {/* Search Input */}
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search books..."
+            className="w-full p-2 mb-4 border rounded"
+          />
+
+          <ul className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+            {bookList
+              .filter((book) =>
+                book.name.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((book) => (
+                <li
+                  key={book.id}
+                  className="flex items-center gap-4 bg-white p-3 rounded shadow"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">{book.name}</p>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveBook(book.id)}
+                    className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium">{book.name}</p>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveBook(book.id)}
-                      className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Remove
-                    </button>
-                    <button
-                      onClick={() => handleEditBook(book)}
-                      className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2"
-                    >
-                      Edit
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    Remove
+                  </button>
+                  <button
+                    onClick={() => handleEditBook(book)}
+                    className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600 ml-2"
+                  >
+                    Edit
+                  </button>
+                </li>
+              ))}
+          </ul>
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@ const SubCategory = () => {
   const [subCategoryName, setSubCategoryName] = useState("");
   const [subCategoryList, setSubCategoryList] = useState([]);
   const [editSubCategory, setEditSubCategory] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getSubCategories()
@@ -102,7 +103,7 @@ const SubCategory = () => {
             type="submit"
             className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
           >
-            {editSubCategory ? "Update Subcategory" : "Add Sub Category"}
+            {editSubCategory ? "Update Subcategory" : "Add Subcategory"}
           </button>
 
           {editSubCategory && (
@@ -117,38 +118,46 @@ const SubCategory = () => {
         </form>
 
         {/* Right: Subcategory List */}
-        <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50">
+        <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50 max-h-96 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4">All Subcategories</h2>
-          {subCategoryList.length === 0 ? (
-            <p className="text-gray-500">No subcategories added yet.</p>
-          ) : (
-            <div className="max-h-[240px] overflow-y-auto pr-2">
-              <ul className="space-y-4">
-                {subCategoryList.map((sc) => (
-                  <li
-                    key={sc.id}
-                    className="flex items-center gap-4 bg-white p-3 rounded shadow"
+
+          {/* Search Input */}
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search subcategories..."
+            className="w-full p-2 mb-4 border rounded"
+          />
+
+          <ul className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+            {subCategoryList
+              .filter((sc) =>
+                sc.name.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((sc) => (
+                <li
+                  key={sc.id}
+                  className="flex items-center gap-4 bg-white p-3 rounded shadow"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">{sc.name}</p>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveSubCategory(sc.id)}
+                    className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium">{sc.name}</p>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveSubCategory(sc.id)}
-                      className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Remove
-                    </button>
-                    <button
-                      onClick={() => handleEditSubCategory(sc)}
-                      className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600 ml-2"
-                    >
-                      Edit
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    Remove
+                  </button>
+                  <button
+                    onClick={() => handleEditSubCategory(sc)}
+                    className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600 ml-2"
+                  >
+                    Edit
+                  </button>
+                </li>
+              ))}
+          </ul>
         </div>
       </div>
     </div>

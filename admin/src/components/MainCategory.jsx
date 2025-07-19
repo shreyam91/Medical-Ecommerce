@@ -11,6 +11,7 @@ const MainCategory = () => {
   const [categoryName, setCategoryName] = useState("");
   const [categoryList, setCategoryList] = useState([]);
   const [editCategory, setEditCategory] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getMainCategories()
@@ -115,38 +116,46 @@ const MainCategory = () => {
         </form>
 
         {/* Right: Category List */}
-        <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50">
+        <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50 max-h-96 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4">All Categories</h2>
-          {categoryList.length === 0 ? (
-            <p className="text-gray-500">No categories added yet.</p>
-          ) : (
-            <div className="max-h-[240px] overflow-y-auto pr-2">
-              <ul className="space-y-4">
-                {categoryList.map((cat) => (
-                  <li
-                    key={cat.id}
-                    className="flex items-center gap-4 bg-white p-3 rounded shadow"
+
+          {/* Search Input */}
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search categories..."
+            className="w-full p-2 mb-4 border rounded"
+          />
+
+          <ul className="space-y-2">
+            {categoryList
+              .filter((cat) =>
+                cat.name.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((cat) => (
+                <li
+                  key={cat.id}
+                  className="flex items-center gap-4 bg-white p-3 rounded shadow"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">{cat.name}</p>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveCategory(cat.id)}
+                    className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium">{cat.name}</p>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveCategory(cat.id)}
-                      className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Remove
-                    </button>
-                    <button
-                      onClick={() => handleEditCategory(cat)}
-                      className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600 ml-2"
-                    >
-                      Edit
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    Remove
+                  </button>
+                  <button
+                    onClick={() => handleEditCategory(cat)}
+                    className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 ml-2"
+                  >
+                    Edit
+                  </button>
+                </li>
+              ))}
+          </ul>
         </div>
       </div>
     </div>

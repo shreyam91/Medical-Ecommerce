@@ -305,7 +305,7 @@ function DoctorForm() {
     <div className="min-h-screen p-8">
       <Toaster position="top-right" />
       <div className="max-w-xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">Doctor Form</h2>
+        <h2 className="text-2xl font-bold mb-4">Add Doctor here</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block mb-1 font-medium">Upload Image</label>
@@ -337,103 +337,118 @@ function DoctorForm() {
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">Phone Number*</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
+  <label className="block mb-1 font-medium">Phone Number*</label>
+  <div className="flex">
+    <span className="inline-flex items-center px-3 border border-r-0 rounded-l bg-gray-100 text-gray-600">
+      +91
+    </span>
+    <input
+      type="tel"
+      name="phone"
+      value={formData.phone}
+      onChange={handleChange}
+      className="w-full border rounded-r px-3 py-2"
+      disabled={loading}
+      maxLength={10}
+      pattern="\d{10}"
+    />
+  </div>
+</div>
+
+
+          <div className="grid grid-cols-2 gap-4">
+  <div>
+    <label className="block mb-1 font-medium">Degree*</label>
+    <input
+      type="text"
+      name="degree"
+      value={formData.degree}
+      onChange={handleChange}
+      className="w-full border rounded px-3 py-2"
+      disabled={loading}
+    />
+  </div>
+  <div>
+    <label className="block mb-1 font-medium">Specialization*</label>
+    <input
+      type="text"
+      name="specialization"
+      value={formData.specialization}
+      onChange={handleChange}
+      className="w-full border rounded px-3 py-2"
+      disabled={loading}
+    />
+  </div>
+</div>
+
 
           <div>
-            <label className="block mb-1 font-medium">Degree*</label>
-            <input
-              type="text"
-              name="degree"
-              value={formData.degree}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
+  <label className="block mb-1 font-medium">Address*</label>
+  <textarea
+    name="address"
+    value={formData.address}
+    onChange={handleChange}
+    rows={3}
+    className="w-full border rounded px-3 py-2"
+    disabled={loading}
+  />
+</div>
 
-          <div>
-            <label className="block mb-1 font-medium">Specialization*</label>
-            <input
-              type="text"
-              name="specialization"
-              value={formData.specialization}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
 
-          <div>
-            <label className="block mb-1 font-medium">Address*</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-4">
+  <div>
+    <label className="block mb-1 font-medium">City*</label>
+    <input
+      type="text"
+      name="city"
+      value={formData.city}
+      onChange={handleChange}
+      className="w-full border rounded px-3 py-2"
+      disabled={loading}
+    />
+  </div>
+  <div>
+    <label className="block mb-1 font-medium">State*</label>
+    <input
+      type="text"
+      name="state"
+      value={formData.state}
+      onChange={handleChange}
+      className="w-full border rounded px-3 py-2"
+      disabled={loading}
+    />
+  </div>
+</div>
 
-          <div>
-            <label className="block mb-1 font-medium">City*</label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
 
-          <div>
-            <label className="block mb-1 font-medium">State*</label>
-            <input
-              type="text"
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-4">
+  <div>
+    <label className="block mb-1 font-medium">Pincode*</label>
+    <input
+      type="text"
+      name="pincode"
+      value={formData.pincode}
+      onChange={handleChange}
+      className="w-full border rounded px-3 py-2"
+      disabled={loading}
+    />
+  </div>
+  <div>
+    <label className="block mb-1 font-medium">Rating (0-5)</label>
+    <input
+      type="number"
+      name="rating"
+      min="0"
+      max="5"
+      step="0.1"
+      value={formData.rating}
+      onChange={handleChange}
+      className="w-full border rounded px-3 py-2"
+      disabled={loading}
+    />
+  </div>
+</div>
 
-          <div>
-            <label className="block mb-1 font-medium">Pincode*</label>
-            <input
-              type="text"
-              name="pincode"
-              value={formData.pincode}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">Rating (0-5)</label>
-            <input
-              type="number"
-              name="rating"
-              min="0"
-              max="5"
-              step="0.1"
-              value={formData.rating}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={loading}
-            />
-          </div>
 
           <div>
             <label className="block mb-1 font-medium">Days Available & Timings*</label>
@@ -503,56 +518,54 @@ function DoctorForm() {
         </form>
 
         <h2 className="text-xl font-bold mt-12 mb-4">Doctors List</h2>
-        {doctorList.length === 0 ? (
-          <p>No doctors available.</p>
-        ) : (
-          <ul>
-            {doctorList.map((doctor) => (
-              <li
-                key={doctor.id}
-                className="border p-4 mb-4 rounded flex justify-between items-center"
-              >
-                <div className="flex items-center space-x-4">
-                  {doctor.image_url && (
-                    <img
-                      src={doctor.image_url}
-                      alt={doctor.name}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-semibold">{doctor.name}</h3>
-                    <p>Phone: {doctor.phone_number}</p>
-                    <p>Specialization: {doctor.specialization}</p>
-                    <p>Rating: {doctor.rating ?? "N/A"}</p>
-                    {/* <p>Status: {doctor.is_available ? "Available" : "Not Available"}</p> */}
-                    {/* <p>Days: {doctor.schedule}</p> */}
-                  
-    
-                  </div>
-                </div>
-                <div className="space-x-2">
-                  <button
-                    onClick={() => handleEdit(doctor)}
-                    className="text-blue-600 hover:underline"
-                    disabled={loading}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(doctor.id)}
-                    className="text-red-600 hover:underline"
-                    disabled={loading}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+<div className="max-h-96 overflow-y-auto pr-2">
+  {doctorList.length === 0 ? (
+    <p>No doctors available.</p>
+  ) : (
+    <ul>
+      {doctorList.map((doctor) => (
+        <li
+          key={doctor.id}
+          className="border p-4 mb-4 rounded flex justify-between items-center"
+        >
+          <div className="flex items-center space-x-4">
+            {doctor.image_url && (
+              <img
+                src={doctor.image_url}
+                alt={doctor.name}
+                className="w-16 h-16 object-cover rounded"
+              />
+            )}
+            <div>
+              <h3 className="font-semibold">{doctor.name}</h3>
+              <p>Phone: {doctor.phone_number}</p>
+              <p>Specialization: {doctor.specialization}</p>
+              <p>Rating: {doctor.rating ?? "N/A"}</p>
+            </div>
+          </div>
+          <div className="space-x-2">
+            <button
+              onClick={() => handleEdit(doctor)}
+              className="text-blue-600 hover:underline"
+              disabled={loading}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => handleDelete(doctor.id)}
+              className="text-red-600 hover:underline"
+              disabled={loading}
+            >
+              Delete
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+</div>
+</div>
   );
 }
 

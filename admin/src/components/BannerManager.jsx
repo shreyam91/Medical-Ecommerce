@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import Select from 'react-select';
+
 import imageCompression from "browser-image-compression";
 import {
   getBanners,
@@ -148,13 +150,19 @@ const BannerManager = () => {
         </select>
 
         {bannerType === "top" && (
-          <select value={productId} onChange={e => setProductId(e.target.value)} className="w-full mt-2 p-2 border rounded">
-            <option value="">-- Select Product --</option>
-            {products.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        )}
+  <div className="mt-2">
+    <Select
+      options={products.map(p => ({ value: p.id, label: p.name }))}
+      value={products.find(p => p.id === productId) ? { value: productId, label: products.find(p => p.id === productId).name } : null}
+      onChange={(selected) => setProductId(selected ? selected.value : "")}
+      isClearable
+      placeholder="Search or select product..."
+      className="react-select-container"
+      classNamePrefix="react-select"
+    />
+  </div>
+)}
+
 
         {preview && (
           <>
@@ -162,7 +170,7 @@ const BannerManager = () => {
               <img src={preview} alt="preview" className="rounded w-full" />
               <button onClick={() => { setPreview(null); setNewBanner(null); }} className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded">Remove</button>
             </div>
-            <button onClick={handleAddBanner} className="mt-4 bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700">Add Banner</button>
+            <button onClick={handleAddBanner} className="mt-4 bg-green-600 text-white px-4 py-2 rounded w-full hover:bg-green-700">Add Banner</button>
           </>
         )}
       </div>

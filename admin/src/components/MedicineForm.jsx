@@ -361,6 +361,8 @@ setTimeout(() => {
       </div>
 
       {/* Brand */}
+                <div className="grid grid-cols-2 gap-4">
+
       <div>
         <label htmlFor="brand_id" className="block font-medium mb-1">
           Brand
@@ -409,6 +411,60 @@ setTimeout(() => {
           <p className="text-red-600 text-sm mt-1">{errors.referenceBook}</p>
         )}
       </div>
+      </div>
+
+
+          <div className="grid grid-cols-2 gap-4">
+
+      <div>
+        <label htmlFor="brand_id" className="block font-medium mb-1">
+          Main Category 
+        </label>
+        <select
+          id="brand_id"
+          name="brand_id"
+          value={form.brand_id}
+          onChange={handleChange}
+          className={`w-full border rounded p-2 ${
+            errors.brand_id ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <option value="">Select Brand</option>
+          {brandsList.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+        {errors.brand_id && (
+          <p className="text-red-600 text-sm mt-1">{errors.brand_id}</p>
+        )}
+      </div>
+
+      {/* Reference Book */}
+      <div>
+        <label htmlFor="referenceBook" className="block font-medium mb-1">
+          Sub Category 
+        </label>
+        <select
+          id="referenceBook"
+          name="referenceBook"
+          value={form.referenceBook}
+          onChange={handleChange}
+          className="w-full border rounded p-2 border-gray-300"
+        >
+          <option value="">Select Reference Book</option>
+          {booksList.map((book) => (
+            <option key={book.id} value={book.name}>
+              {book.name}
+            </option>
+          ))}
+        </select>
+        {errors.referenceBook && (
+          <p className="text-red-600 text-sm mt-1">{errors.referenceBook}</p>
+        )}
+      </div>
+      </div>
 
       {/* Key Tags */}
       <TagInput
@@ -437,7 +493,7 @@ setTimeout(() => {
       </div>
 
       {/* Key Benefits */}
-      <div>
+      {/* <div>
         <label className="font-medium block mb-1">Key Benefits</label>
         <textarea
           name="benefits"
@@ -450,11 +506,12 @@ setTimeout(() => {
         {errors.benefits && (
           <p className="text-red-500 text-sm">{errors.benefits}</p>
         )}
-      </div>
+      </div> */}
 
       {/* How to use */}
       <div>
         <label className="font-medium block mb-1">How to use</label>
+        *Dosage 
         <textarea
           name="howToUse"
           placeholder="Dosage info eg: 1 tab, 1 spoon at a time"
@@ -468,9 +525,10 @@ setTimeout(() => {
         )}
       </div>
 
-      {/* Safety & Precaution */}
+      {/* Safety & Precaution */} 
       <div>
         <label className="font-medium block mb-1">Safety & Precaution</label>
+      *changed to Dietary & Lifestyle Advice 
         <textarea
           name="safetyPrecaution"
           placeholder="Write Safety & precaution for product."
@@ -501,7 +559,7 @@ setTimeout(() => {
       </div>
 
       {/* Other Information */}
-      <div>
+      {/* <div>
         <label className="font-medium block mb-1">Other Information</label>
         <textarea
           name="otherInfo"
@@ -514,7 +572,7 @@ setTimeout(() => {
         {errors.otherInfo && (
           <p className="text-red-500 text-sm">{errors.otherInfo}</p>
         )}
-      </div>
+      </div> */}
 
       {/* GST & Strength */}
       <div className="flex gap-4">
