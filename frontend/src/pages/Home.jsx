@@ -86,7 +86,6 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [topBanners, setTopBanners] = useState([]);
-  const [allBanners, setAllBanners] = useState([]);
 
   const scrollRef = useRef(null);
 
@@ -129,24 +128,19 @@ const Home = () => {
         setLoading(false);
       });
 
-    // Fetch all banners
+    // Fetch banners
     fetch('http://localhost:3001/api/banner')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch banners');
         return res.json();
       })
       .then(data => {
-         const filtered = data.filter(b => b.type === 'top');
+        const filtered = data.filter(b => b.type === 'top');
         setTopBanners(filtered);
-        console.log('Top banners:', filtered);
-        setAllBanners(data);
+        // console.log('Top banners:', filtered);
       })
-      .catch(() => setAllBanners([]))
-       .catch(() => setTopBanners([]));
+      .catch(() => setTopBanners([]));
   }, []);
-
-  // Helper to get banner by type
-  const getBannerByType = (type) => allBanners.find(b => b.type === type);
 
 
   return (
@@ -168,15 +162,9 @@ const Home = () => {
       <SearchComponent />
     </div>
       <Type/>
-     
       <BannerTop banners={topBanners}/>
-      
-      
-      
       <Category/>
- {/* 1st: Ad Banner */}
-      {getBannerByType('ad') && <Banners banners={[getBannerByType('ad')]} />}
-
+      <Banners/>
 
         {/* ----------  */}
         <div className="p-6">
@@ -200,9 +188,8 @@ const Home = () => {
     </div>
     {/* ---------------  */}
 
-{/* 2nd: Info Banner */}
-      {getBannerByType('info') && <Banners banners={[getBannerByType('info')]} />}
-                  <Brands />
+      <Banners/>
+            <Brands />
 
 
   {/* ----------  */}
@@ -249,12 +236,8 @@ const Home = () => {
   )}
 </div>
 
-{/* 3rd: Company Banner */}
-      {getBannerByType('company') && <Banners banners={[getBannerByType('company')]} />}
-
-
-{/* 4th: WhatsApp Banner */}
-      {getBannerByType('whatsapp') && <Banners banners={[getBannerByType('whatsapp')]} />}
+<Banners/>
+<Banners/>
 
 <StyleHome/>
 

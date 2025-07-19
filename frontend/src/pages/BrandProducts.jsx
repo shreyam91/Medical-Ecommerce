@@ -4,6 +4,7 @@ import ProductCard from '../components/ProductCard'; // Ensure the path is corre
 // import BrandFilterAside from '../components/BrandFilterAside'; // Uncomment if needed
 
 import {Banners} from '../components/Banner'
+import BrandFilterAside from '../components/BrandFilterAside';
 
 const BrandProducts = () => {
   const { brandId } = useParams();
