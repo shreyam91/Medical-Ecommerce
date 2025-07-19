@@ -28,6 +28,7 @@ import Unani from '../pages/Unani';
 import Ayurvedic from '../pages/Ayurvedic';
 import Search from '../pages/Search';
 import RequestProduct from '../pages/RequestProduct';
+import CategoryPage from '../pages/CategoryPage';
 
 const AppRoutes = () => {
   return (
@@ -53,6 +54,7 @@ const AppRoutes = () => {
       <Route path="/offers" element={<Offers />} />
       <Route path="/contact" element={<Contact/>} />
       <Route path="/homeopathic" element={<HomeoPathic/>} />
+      <Route path="/categories/:categorySlug" element={<CategoryPage />} />
 
       <Route path="/unani" element={<Unani/>} />
       <Route path='/ayurvedic' element={<Ayurvedic/>} />
