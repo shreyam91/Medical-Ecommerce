@@ -4,13 +4,15 @@ import Breadcrumb from '../components/Breadcrumb'
 import Brands, { PopularBrand } from '../components/Brands'
 import Category from '../components/Category'
 import BannerTop, {  Banners } from '../components/Banner'
-import DealsOfTheDay from '../components/DealsOfTheDay'
-import Trending from '../components/Trending'
 import Type from '../components/Type'
 import BlogCard from '../components/BlogCard'
 import { Link } from 'react-router-dom';
 import ProductCard, { ProductCardScrollable } from '../components/ProductCard';
 import { StyleHome } from '../components/Style';
+import SearchComponent from '../components/SearchComponent';
+
+import leftImage from '/assets/left.svg';
+import rightImage from '/assets/right.svg';
 
 
 const products = [
@@ -84,6 +86,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [topBanners, setTopBanners] = useState([]);
+  const [allBanners, setAllBanners] = useState([]);
 
   const scrollRef = useRef(null);
 
@@ -126,42 +129,54 @@ const Home = () => {
         setLoading(false);
       });
 
-    // Fetch banners
+    // Fetch all banners
     fetch('http://localhost:3001/api/banner')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch banners');
         return res.json();
       })
       .then(data => {
-        const filtered = data.filter(b => b.type === 'top');
+         const filtered = data.filter(b => b.type === 'top');
         setTopBanners(filtered);
         console.log('Top banners:', filtered);
+        setAllBanners(data);
       })
-      .catch(() => setTopBanners([]));
+      .catch(() => setAllBanners([]))
+       .catch(() => setTopBanners([]));
   }, []);
 
-  const dummyProduct = {
-    id: 1,
-    name: 'Ashwagandha Tablets',
-    images: [
-      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80'
-    ],
-    actual_price: 499,
-    selling_price: 349,
+  // Helper to get banner by type
+  const getBannerByType = (type) => allBanners.find(b => b.type === type);
 
-    
-  };
 
   return (
     <>
+    <div className="relative bg-gradient-to-tr from-blue-50 via-purple-100 to-pink-50 overflow-hidden flex flex-col items-center rounded-2xl">
+      {/* Images on Left & Right */}
+      <img
+        src={leftImage}
+        alt="Left Decoration"
+        className="absolute top-10 left-4 w-32 opacity-80"
+      />
+      <img
+        src={rightImage}
+        alt="Right Decoration"
+        className="absolute top-10 right-4 w-32 opacity-80"
+      />
+
+      <h1 className="text-4xl font-bold text-center mt-2 text-gray-700">Search your medicine here</h1>
+      <SearchComponent />
+    </div>
       <Type/>
+     
       <BannerTop banners={topBanners}/>
-      {/* <Breadcrumb/> */}
+      
+      
+      
       <Category/>
-      <Banners/>
-      {/* <div className="min-h-screen flex items-center justify-center">
-      </div> */}
-      {/* <Trending/> */}
+ {/* 1st: Ad Banner */}
+      {getBannerByType('ad') && <Banners banners={[getBannerByType('ad')]} />}
+
 
         {/* ----------  */}
         <div className="p-6">
@@ -174,7 +189,6 @@ const Home = () => {
     </div>
     {/* ---------------  */}
 
-      {/* <DealsOfTheDay /> */}
 {/* ----------  */}
         <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Top Products</h1>
@@ -186,11 +200,10 @@ const Home = () => {
     </div>
     {/* ---------------  */}
 
-      <Banners/>
-            <Brands />
+{/* 2nd: Info Banner */}
+      {getBannerByType('info') && <Banners banners={[getBannerByType('info')]} />}
+                  <Brands />
 
-                  {/* <DealsOfTheDay />
-  <ProductCard product={dummyProduct} /> */}
 
   {/* ----------  */}
         <div className="p-6">
@@ -236,8 +249,12 @@ const Home = () => {
   )}
 </div>
 
-<Banners/>
-<Banners/>
+{/* 3rd: Company Banner */}
+      {getBannerByType('company') && <Banners banners={[getBannerByType('company')]} />}
+
+
+{/* 4th: WhatsApp Banner */}
+      {getBannerByType('whatsapp') && <Banners banners={[getBannerByType('whatsapp')]} />}
 
 <StyleHome/>
 
