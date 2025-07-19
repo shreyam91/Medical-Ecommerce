@@ -204,7 +204,7 @@ export function Banners({ banners }) {
   }
 
   // Debug: log the image URL
-  console.log('Banner image URL:', bannerData.image_url);
+  // console.log('Banner image URL:', bannerData.image_url);
 
   // If product_id exists, link to product page; else, use link or just show image
   const handleClick = () => {
@@ -443,9 +443,9 @@ export default function BannerTop ({ banners }) {
         onMouseLeave={handleMouseLeave}
       >
         {visibleBanners.map((banner, idx) => {
-          console.log('Banner:', banner); // Debug: log each banner
+          // console.log('Banner:', banner); // Debug: log each banner
           const handleClick = () => {
-            console.log('Clicked banner:', banner); // Debug: log click event
+            // console.log('Clicked banner:', banner); // Debug: log click event
             if (banner.product_id) {
               navigate(`/product/${banner.product_id}`);
             } else if (banner.link) {

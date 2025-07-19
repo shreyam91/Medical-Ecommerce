@@ -92,18 +92,36 @@ const ProductCard = ({ product }) => {
 
 export default ProductCard;
 
+// Updated ProductCardScrollable
+export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPrice }) => {
+  const { addToCart, cartItems } = useCart();
+  const isInCart = cartItems.some(item => item.id === id);
 
-export const ProductCardScrollable = ({ image, name, actualPrice, sellingPrice }) => {
+  const handleAddToCart = () => {
+    addToCart({
+      id,
+      name,
+      price: sellingPrice,
+      image,
+      actual_price: actualPrice,
+    });
+    toast.success("Added to cart!");
+  };
+
   return (
     <div className="w-64 p-4 bg-white rounded-lg shadow-md flex-shrink-0 transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
+      {/* <Toaster position="top-right" /> */}
       <img src={image} alt={name} className="h-40 w-full object-cover rounded-md mb-4" />
       <h2 className="text-lg font-semibold">{name}</h2>
       <div className="flex items-center gap-2 my-2">
         <span className="text-gray-500 line-through text-sm">₹{actualPrice}</span>
         <span className="text-red-600 font-bold">₹{sellingPrice}</span>
       </div>
-      <button className="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200 w-full">
-        Add to Cart
+      <button
+        className={`mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200 w-full`}
+        onClick={handleAddToCart}
+      >
+        { 'Add to Cart'}
       </button>
     </div>
   );

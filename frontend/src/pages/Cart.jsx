@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import DealsOfTheDay from "../components/DealsOfTheDay";
 import { ProductCardScrollable } from "../components/ProductCard";
 
 const productSimilar = [
@@ -412,8 +411,6 @@ export default function Cart() {
     </div>
   </div>
 </div>
-
-{/* <DealsOfTheDay/> */}
 
 {/* ----------  */}
             <div className="mt-2">

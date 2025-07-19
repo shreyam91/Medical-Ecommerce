@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import Style from "../components/Style";
-import Trending from "../components/Trending";
 
 import badges from '/assets/badges.svg';
 import brands from '/assets/brands.svg';
