@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export default function BrandFilterAside ({ selectedBrands, onBrandChange }){
+export default function BrandFilterAside({ selectedBrands, onBrandChange }) {
   const [brands, setBrands] = useState([]);
   const [search, setSearch] = useState('');
 
@@ -17,7 +17,7 @@ export default function BrandFilterAside ({ selectedBrands, onBrandChange }){
       ? selectedBrands.filter((id) => id !== brandId)
       : [...selectedBrands, brandId];
 
-    onBrandChange(updated); // Call parent callback
+    onBrandChange(updated);
   };
 
   const filteredBrands = brands.filter((brand) =>
@@ -25,10 +25,9 @@ export default function BrandFilterAside ({ selectedBrands, onBrandChange }){
   );
 
   return (
-    <aside className="w-full sm:w-64 p-4 bg-white shadow rounded h-fit sticky top-4">
+    <aside className="w-full sm:w-64 p-4 bg-white shadow rounded">
       <h2 className="text-xl font-semibold mb-4 text-gray-700">Filter by Brand</h2>
 
-      {/* Search Input */}
       <input
         type="text"
         placeholder="Search brands..."
@@ -37,8 +36,7 @@ export default function BrandFilterAside ({ selectedBrands, onBrandChange }){
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* Brand Checkboxes */}
-      <ul className="space-y-2 max-h-80 overflow-y-auto pr-1">
+      <ul className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
         {filteredBrands.length > 0 ? (
           filteredBrands.map((brand) => (
             <li key={brand.id} className="flex items-center space-x-2">
@@ -60,9 +58,7 @@ export default function BrandFilterAside ({ selectedBrands, onBrandChange }){
       </ul>
     </aside>
   );
-};
-
-
+}
 
 
 export const DiseaseFilterAside = ({ selectedDiseases, onDiseaseChange }) => {
@@ -82,7 +78,7 @@ export const DiseaseFilterAside = ({ selectedDiseases, onDiseaseChange }) => {
       ? selectedDiseases.filter((id) => id !== diseaseId)
       : [...selectedDiseases, diseaseId];
 
-    onDiseaseChange(updated); // Call parent callback
+    onDiseaseChange(updated);
   };
 
   const filteredDiseases = diseases.filter((disease) =>
@@ -90,10 +86,9 @@ export const DiseaseFilterAside = ({ selectedDiseases, onDiseaseChange }) => {
   );
 
   return (
-    <aside className="w-full sm:w-64 p-4 bg-white shadow rounded h-fit sticky top-4">
+    <aside className="w-full sm:w-64 p-4 bg-white shadow rounded">
       <h2 className="text-xl font-semibold mb-4 text-gray-700">Filter by Disease</h2>
 
-      {/* Search Input */}
       <input
         type="text"
         placeholder="Search diseases..."
@@ -102,8 +97,7 @@ export const DiseaseFilterAside = ({ selectedDiseases, onDiseaseChange }) => {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* Disease Checkboxes */}
-      <ul className="space-y-2 max-h-80 overflow-y-auto pr-1">
+      <ul className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
         {filteredDiseases.length > 0 ? (
           filteredDiseases.map((disease) => (
             <li key={disease.id} className="flex items-center space-x-2">
