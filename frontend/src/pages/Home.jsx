@@ -1,91 +1,91 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
-import Breadcrumb from '../components/Breadcrumb'
-import Brands, { PopularBrand } from '../components/Brands'
-import Category from '../components/Category'
-import BannerTop, {  Banners } from '../components/Banner'
-import Type from '../components/Type'
-import BlogCard from '../components/BlogCard'
-import { Link } from 'react-router-dom';
-import ProductCard, { ProductCardScrollable } from '../components/ProductCard';
-import { StyleHome } from '../components/Style';
-import SearchComponent from '../components/SearchComponent';
+import Breadcrumb from "../components/Breadcrumb";
+import Brands, { PopularBrand } from "../components/Brands";
+import Category from "../components/Category";
+import BannerTop, { Banners } from "../components/Banner";
+import Type from "../components/Type";
+import BlogCard from "../components/BlogCard";
+import { Link } from "react-router-dom";
+import ProductCard, { ProductCardScrollable } from "../components/ProductCard";
+import { StyleHome } from "../components/Style";
+import SearchComponent from "../components/SearchComponent";
 
-import leftImage from '/assets/left.svg';
-import rightImage from '/assets/right.svg';
-
+import leftImage from "/assets/left.svg";
+import rightImage from "/assets/right.svg";
 
 const products = [
   {
     id: 1,
-    name: 'Stylish Shoes',
-    image: 'https://via.placeholder.com/200',
+    name: "Stylish Shoes",
+    image: "https://via.placeholder.com/200",
     actualPrice: 99.99,
-    sellingPrice: 59.99
+    sellingPrice: 59.99,
   },
   {
     id: 2,
-    name: 'Casual Jacket',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 120.00,
-    sellingPrice: 85.00
+    name: "Casual Jacket",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 120.0,
+    sellingPrice: 85.0,
   },
   {
     id: 3,
-    name: 'Wrist Watch',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 250.00,
-    sellingPrice: 180.00
+    name: "Wrist Watch",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 250.0,
+    sellingPrice: 180.0,
   },
   {
     id: 4,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
+    name: "Sunglasses",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 70.0,
+    sellingPrice: 45.0,
   },
   {
     id: 5,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
+    name: "Sunglasses",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 70.0,
+    sellingPrice: 45.0,
   },
   {
     id: 6,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
+    name: "Sunglasses",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 70.0,
+    sellingPrice: 45.0,
   },
   {
     id: 7,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
+    name: "Sunglasses",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 70.0,
+    sellingPrice: 45.0,
   },
   {
     id: 8,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
+    name: "Sunglasses",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 70.0,
+    sellingPrice: 45.0,
   },
   {
     id: 9,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  }
-];  
+    name: "Sunglasses",
+    image: "https://via.placeholder.com/200",
+    actualPrice: 70.0,
+    sellingPrice: 45.0,
+  },
+];
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [topBanners, setTopBanners] = useState([]);
+  const [allBanners, setAllBanners] = useState([]);
 
   const scrollRef = useRef(null);
 
@@ -96,152 +96,167 @@ const Home = () => {
 
     const scrollInterval = setInterval(() => {
       if (!scrollContainer) return;
-      scrollContainer.scrollBy({ left: 1, behavior: 'smooth' });
+      scrollContainer.scrollBy({ left: 1, behavior: "smooth" });
       scrollAmount += 1;
 
-      if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+      if (
+        scrollAmount >=
+        scrollContainer.scrollWidth - scrollContainer.clientWidth
+      ) {
         scrollAmount = 0;
-        scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+        scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
       }
     }, 20); // Adjust speed (lower = faster)
 
     return () => clearInterval(scrollInterval);
   }, []);
 
-
-
   useEffect(() => {
     // Fetch blogs
     setLoading(true);
     setError(null);
-    fetch('http://localhost:3001/api/blog')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch blogs');
+    fetch("http://localhost:3001/api/blog")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch blogs");
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         setBlogs(data.slice(0, 3)); // Show only the latest 3 blogs
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         setError(err.message);
         setLoading(false);
       });
 
     // Fetch banners
-    fetch('http://localhost:3001/api/banner')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch banners');
+    fetch("http://localhost:3001/api/banner")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch banners");
         return res.json();
       })
-      .then(data => {
-        const filtered = data.filter(b => b.type === 'top');
+      .then((data) => {
+        const filtered = data.filter((b) => b.type === "top");
         setTopBanners(filtered);
         // console.log('Top banners:', filtered);
+        setAllBanners(data);
       })
-      .catch(() => setTopBanners([]));
+      .catch(() => setTopBanners([]))
+      .catch(() => setAllBanners([]));
   }, []);
 
+  const getBannerByType = (type) => allBanners.find((b) => b.type === type);
 
   return (
     <>
-    <div className="relative bg-gradient-to-tr from-blue-50 via-purple-100 to-pink-50 overflow-hidden flex flex-col items-center rounded-2xl">
-      {/* Images on Left & Right */}
-      <img
-        src={leftImage}
-        alt="Left Decoration"
-        className="absolute top-10 left-4 w-32 opacity-80"
-      />
-      <img
-        src={rightImage}
-        alt="Right Decoration"
-        className="absolute top-10 right-4 w-32 opacity-80"
-      />
+      <div className="relative bg-gradient-to-tr from-blue-50 via-purple-100 to-pink-50 overflow-hidden flex flex-col items-center rounded-2xl">
+        {/* Images on Left & Right */}
+        <img
+          src={leftImage}
+          alt="Left Decoration"
+          className="absolute top-10 left-4 w-32 opacity-80"
+        />
+        <img
+          src={rightImage}
+          alt="Right Decoration"
+          className="absolute top-10 right-4 w-32 opacity-80"
+        />
 
-      <h1 className="text-4xl font-bold text-center mt-2 text-gray-700">Search your medicine here</h1>
-      <SearchComponent />
-    </div>
-      <Type/>
-      <BannerTop banners={topBanners}/>
-      <Category/>
-      <Banners/>
-
-        {/* ----------  */}
-        <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Seasonal Products</h1>
-      <div className="flex overflow-x-auto gap-4">
-        {products.map((product) => (
-          <ProductCardScrollable key={product.id} {...product} />
-        ))}
+        <h1 className="text-4xl font-bold text-center mt-2 text-gray-700">
+          Search your medicine here
+        </h1>
+        <SearchComponent />
       </div>
-    </div>
-    {/* ---------------  */}
-
-{/* ----------  */}
-        <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Top Products</h1>
-      <div className="flex overflow-x-auto gap-4">
-        {products.map((product) => (
-          <ProductCardScrollable key={product.id} {...product} />
-        ))}
+      <Type />
+      {/* top banner for product display  */}
+      <BannerTop banners={topBanners} />
+      <Category />
+      {/* banner for ad  */}
+      {getBannerByType("ad") && <Banners banners={[getBannerByType("ad")]} />}
+      {/* ----------  */}
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Seasonal Products</h1>
+        <div className="flex overflow-x-auto gap-4">
+          {products.map((product) => (
+            <ProductCardScrollable key={product.id} {...product} />
+          ))}
+        </div>
       </div>
-    </div>
-    {/* ---------------  */}
-
-      <Banners/>
-            <Brands />
-
-
-  {/* ----------  */}
-        <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Maximum Discount Products</h1>
-      <div className="flex overflow-x-auto gap-4">
-        {products.map((product) => (
-          <ProductCardScrollable key={product.id} {...product} />
-        ))}
+      {/* ---------------  */}
+      {/* ----------  */}
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Top Products</h1>
+        <div className="flex overflow-x-auto gap-4">
+          {products.map((product) => (
+            <ProductCardScrollable key={product.id} {...product} />
+          ))}
+        </div>
       </div>
-    </div>
-    {/* ---------------  */}
-
-    <PopularBrand/>
-
+      {/* ---------------  */}
+      {/* info banner  */}
+      {getBannerByType("info") && (
+        <Banners banners={[getBannerByType("info")]} />
+      )}{" "}
+      <Brands />
+      {/* ----------  */}
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Maximum Discount Products</h1>
+        <div className="flex overflow-x-auto gap-4">
+          {products.map((product) => (
+            <ProductCardScrollable key={product.id} {...product} />
+          ))}
+        </div>
+      </div>
+      {/* ---------------  */}
+      <PopularBrand />
       {/* Blog Section */}
       <div className="my-10">
-  <div className="flex justify-between items-center mb-6">
-    <h2 className="text-2xl font-bold text-green-700">Discover Ayurveda</h2>
-    <Link to="/blog" className='text-md font-semibold text-blue-600 cursor-pointer hover:underline'> See all</Link>
-    {/* <h2 className="text-md font-semibold text-blue-600 cursor-pointer hover:underline">See all</h2> */}
-  </div>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-green-700">
+            Discover Ayurveda
+          </h2>
+          <Link
+            to="/blog"
+            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
+          >
+            {" "}
+            See all
+          </Link>
+          {/* <h2 className="text-md font-semibold text-blue-600 cursor-pointer hover:underline">See all</h2> */}
+        </div>
 
-  {loading && <div className="text-gray-500">Loading blogs...</div>}
-  {error && <div className="text-red-500">{error}</div>}
+        {loading && <div className="text-gray-500">Loading blogs...</div>}
+        {error && <div className="text-red-500">{error}</div>}
 
-  {!loading && !error && blogs.length > 0 && (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {blogs.map(blog => (
-        <BlogCard
-          key={blog.id}
-          image={blog.image_url}
-          title={blog.title}
-          description={blog.short_description}
-          tags={blog.tags || []}
-          link={`/blog/${blog.id}`}
-        />
-      ))}
-    </div>
-  )}
+        {!loading && !error && blogs.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {blogs.map((blog) => (
+              <BlogCard
+                key={blog.id}
+                image={blog.image_url}
+                title={blog.title}
+                description={blog.short_description}
+                tags={blog.tags || []}
+                link={`/blog/${blog.id}`}
+              />
+            ))}
+          </div>
+        )}
 
-  {!loading && !error && blogs.length === 0 && (
-    <div className="text-gray-400">No blogs available.</div>
-  )}
-</div>
-
-<Banners/>
-<Banners/>
-
-<StyleHome/>
-
+        {!loading && !error && blogs.length === 0 && (
+          <div className="text-gray-400">No blogs available.</div>
+        )}
+      </div>
+      {/* Company banner  */}
+      {getBannerByType("company") && (
+        <Banners banners={[getBannerByType("company")]} />
+      )}
+      {/* whatsapp banner  */}
+      {getBannerByType("whatsapp") && (
+        <Banners banners={[getBannerByType("whatsapp")]} />
+      )}
+      <StyleHome />
     </>
   );
-}
-export default Home
+};
+export default Home;
