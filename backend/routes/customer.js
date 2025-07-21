@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
 const auth = require('./auth');
+const { v4: uuidv4 } = require('uuid'); // For order UUIDs if needed
 
 function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
@@ -35,7 +36,19 @@ router.get('/:id', auth, requireAdmin, async (req, res) => {
 router.post('/', auth, requireAdmin, async (req, res) => {
   const { name, email, mobile, address, active } = req.body;
   try {
-    const [customer] = await sql`INSERT INTO customer (name, email, mobile, address, active) VALUES (${name}, ${email}, ${mobile}, ${address}, ${active}) RETURNING *`;
+    // 1. Insert customer, get id and created_at
+    const [customer] = await sql`
+      INSERT INTO customer (name, email, mobile, address, active)
+      VALUES (${name}, ${email}, ${mobile}, ${address}, ${active})
+      RETURNING *`;
+    // 2. Generate custom customer_id
+    const date = (customer.created_at || new Date()).toISOString().slice(0,10).replace(/-/g,'');
+    const namePart = (customer.name || '').toUpperCase().replace(/[^A-Z]/g, '').padEnd(3, 'X').slice(0,3);
+    const idPart = String(customer.id).padStart(2, '0');
+    const customId = `CUST-${date}-${namePart}${idPart}`;
+    // 3. Update customer row
+    await sql`UPDATE customer SET customer_id = ${customId} WHERE id = ${customer.id}`;
+    customer.customer_id = customId;
     res.status(201).json(customer);
   } catch (err) {
     res.status(500).json({ error: err.message });

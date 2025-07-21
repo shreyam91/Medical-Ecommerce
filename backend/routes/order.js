@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const sql = require('../config/supabase');
 const auth = require('./auth');
+const { v4: uuidv4 } = require('uuid');
 
 function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
@@ -13,9 +14,16 @@ function requireAdmin(req, res, next) {
 // Get all orders
 router.get('/', auth, requireAdmin, async (req, res) => {
   try {
-    const orders = await sql`SELECT * FROM "order" ORDER BY order_date DESC`;
+    const orders = await sql`
+      SELECT o.*, c.name AS customer_name, p.method AS payment_method
+      FROM "order" o
+      LEFT JOIN customer c ON o.customer_id = c.id
+      LEFT JOIN payment p ON o.payment_id = p.id
+      ORDER BY o.order_date DESC
+    `;
     res.json(orders);
   } catch (err) {
+    console.error('Order API error:', err); // <-- Add this line
     res.status(500).json({ error: err.message });
   }
 });
@@ -35,9 +43,10 @@ router.get('/:id', auth, requireAdmin, async (req, res) => {
 router.post('/', auth, requireAdmin, async (req, res) => {
   const { customer_id, status, total_amount, payment_id, address, notes } = req.body;
   try {
+    const order_uuid = uuidv4();
     const [order] = await sql`
-      INSERT INTO "order" (customer_id, status, total_amount, payment_id, address, notes)
-      VALUES (${customer_id}, ${status}, ${total_amount}, ${payment_id}, ${address}, ${notes})
+      INSERT INTO "order" (id, customer_id, status, total_amount, payment_id, address, notes)
+      VALUES (${order_uuid}, ${customer_id}, ${status}, ${total_amount}, ${payment_id}, ${address}, ${notes})
       RETURNING *`;
     res.status(201).json(order);
   } catch (err) {

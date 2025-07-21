@@ -29,6 +29,8 @@ app.use('/api/reference_book', require('./routes/reference_book'));
 app.use('/api/disease', require('./routes/disease'));
 app.use('/api/main_category', require('./routes/main_category'));
 app.use('/api/sub_category', require('./routes/sub_category'));
+app.use('/api/customer', require('./routes/customer'));
+app.use('/api/payment', require('./routes/payment'));
 
 // Endpoint to fetch pincodes by city or pincode using a free public API
 app.get('/api/pincodes/:query', async (req, res) => {
