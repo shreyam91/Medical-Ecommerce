@@ -44,11 +44,13 @@
     "date-fns": "^4.1.0",
     "editor.js": "^0.1.0",
     "editorjs-html": "^4.0.5",
+    "file-saver": "^2.0.5",
     "lucide-react": "^0.515.0",
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-date-range": "^2.0.1",
+    "react-datepicker": "^8.4.0",
     "react-dom": "^19.1.0",
     "react-editor-js": "^2.1.0",
     "react-hot-toast": "^2.5.2",
@@ -59,6 +61,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.67"
   },
   "devDependencies": {
