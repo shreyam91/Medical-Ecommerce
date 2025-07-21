@@ -5,6 +5,7 @@ import Header from '@editorjs/header';
 import List from '@editorjs/list';
 import ImageTool from '@editorjs/image';
 import Paragraph from '@editorjs/paragraph';
+import LinkTool from '@editorjs/link';
 
 import imageCompression from 'browser-image-compression';
 
@@ -12,8 +13,42 @@ import imageCompression from 'browser-image-compression';
 const EDITOR_JS_TOOLS = {
   header: Header,
   list: List,
-  image: ImageTool,
   paragraph: Paragraph,
+  image: {
+    class: ImageTool,
+    config: {
+      uploader: {
+        async uploadByFile(file) {
+          // Compress image before upload
+          const compressed = await imageCompression(file, {
+            maxSizeMB: 0.5,
+            maxWidthOrHeight: 1200,
+            useWebWorker: true,
+          });
+          const formData = new FormData();
+          formData.append('image', compressed);
+          const response = await fetch('http://localhost:3001/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) throw new Error('Upload failed');
+          const data = await response.json();
+          return {
+            success: 1,
+            file: {
+              url: data.imageUrl,
+            },
+          };
+        },
+      },
+    },
+  },
+  linkTool: {
+    class: LinkTool,
+    config: {
+      endpoint: 'http://localhost:3001/api/fetchUrl', // You may need to implement this endpoint or use a dummy one
+    },
+  },
 };
 
 const BlogEditor = ({ blog = {}, onSave, onCancel }) => {

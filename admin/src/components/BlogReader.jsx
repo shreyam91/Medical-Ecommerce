@@ -63,6 +63,33 @@ const renderBlock = (block, index) => {
             <code>{block.data.code}</code>
           </pre>
         );
+      case 'linkTool': {
+        const { link, meta } = block.data;
+        if (!link) return null;
+        return (
+          <a
+            key={index}
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block border rounded p-4 my-4 hover:shadow transition bg-gray-50"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            <div className="flex gap-4 items-center">
+              {meta?.image && (
+                <img src={meta.image} alt={meta.title || link} className="w-20 h-20 object-cover rounded" />
+              )}
+              <div>
+                <div className="font-semibold text-lg mb-1">{meta?.title || link}</div>
+                {meta?.description && (
+                  <div className="text-gray-600 text-sm mb-1">{meta.description}</div>
+                )}
+                <div className="text-blue-600 text-xs break-all">{link}</div>
+              </div>
+            </div>
+          </a>
+        );
+      }
 
       default:
         return null; // safely ignore unknown blocks
