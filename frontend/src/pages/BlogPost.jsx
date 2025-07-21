@@ -6,6 +6,7 @@ const BlogPost = () => {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +26,28 @@ const BlogPost = () => {
         setLoading(false);
       });
   }, [id]);
+
+  // Fetch related blogs
+  useEffect(() => {
+    if (!blog) return;
+    fetch('http://localhost:3001/api/blog')
+      .then(res => res.json())
+      .then(allBlogs => {
+        // Exclude current blog
+        const others = allBlogs.filter(b => String(b.id) !== String(id));
+        // Try to match by tag
+        let related = [];
+        if (blog.tags && blog.tags.length > 0) {
+          related = others.filter(b => b.tags && b.tags.some(tag => blog.tags.includes(tag)));
+        }
+        // Fallback: recent blogs
+        if (related.length < 3) {
+          const more = others.filter(b => !related.includes(b)).slice(0, 3 - related.length);
+          related = [...related, ...more];
+        }
+        setRelatedBlogs(related.slice(0, 3));
+      });
+  }, [blog, id]);
 
   if (loading) {
     return <div className="text-center mt-20 text-gray-500">Loading blog...</div>;
@@ -135,6 +158,48 @@ const BlogPost = () => {
                         ))}
                       </ul>
                     );
+                  case 'image': {
+                    const imageUrl = block.data.file?.url || block.data.url;
+                    return (
+                      <div key={idx} className="my-4">
+                        <img
+                          src={imageUrl}
+                          alt={block.data.caption || ''}
+                          className="rounded w-full max-h-96 object-contain"
+                        />
+                        {block.data.caption && (
+                          <p className="text-center text-sm text-gray-500 mt-1">{block.data.caption}</p>
+                        )}
+                      </div>
+                    );
+                  }
+                  case 'linkTool': {
+                    const { link, meta } = block.data;
+                    if (!link) return null;
+                    return (
+                      <a
+                        key={idx}
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block border rounded p-4 my-4 hover:shadow transition bg-gray-50"
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        <div className="flex gap-4 items-center">
+                          {meta?.image && (
+                            <img src={meta.image} alt={meta.title || link} className="w-20 h-20 object-cover rounded" />
+                          )}
+                          <div>
+                            <div className="font-semibold text-lg mb-1">{meta?.title || link}</div>
+                            {meta?.description && (
+                              <div className="text-gray-600 text-sm mb-1">{meta.description}</div>
+                            )}
+                            <div className="text-blue-600 text-xs break-all">{link}</div>
+                          </div>
+                        </div>
+                      </a>
+                    );
+                  }
                   default:
                     return null;
                 }
@@ -145,7 +210,29 @@ const BlogPost = () => {
           </div>
         </div>
 
-        {/* Right: Related Blogs (optional, could fetch more blogs and filter by tag) */}
+        {/* Right: Related Blogs */}
+        <aside className="lg:w-1/3 w-full mt-10 lg:mt-0">
+          <h2 className="text-xl font-bold mb-4">Related Blogs</h2>
+          {relatedBlogs.length === 0 && <div className="text-gray-500">No related blogs found.</div>}
+          <div className="space-y-6">
+            {relatedBlogs.map((b) => (
+              <Link key={b.id} to={`/blog/${b.id}`} className="block border rounded-lg p-4 hover:shadow transition bg-white">
+                <div className="flex gap-4 items-center">
+                  <img src={b.image_url} alt={b.title} className="w-20 h-20 object-cover rounded" />
+                  <div>
+                    <div className="font-semibold text-lg mb-1 text-orange-700">{b.title}</div>
+                    <div className="text-gray-600 text-sm mb-1 line-clamp-2">{b.short_description}</div>
+                    <div className="flex gap-2 flex-wrap mt-1">
+                      {b.tags && b.tags.length > 0 && b.tags.slice(0, 3).map((tag, i) => (
+                        <span key={i} className="bg-blue-50 text-green-700 px-2 py-0.5 rounded-full text-xs font-semibold">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </aside>
       </div>
     </div>
   );

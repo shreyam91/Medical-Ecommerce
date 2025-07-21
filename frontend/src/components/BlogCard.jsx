@@ -1,5 +1,6 @@
 // src/components/BlogCard.jsx
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const BlogCard = ({ image, title, description, tags, link }) => {
   return (
@@ -18,12 +19,12 @@ const BlogCard = ({ image, title, description, tags, link }) => {
           ))}
         </div>
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">{description}</p>
-        <a
-          href={link}
+        <Link
+          to={link}
           className="inline-block text-green-500 hover:text-orange-500 text-sm font-medium"
         >
           Read More →
-        </a>
+        </Link>
       </div>
     </div>
   );

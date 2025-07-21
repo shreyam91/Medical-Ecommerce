@@ -149,7 +149,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="relative bg-gradient-to-tr from-blue-50 via-purple-100 to-pink-50 overflow-hidden flex flex-col items-center rounded-2xl">
+      <div className="relative bg-gradient-to-tr from-orange-50 via-green-100 to-blue-50 overflow-hidden flex flex-col items-center rounded-2xl">
         {/* Images on Left & Right */}
         <img
           src={leftImage}
@@ -161,10 +161,6 @@ const Home = () => {
           alt="Right Decoration"
           className="absolute top-10 right-4 w-32 opacity-80"
         />
-
-        <h1 className="text-4xl font-bold text-center mt-2 text-gray-700">
-          Search your medicine here
-        </h1>
         <SearchComponent />
       </div>
       <Type />
@@ -174,8 +170,8 @@ const Home = () => {
       {/* banner for ad  */}
       {getBannerByType("ad") && <Banners banners={[getBannerByType("ad")]} />}
       {/* ----------  */}
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Seasonal Products</h1>
+      <div className="mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Seasonal Products</h1>
         <div className="flex overflow-x-auto gap-4">
           {products.map((product) => (
             <ProductCardScrollable key={product.id} {...product} />
@@ -184,8 +180,8 @@ const Home = () => {
       </div>
       {/* ---------------  */}
       {/* ----------  */}
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Top Products</h1>
+      <div className="mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Top Products</h1>
         <div className="flex overflow-x-auto gap-4">
           {products.map((product) => (
             <ProductCardScrollable key={product.id} {...product} />
@@ -199,8 +195,8 @@ const Home = () => {
       )}{" "}
       <Brands />
       {/* ----------  */}
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Maximum Discount Products</h1>
+      <div className="mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Maximum Discount Products</h1>
         <div className="flex overflow-x-auto gap-4">
           {products.map((product) => (
             <ProductCardScrollable key={product.id} {...product} />
@@ -212,7 +208,7 @@ const Home = () => {
       {/* Blog Section */}
       <div className="my-10">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-green-700">
+          <h2 className="text-2xl sm:text-3xl font-bold text-black">
             Discover Ayurveda
           </h2>
           <Link
