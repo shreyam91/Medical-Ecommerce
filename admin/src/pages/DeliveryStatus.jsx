@@ -1,27 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
-// Simulated API fetch function
-const simulateFetch = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(Array.from({ length: 50 }, (_, i) => ({
-        srNo: i + 1,
-        invoice: `INV${100000 + i}`,
-        status: ['Delivered', 'In Transit', 'Pending'][i % 3],
-        paymentMode: ['Credit Card', 'UPI', 'Cash on Delivery'][i % 3],
-        customer: {
-          name: ['John Doe', 'Jane Smith', 'Rahul Verma'][i % 3],
-          id: `C${String(i + 1).padStart(3, '0')}`,
-        },
-        orderId: `ORD${5000 + i}`,
-        city: ['Mumbai', 'Delhi', 'Bangalore'][i % 3],
-        pincode: [400001, 110001, 560001][i % 3],
-        orderDate: new Date(Date.now() - i * 86400000),
-        transitDate: new Date(Date.now() - (i - 1) * 86400000),
-        deliveryDate: new Date(Date.now() - (i - 2) * 86400000),
-      })));
-    }, 1000);
+// Remove simulateFetch and use real API
+const fetchDeliveryStatus = async () => {
+  const token = localStorage.getItem('token');
+  const res = await fetch('http://localhost:3001/api/delivery_status', {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
   });
+  if (!res.ok) throw new Error('Failed to fetch delivery status');
+  return res.json();
 };
 
 const statusColors = {
@@ -42,8 +31,24 @@ export default function DeliveryStatusTable() {
 
   const fetchData = async () => {
     setLoading(true);
-    const res = await simulateFetch();
-    setData(res);
+    try {
+      const backendData = await fetchDeliveryStatus();
+      // Map backend fields to frontend structure
+      const mapped = backendData.map((item, i) => ({
+        srNo: i + 1,
+        orderId: item.order_id || item.id || '',
+        customer: { name: item.customer_name || 'N/A', id: item.customer_id || '' },
+        city: item.city || '',
+        pincode: item.pincode || '',
+        orderDate: item.order_date,
+        deliveryDate: item.delivery_date,
+        status: item.delivery_status || item.status || '',
+        paymentMode: item.payment_type || '',
+      }));
+      setData(mapped);
+    } catch (err) {
+      setData([]);
+    }
     setLoading(false);
   };
 
@@ -62,9 +67,8 @@ export default function DeliveryStatusTable() {
 
   const filtered = data
     .filter(item =>
-  item.invoice.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  item.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
   item.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  item.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
   item.city.toLowerCase().includes(searchTerm.toLowerCase()) || 
   item.paymentMode.toLowerCase().includes(searchTerm.toLowerCase()) 
 )
@@ -127,6 +131,8 @@ export default function DeliveryStatusTable() {
           <option value="Delivered">Delivered</option>
           <option value="In Transit">In Transit</option>
           <option value="Pending">Pending</option>
+          <option value="Pending">Returned</option>
+          <option value="Pending">Cancelled</option>
         </select>
         <select
           value={rowsPerPage}
@@ -156,7 +162,7 @@ export default function DeliveryStatusTable() {
           <tbody>
             {pageData.length ? pageData.map((item, index) => (
               <tr
-                key={item.invoice}
+                key={item.orderId}
                 className={`hover:bg-gray-100 ${isDelayed(item.status, item.orderDate) ? 'border-l-4 border-red-500' : ''}`}
               >
                 <td className="border p-2">{(currentPage - 1) * rowsPerPage + index + 1}</td>

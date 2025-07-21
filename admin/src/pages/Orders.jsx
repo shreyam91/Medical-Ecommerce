@@ -1,59 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { getOrders, createOrder, updateOrder, deleteOrder } from '../lib/orderApi';
+import { getCustomers } from '../lib/customerApi';
+import { getPayments } from '../lib/paymentApi';
 
 const statusOptions = ['Ordered', 'Shipped', 'Delivered', 'Returned', 'Refunded'];
-
-const initialOrders = [
-  {
-    id: 1,
-    invoiceId: 'INV-1001',
-    customerName: 'John Doe',
-    date: '2025-06-18',
-    price: 149.99,
-    status: 'Shipped',
-    items: 'Aspirin x2, Thermometer x1, Bandages x5, Hand Sanitizer x1',
-    address: '123 Main St, Springfield',
-    notes: '',
-    payment_type: 'Online',
-  },
-  {
-    id: 2,
-    invoiceId: 'INV-1002',
-    customerName: 'Jane Smith',
-    date: '2025-06-17',
-    price: 89.5,
-    status: 'Shipped',
-    items: 'Vitamin C x3, Bandage x5',
-    address: '456 Elm St, Rivertown',
-    notes: '',
-    payment_type: 'COD',
-    prescriptionRequired: true,
-  },
-  {
-    id: 3,
-    invoiceId: 'INV-1003',
-    customerName: 'Robert Brown',
-    date: '2025-06-15',
-    price: 119.99,
-    status: 'Delivered',
-    items: 'Insulin Pen x1, Glucometer x1, Test Strips x50, Cotton x2, Gloves x10',
-    address: '789 Oak St, Hillview',
-    notes: '',
-    payment_type: 'UPI',
-  },
-  {
-    id: 4,
-    invoiceId: 'INV-1004',
-    customerName: 'Alice Green',
-    date: '2025-06-14',
-    price: 59.0,
-    status: 'Returned',
-    items: 'Mask x5, Thermometer x1',
-    address: '222 Maple Ave, Hilltown',
-    notes: '',
-    payment_type: 'COD',
-  },
-];
 
 export default function OrdersPro() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -61,7 +11,7 @@ export default function OrdersPro() {
     return <div className="p-8 text-red-600 font-bold">Access denied</div>;
   }
 
-  const [orders, setOrders] = useState(initialOrders);
+  const [orders, setOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState('All');
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,6 +38,8 @@ export default function OrdersPro() {
     payment_type: true,
     notes: true,
   });
+  const [customers, setCustomers] = useState([]);
+  const [payments, setPayments] = useState([]);
 
   // Sorting
   const handleSort = key => {
@@ -223,7 +175,29 @@ export default function OrdersPro() {
   useEffect(() => setCurrentPage(1), [filterStatus, searchTerm, entriesPerPage, dateFrom, dateTo]);
 
   useEffect(() => {
-    getOrders().then(setOrders).catch(() => setOrders([]));
+    getOrders().then(async (ordersData) => {
+      // Try to use backend-joined fields, but fallback to merging if missing
+      let hasCustomerName = ordersData.length > 0 && 'customer_name' in ordersData[0];
+      let hasPaymentMethod = ordersData.length > 0 && 'payment_method' in ordersData[0];
+      if (!hasCustomerName || !hasPaymentMethod) {
+        // Fetch customers and payments for merging
+        const [customerData, paymentData] = await Promise.all([
+          getCustomers().catch(() => []),
+          getPayments().catch(() => []),
+        ]);
+        setCustomers(customerData);
+        setPayments(paymentData);
+        // Merge customer name and payment method
+        const customerMap = Object.fromEntries(customerData.map(c => [c.id, c]));
+        const paymentMap = Object.fromEntries(paymentData.map(p => [p.id, p]));
+        ordersData = ordersData.map(order => ({
+          ...order,
+          customer_name: customerMap[order.customer_id]?.name || '',
+          payment_method: paymentMap[order.payment_id]?.method || '',
+        }));
+      }
+      setOrders(ordersData);
+    }).catch(() => setOrders([]));
   }, []);
 
   return (
@@ -316,14 +290,14 @@ export default function OrdersPro() {
               {/* {visibleColumns.invoiceId && <th className="border px-2 py-2">Invoice ID</th>} */}
               {visibleColumns.customerName && <th className="border px-2 py-2">Customer</th>}
               {visibleColumns.date && (
-  <th
-    className="border px-3 py-2 cursor-pointer select-none whitespace-nowrap min-w-[120px]"
-    onClick={() => handleSort('date')}
-  >
-    Date{' '}
-    {sortConfig.key === 'date' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
-  </th>
-)}
+                <th
+                  className="border px-3 py-2 cursor-pointer select-none whitespace-nowrap min-w-[120px]"
+                  onClick={() => handleSort('date')}
+                >
+                  Date{' '}
+                  {sortConfig.key === 'date' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                </th>
+              )}
               {visibleColumns.price && <th className="border px-2 py-2">Price (₹)</th>}
               {visibleColumns.status && <th className="border px-2 py-2">Status</th>}
               {visibleColumns.items && <th className="border px-2 py-2">Items</th>}
@@ -334,67 +308,74 @@ export default function OrdersPro() {
             </tr>
           </thead>
           <tbody>
-            {paginatedOrders.map((order, idx) => (
-              <tr
-  key={order.id}
-  className={order.prescriptionRequired ? 'border-2 border-red-500' : ''}
->
-
-                <td className="border text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(order.id)}
-                    onChange={() => toggleSelectRow(order.id)}
-                  />
-                </td>
-                {visibleColumns.srNo && <td className="border px-2 py-1 text-center">{(currentPage - 1) * entriesPerPage + idx + 1}</td>}
-                {visibleColumns.orderId && <td className="border px-2 py-1">{order.id}</td>}
-                {/* {visibleColumns.invoiceId && <td className="border px-2 py-1">{order.invoiceId}</td>} */}
-                {visibleColumns.customerName && <td className="border px-2 py-1">{order.customerName}</td>}
-                {visibleColumns.date && (
-  <td className="border px-3 py-2 whitespace-nowrap min-w-[120px]">
-    {order.date}
-  </td>
-)}
-                {visibleColumns.price && <td className="border px-2 py-1">₹{order.price.toFixed(2)}</td>}
-                {visibleColumns.status && (
-                  <td className="border px-2 py-1">
-                    <select
-                      className="border rounded px-1 py-0.5"
-                      value={order.status}
-                      onChange={e => handleStatusChange(order.id, e.target.value)}
-                    >
-                      {statusOptions.map(s => <option key={s}>{s}</option>)}
-                    </select>
-                  </td>
-                )}
-                {visibleColumns.items && (
-                  <td className="border px-2 py-1">{order.items}</td>
-                )}
-                {visibleColumns.address && <td className="border px-2 py-1">{order.address}</td>}
-                {visibleColumns.payment_type && <td className="border px-2 py-1">{order.payment_type}</td>}
-                {visibleColumns.notes && (
-                  <td className="border px-2 py-1">
-                    <textarea
-                      rows={2}
-                      value={noteEdits[order.id] ?? order.notes}
-                      onChange={e => handleNoteChange(order.id, e.target.value)}
-                      onBlur={() => saveNote(order.id)}
-                      className="w-full border rounded"
-                      placeholder="Note..."
-                    />
-                  </td>
-                )}
-                <td className="border px-2 py-1 text-center">
-                  <button
-                    className="text-blue-600 underline"
-                    onClick={() => setShowDetailsOrder(order)}
-                  >
-                    View
-                  </button>
+            {paginatedOrders.length === 0 ? (
+              <tr>
+                <td colSpan={Object.values(visibleColumns).filter(Boolean).length + 2} className="text-center py-8 text-gray-500">
+                  No orders yet.
                 </td>
               </tr>
-            ))}
+            ) : (
+              paginatedOrders.map((order, idx) => (
+                <tr
+                  key={order.id}
+                  className={order.prescriptionRequired ? 'border-2 border-red-500' : ''}
+                >
+
+                  <td className="border text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(order.id)}
+                      onChange={() => toggleSelectRow(order.id)}
+                    />
+                  </td>
+                  {visibleColumns.srNo && <td className="border px-2 py-1 text-center">{(currentPage - 1) * entriesPerPage + idx + 1}</td>}
+                  {visibleColumns.orderId && <td className="border px-2 py-1">{order.id}</td>}
+                  {visibleColumns.customerName && <td className="border px-2 py-1">{order.customer_name}</td>}
+                  {visibleColumns.date && (
+                    <td className="border px-3 py-2 whitespace-nowrap min-w-[120px]">
+                      {order.date}
+                    </td>
+                  )}
+                  {visibleColumns.price && <td className="border px-2 py-1">₹{order.price.toFixed(2)}</td>}
+                  {visibleColumns.status && (
+                    <td className="border px-2 py-1">
+                      <select
+                        className="border rounded px-1 py-0.5"
+                        value={order.status}
+                        onChange={e => handleStatusChange(order.id, e.target.value)}
+                      >
+                        {statusOptions.map(s => <option key={s}>{s}</option>)}
+                      </select>
+                    </td>
+                  )}
+                  {visibleColumns.items && (
+                    <td className="border px-2 py-1">{order.items}</td>
+                  )}
+                  {visibleColumns.address && <td className="border px-2 py-1">{order.address}</td>}
+                  {visibleColumns.payment_type && <td className="border px-2 py-1">{order.payment_method}</td>}
+                  {visibleColumns.notes && (
+                    <td className="border px-2 py-1">
+                      <textarea
+                        rows={2}
+                        value={noteEdits[order.id] ?? order.notes}
+                        onChange={e => handleNoteChange(order.id, e.target.value)}
+                        onBlur={() => saveNote(order.id)}
+                        className="w-full border rounded"
+                        placeholder="Note..."
+                      />
+                    </td>
+                  )}
+                  <td className="border px-2 py-1 text-center">
+                    <button
+                      className="text-blue-600 underline"
+                      onClick={() => setShowDetailsOrder(order)}
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -440,32 +421,35 @@ export default function OrdersPro() {
       </div>
 
       {/* View Modal */}
-{showDetailsOrder && (
-  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-    <div className="bg-white p-6 rounded shadow-lg w-full max-w-lg max-h-full overflow-auto relative">
-      <button
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-xl"
-        onClick={() => setShowDetailsOrder(null)}
-      >
-        &times;
-      </button>
-      <h2 className="text-2xl font-bold mb-4">Order Details</h2>
+      {showDetailsOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-lg max-h-full overflow-auto relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-xl"
+              onClick={() => setShowDetailsOrder(null)}
+            >
+              &times;
+            </button>
+            <h2 className="text-2xl font-bold mb-4">Order Details</h2>
 
-      <div className="space-y-2 text-sm">
-        <p><strong>Order ID:</strong> {showDetailsOrder.id}</p>
-        {/* <p><strong>Invoice ID:</strong> {showDetailsOrder.invoiceId}</p> */}
-        <p><strong>Customer:</strong> {showDetailsOrder.customerName}</p>
-        <p><strong>Date:</strong> {showDetailsOrder.date}</p>
-        <p><strong>Price:</strong> ₹{showDetailsOrder.price.toFixed(2)}</p>
-        <p><strong>Status:</strong> {showDetailsOrder.status}</p>
-        <p><strong>Items:</strong> {showDetailsOrder.items}</p>
-        <p><strong>Address:</strong> {showDetailsOrder.address}</p>
-        <p><strong>Payment Type:</strong> {showDetailsOrder.payment_type}</p>
-        <p><strong>Notes:</strong> {showDetailsOrder.notes || '(No notes)'}</p>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="space-y-2 text-sm">
+              <p><strong>Order ID:</strong> {showDetailsOrder.id}</p>
+              {/* <p><strong>Invoice ID:</strong> {showDetailsOrder.invoiceId}</p> */}
+              <p><strong>Customer:</strong> {showDetailsOrder.customer_name}</p>
+              <p><strong>Date:</strong> {showDetailsOrder.date}</p>
+              <p><strong>Price:</strong> ₹{showDetailsOrder.price.toFixed(2)}</p>
+              <p><strong>Status:</strong> {showDetailsOrder.status}</p>
+              <p><strong>Items:</strong> {showDetailsOrder.items}</p>
+              <p><strong>Address:</strong> {showDetailsOrder.address}</p>
+              <p><strong>Payment Type:</strong> {showDetailsOrder.payment_method}</p>
+              <p><strong>Notes:</strong> {showDetailsOrder.notes || '(No notes)'}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+
+
