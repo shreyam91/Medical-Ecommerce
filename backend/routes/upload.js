@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const cheerio = require('cheerio');
 
 // Multer storage (in-memory)
 const storage = multer.memoryStorage();
@@ -36,6 +38,34 @@ router.post('/upload', upload.single('image'), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Upload failed', details: err.message });
+  }
+});
+
+// Add link preview endpoint for Editor.js LinkTool
+router.post('/fetchUrl', async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ success: 0, error: 'No URL provided' });
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    const getMeta = (name) =>
+      $(`meta[name='${name}']`).attr('content') ||
+      $(`meta[property='og:${name}']`).attr('content') ||
+      $(`meta[property='twitter:${name}']`).attr('content') || '';
+    const title = $('title').text() || getMeta('title');
+    const description = getMeta('description');
+    const image = getMeta('image');
+    res.json({
+      success: 1,
+      meta: {
+        title,
+        description,
+        image,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: 0, error: 'Failed to fetch link preview', details: err.message });
   }
 });
 
