@@ -85,7 +85,7 @@ const Brands = () => {
 
   return (
     <div className="relative mt-3 max-w-full md:max-w-7xl mx-auto">
-<h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-green-700">
+<h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-black">
         Our Top Brands
       </h1>
 
@@ -153,8 +153,8 @@ export function PopularBrand() {
   ];
 
   return (
-    <div className="relative mt-3 max-w-full md:max-w-7xl mx-auto px-4 rounded-1xl">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-green-700">
+    <div className="relative mt-3 max-w-full md:max-w-7xl mx-auto rounded-1xl">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-black">
         Popular Brands
       </h1>
 

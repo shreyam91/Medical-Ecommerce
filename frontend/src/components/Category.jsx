@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const data = [
   { id: 1, title: "Diabetes", imageUrl: "/assets/diabetes.svg", link: "/categories/diabetes" },
@@ -23,7 +24,7 @@ export default function Category() {
 
   return (
     <div className=" py-8 max-w-7xl mx-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-green-700">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">
         Shop by Health Concern
       </h1>
 
@@ -41,8 +42,8 @@ export default function Category() {
                 </div>
               ))
             : data.map(({ id, title, imageUrl, link }) => (
-                <a
-                  href={link}
+                <Link
+                  to={link}
                   key={id}
                   className="flex items-center min-w-[200px] bg-white rounded-md shadow-md p-4 hover:shadow-lg transition duration-300 hover:bg-gray-50 snap-start"
                 >
@@ -53,7 +54,7 @@ export default function Category() {
                     loading="lazy"
                   />
                   <p className="text-md font-medium text-gray-800">{title}</p>
-                </a>
+                </Link>
               ))}
         </div>
       </div>
@@ -71,8 +72,8 @@ export default function Category() {
               </div>
             ))
           : data.map(({ id, title, imageUrl, link }) => (
-              <a
-                href={link}
+              <Link
+                to={link}
                 key={id}
                 className="flex items-center bg-white rounded-md shadow-md p-4 hover:shadow-lg transition duration-300 hover:bg-gray-50"
               >
@@ -83,7 +84,7 @@ export default function Category() {
                   loading="lazy"
                 />
                 <p className="text-md font-semibold text-gray-800">{title}</p>
-              </a>
+              </Link>
             ))}
       </div>
     </div>

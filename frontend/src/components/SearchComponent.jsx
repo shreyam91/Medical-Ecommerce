@@ -44,28 +44,30 @@ export default function SearchComponent() {
 
   return (
     <div
-      className="relative transition-all duration-300 ease-in-out w-full max-w-xl mx-auto mt-12"
+      className="flex flex-col items-center justify-center w-full min-h-[120px] py-12"
       ref={dropdownRef}
     >
-      <div className={`relative ${isFocused ? 'w-full' : 'w-80'} transition-all`}>
+      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-700 drop-shadow-sm">
+        Search your medicine here
+      </h1>
+      <div className={`relative w-full max-w-xl transition-all duration-300 ease-in-out`}>  
         <FiSearch
           className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-transform duration-300 ${
             isFocused ? 'text-blue-500 scale-110' : 'scale-100'
           }`}
-          size={20}
+          size={22}
         />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          placeholder="Search something cool..."
-          className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 shadow-md focus:shadow-xl"
+          placeholder="Search your medicine here... "
+          className="w-full pl-10 pr-4 py-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 shadow-md focus:shadow-xl bg-white text-lg"
         />
       </div>
-
       {isFocused && filteredSuggestions.length > 0 && (
-        <ul className="absolute w-full bg-white rounded-lg shadow-lg mt-2 z-10 overflow-hidden">
+        <ul className="absolute w-full max-w-xl bg-white rounded-lg shadow-lg mt-2 z-10 overflow-hidden">
           {filteredSuggestions.map((suggestion, index) => (
             <li
               key={index}
