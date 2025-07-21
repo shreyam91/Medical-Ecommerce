@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
-import { createProduct, updateProduct, deleteImage } from "../lib/productApi";
+import { createProduct, updateProduct, deleteProduct, deleteImage, getProductPrices } from "../lib/productApi";
 import { getBrands } from "../lib/brandApi";
 import { getReferenceBooks } from "../lib/referenceBookApi";
+import { getMainCategories } from "../lib/mainCategoryApi";
+import { getSubCategories } from "../lib/subCategoryApi";
+import { getDiseases } from "../lib/diseaseApi";
 import TagInput from "./TagInput";
+import Select from 'react-select';
+import ProductSelects from './ProductSelects';
+import ProductFlags from './ProductFlags';
+import PriceSection from './PriceSection';
 
 const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
   const imageRef = useRef();
@@ -19,15 +26,14 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
     type: "tablet",
     name: "",
     brand_id: "",
+    mainCategoryId: "",
+    subCategoryId: "",
     referenceBook: "",
     keyTags: [],
     ingredients: "",
-    howToUse: "",
-    safetyPrecaution: "",
+    dosage: "",
+    dietary: "",
     description: "",
-    benefits: "",
-    otherInfo: "",
-    gst: "",
     prescriptionRequired: false,
     strength: "",
     prices: [
@@ -40,60 +46,101 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
       },
     ],
     selectedImages: [],
+    seasonalMedicine: false,
+    frequentlyBought: false,
+    topProducts: false,
+    peoplePreferred: false,
+    diseaseId: "",
   };
 
   const [form, setForm] = useState(initial);
   const [errors, setErrors] = useState({});
   const [brandsList, setBrandsList] = useState([]);
   const [booksList, setBooksList] = useState([]);
+  const [mainCategories, setMainCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [diseasesList, setDiseasesList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [brandSearch, setBrandSearch] = useState("");
+  const [mainCategorySearch, setMainCategorySearch] = useState("");
+  const [subCategorySearch, setSubCategorySearch] = useState("");
+  const [referenceBookSearch, setReferenceBookSearch] = useState("");
+  const [diseaseSearch, setDiseaseSearch] = useState("");
+  const [listsLoaded, setListsLoaded] = useState(false);
 
   // Fetch brands & books, initialize on edit
   useEffect(() => {
-    getBrands()
-      .then(setBrandsList)
-      .catch(() => setBrandsList([]));
-    getReferenceBooks()
-      .then(setBooksList)
-      .catch(() => setBooksList([]));
+    Promise.all([
+      getBrands().then(setBrandsList).catch(() => setBrandsList([])),
+      getReferenceBooks().then(setBooksList).catch(() => setBooksList([])),
+      getMainCategories().then(setMainCategories).catch(() => setMainCategories([])),
+      getSubCategories().then(setSubCategories).catch(() => setSubCategories([])),
+      getDiseases().then(setDiseasesList).catch(() => setDiseasesList([])),
+    ]).then(() => setListsLoaded(true));
+  }, []);
 
-    if (editProduct) {
-      setForm({
-        type:
-          editProduct.medicine_type === "Syrup"
-            ? "ml"
-            : editProduct.medicine_type === "Powder"
-            ? "gm"
-            : "tablet",
-        name: editProduct.name || "",
-        brand_id: String(editProduct.brand_id || ""),
-        referenceBook: editProduct.reference_books?.[0] || "",
-        keyTags: (editProduct.key || "")
-          .split(",")
-          .map((s) => s.trim())
-          .filter((s) => s),
-        ingredients: editProduct.key_ingredients || "",
-        howToUse: editProduct.how_to_use || "",
-        safetyPrecaution: editProduct.safety_precaution || "",
-        description: editProduct.description || "",
-        benefits: editProduct.key_benefits || "",
-        otherInfo: editProduct.other_info || "",
-        gst: String(editProduct.gst || ""),
-        prescriptionRequired: Boolean(editProduct.prescription_required),
-        strength: editProduct.strength || "",
-        prices: [
-          {
-            size: editProduct.size || editProduct.medicine_type || form.type,
-            quantity: String(editProduct.total_quantity || ""),
-            actualPrice: String(editProduct.actual_price || ""),
-            discount: String(editProduct.discount_percent || ""),
-            sellingPrice: String(editProduct.selling_price || ""),
-          },
-        ],
-        selectedImages: editProduct.images || [],
-      });
+  useEffect(() => {
+    if (editProduct && listsLoaded) {
+      (async () => {
+        let pricesArr = [];
+        try {
+          pricesArr = await getProductPrices(editProduct.id);
+          pricesArr = pricesArr.map(p => ({
+            size: String(p.size || p.unit || p.medicine_type || form.type),
+            quantity: String(p.quantity || p.total_quantity || ""),
+            actualPrice: String(p.actual_price || p.actualPrice || ""),
+            discount: String(p.discount_percent || p.discount || ""),
+            sellingPrice: String(p.selling_price || p.sellingPrice || ""),
+          }));
+        } catch (e) {
+          // fallback to single price if fetch fails
+          pricesArr = [
+            {
+              size: String(editProduct.size || editProduct.medicine_type || form.type),
+              quantity: String(editProduct.total_quantity || ""),
+              actualPrice: String(editProduct.actual_price || ""),
+              discount: String(editProduct.discount_percent || ""),
+              sellingPrice: String(editProduct.selling_price || ""),
+            },
+          ];
+        }
+        setForm({
+          type:
+            editProduct.medicine_type === "Syrup"
+              ? "ml"
+              : editProduct.medicine_type === "Powder"
+              ? "gm"
+              : editProduct.medicine_type === "Capsule"
+              ? "capsule"
+              : "tablet",
+          name: editProduct.name || "",
+          brand_id: String(editProduct.brand_id || ""),
+          mainCategoryId: String(editProduct.main_category_id || ""),
+          subCategoryId: String(editProduct.sub_category_id || ""),
+          referenceBook: editProduct.reference_books?.[0] || "",
+          keyTags: (editProduct.key || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s),
+          ingredients: editProduct.key_ingredients || "",
+          dosage: editProduct.dosage || "",
+          dietary: editProduct.dietary || "",
+          description: editProduct.description || "",
+          prescriptionRequired: Boolean(editProduct.prescription_required),
+          strength: editProduct.strength || "",
+          prices: pricesArr,
+          selectedImages: editProduct.images || [],
+          seasonalMedicine: Boolean(editProduct.seasonal_medicine),
+          frequentlyBought: Boolean(editProduct.frequently_bought),
+          topProducts: Boolean(editProduct.top_products),
+          peoplePreferred: Boolean(editProduct.people_preferred),
+          diseaseId: String(editProduct.disease_id || ""),
+        });
+      })();
+    } else if (!editProduct && listsLoaded) {
+      setForm(initial);
     }
-  }, [editProduct]);
+  }, [editProduct, listsLoaded]);
 
   const handleChange = ({ target: { name, value, type, checked } }) => {
     setForm((prev) => ({
@@ -105,16 +152,11 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
   const handlePriceChange = (idx, field, value) => {
     const prices = [...form.prices];
     prices[idx][field] = value;
-
     const actual = parseFloat(prices[idx].actualPrice) || 0;
     const discount = parseFloat(prices[idx].discount) || 0;
     // Calculate discounted price
     let discounted = actual > 0 ? actual - (actual * discount) / 100 : 0;
-    // Add GST if available
-    const gst = parseFloat(form.gst) || 0;
-    let sellingWithGst = discounted > 0 ? discounted + (discounted * gst) / 100 : "";
-    prices[idx].sellingPrice = sellingWithGst !== "" ? sellingWithGst.toFixed(2) : "";
-
+    prices[idx].sellingPrice = discounted > 0 ? discounted.toFixed(2) : "";
     setForm((prev) => ({ ...prev, prices }));
   };
 
@@ -145,15 +187,16 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
     const e = {};
     if (!form.name.trim()) e.name = "Required";
     if (!form.brand_id) e.brand_id = "Required";
+    if (!form.mainCategoryId) e.mainCategoryId = "Required";
+    if (!form.subCategoryId) e.subCategoryId = "Required";
     if (!form.keyTags.length) e.keyTags = "Add tags";
     if (!form.description.trim()) e.description = "Required";
-    if (!form.benefits.trim()) e.benefits = "Required";
-    if (!form.howToUse.trim()) e.howToUse = "Required";
-    if (!form.safetyPrecaution.trim()) e.safetyPrecaution = "Required";
+    if (!form.dosage.trim()) e.dosage = "Required";
+    if (!form.dietary.trim()) e.dietary = "Required";
     if (!form.ingredients.trim()) e.ingredients = "Required";
-    if (!form.otherInfo.trim()) e.otherInfo = "Required";
-    if (!["0", "5", "12", "18"].includes(form.gst)) e.gst = "Select valid GST";
     if (form.type === "tablet" && !form.strength) e.strength = "Required";
+    if (!form.referenceBook) e.referenceBook = "Required"; // Added error handling for referenceBook
+    if (!form.diseaseId) e.diseaseId = "Required";
     form.prices.forEach((p, i) => {
       if (!p.size) e[`size_${i}`] = "Required";
       if (!p.quantity) e[`quantity_${i}`] = "Required";
@@ -194,7 +237,10 @@ setTimeout(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    console.log("Submitting form", form);
+    const isValid = validateForm();
+    console.log("Validation result:", isValid, errors);
+    if (!isValid) return;
     setLoading(true);
 
     let productId,
@@ -214,25 +260,32 @@ setTimeout(() => {
             ? "Liquid"
             : form.type === "gm"
             ? "Gram"
+            : form.type === "capsule"
+            ? "Capsule"
             : "Tablet",
         brand_id: parseInt(form.brand_id, 10),
+        main_category_id: parseInt(form.mainCategoryId, 10),
+        sub_category_id: parseInt(form.subCategoryId, 10),
         reference_books: form.referenceBook ? [form.referenceBook] : [],
         key: form.keyTags.join(", "),
         key_ingredients: form.ingredients.trim(),
-        key_benefits: form.benefits.trim(),
-        how_to_use: form.howToUse.trim(),
-        safety_precaution: form.safetyPrecaution.trim(),
+        dosage: form.dosage.trim(),
+        dietary: form.dietary.trim(),
         description: form.description.trim(),
-        other_info: form.otherInfo.trim(),
         strength: form.strength.trim(),
-        gst: parseInt(form.gst, 10),
         prescription_required: form.prescriptionRequired,
-        actual_price: parseFloat(form.prices[0].actualPrice),
+        actual_price: parseFloat(form.prices[0].actualPrice), // Only the first price row is submitted. // TODO: Support multiple price rows in backend and here.
         selling_price: parseFloat(form.prices[0].sellingPrice),
         discount_percent: parseFloat(form.prices[0].discount),
         total_quantity: parseInt(form.prices[0].quantity, 10),
         images: [],
+        seasonal_medicine: form.seasonalMedicine,
+        frequently_bought: form.frequentlyBought,
+        top_products: form.topProducts,
+        people_preferred: form.peoplePreferred,
+        disease_id: form.diseaseId ? parseInt(form.diseaseId, 10) : undefined,
       };
+      console.log("Submitting to API:", editProduct ? "update" : "create", common);
 
       if (editProduct) {
         await updateProduct(editProduct.id, { ...common });
@@ -271,16 +324,22 @@ setTimeout(() => {
       }
 
       setForm(initial);
-      imageRef.current?.clearImages();
+      if (imageRef.current?.clearImages) {
+        imageRef.current.clearImages();
+      } else {
+        // Warn if clearImages is not implemented
+        console.warn("ImageUploader is missing clearImages method. Please implement it for proper reset.");
+      }
       setEditProduct?.(null);
     } catch (err) {
+      console.error("Error submitting product:", err);
       toast.error(err.message || "Failed to submit product");
       // Clean up orphaned images
       for (const url of uploadedUrls) {
         try {
           await deleteImage(url);
-        } catch {
-          console.error("Cleanup failed for", url);
+        } catch (cleanupErr) {
+          console.error("Cleanup failed for", url, cleanupErr);
         }
       }
     } finally {
@@ -288,6 +347,7 @@ setTimeout(() => {
     }
   };
 
+  // console.log("Form state:", form);
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Toaster position="top-right" />
@@ -360,117 +420,23 @@ setTimeout(() => {
         {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
       </div>
 
-      {/* Brand */}
-                <div className="grid grid-cols-2 gap-4">
-
-      <div>
-        <label htmlFor="brand_id" className="block font-medium mb-1">
-          Brand
-        </label>
-        <select
-          id="brand_id"
-          name="brand_id"
-          value={form.brand_id}
-          onChange={handleChange}
-          className={`w-full border rounded p-2 ${
-            errors.brand_id ? "border-red-500" : "border-gray-300"
-          }`}
-        >
-          <option value="">Select Brand</option>
-          {brandsList.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.name}
-            </option>
-          ))}
-        </select>
-        {errors.brand_id && (
-          <p className="text-red-600 text-sm mt-1">{errors.brand_id}</p>
-        )}
-      </div>
-
-      {/* Reference Book */}
-      <div>
-        <label htmlFor="referenceBook" className="block font-medium mb-1">
-          Reference Book
-        </label>
-        <select
-          id="referenceBook"
-          name="referenceBook"
-          value={form.referenceBook}
-          onChange={handleChange}
-          className="w-full border rounded p-2 border-gray-300"
-        >
-          <option value="">Select Reference Book</option>
-          {booksList.map((book) => (
-            <option key={book.id} value={book.name}>
-              {book.name}
-            </option>
-          ))}
-        </select>
-        {errors.referenceBook && (
-          <p className="text-red-600 text-sm mt-1">{errors.referenceBook}</p>
-        )}
-      </div>
-      </div>
-
-
-          <div className="grid grid-cols-2 gap-4">
-
-      <div>
-        <label htmlFor="brand_id" className="block font-medium mb-1">
-          Main Category 
-        </label>
-        <select
-          id="brand_id"
-          name="brand_id"
-          value={form.brand_id}
-          onChange={handleChange}
-          className={`w-full border rounded p-2 ${
-            errors.brand_id ? "border-red-500" : "border-gray-300"
-          }`}
-        >
-          <option value="">Select Brand</option>
-          {brandsList.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.name}
-            </option>
-          ))}
-        </select>
-        {errors.brand_id && (
-          <p className="text-red-600 text-sm mt-1">{errors.brand_id}</p>
-        )}
-      </div>
-
-      {/* Reference Book */}
-      <div>
-        <label htmlFor="referenceBook" className="block font-medium mb-1">
-          Sub Category 
-        </label>
-        <select
-          id="referenceBook"
-          name="referenceBook"
-          value={form.referenceBook}
-          onChange={handleChange}
-          className="w-full border rounded p-2 border-gray-300"
-        >
-          <option value="">Select Reference Book</option>
-          {booksList.map((book) => (
-            <option key={book.id} value={book.name}>
-              {book.name}
-            </option>
-          ))}
-        </select>
-        {errors.referenceBook && (
-          <p className="text-red-600 text-sm mt-1">{errors.referenceBook}</p>
-        )}
-      </div>
-      </div>
+      {/* Product Selects (Brand, Main Category, Sub Category, Reference Book, Disease) */}
+      <ProductSelects
+        form={form}
+        setForm={setForm}
+        errors={errors}
+        brandsList={brandsList}
+        mainCategories={mainCategories}
+        subCategories={subCategories}
+        booksList={booksList}
+        diseasesList={diseasesList}
+      />
 
       {/* Key Tags */}
       <TagInput
         tags={form.keyTags}
         onChange={(keyTags) => setForm((f) => ({ ...f, keyTags }))}
-        placeholder="Write key Eg: Cough, Fever, Ayurvedic, Homeopathic"
+        placeholder="Eg: Cough, Fever, Ayurvedic, Homeopathic"
       />
       {errors.keyTags && (
         <p className="text-red-500 text-sm">{errors.keyTags}</p>
@@ -492,53 +458,35 @@ setTimeout(() => {
         )}
       </div>
 
-      {/* Key Benefits */}
-      {/* <div>
-        <label className="font-medium block mb-1">Key Benefits</label>
-        <textarea
-          name="benefits"
-          placeholder="key benefits of product Eg: Immune Boost."
-          className="w-full border rounded p-2"
-          rows={2}
-          value={form.benefits}
-          onChange={handleChange}
-        />
-        {errors.benefits && (
-          <p className="text-red-500 text-sm">{errors.benefits}</p>
-        )}
-      </div> */}
-
-      {/* How to use */}
+      {/* Dosage */}
       <div>
-        <label className="font-medium block mb-1">How to use</label>
-        *Dosage 
+        <label className="font-medium block mb-1">Dosage</label>
         <textarea
-          name="howToUse"
-          placeholder="Dosage info eg: 1 tab, 1 spoon at a time"
+          name="dosage"
+          placeholder="Dosage info.."
           className="w-full border rounded p-2"
           rows={2}
-          value={form.howToUse}
+          value={form.dosage}
           onChange={handleChange}
         />
-        {errors.howToUse && (
-          <p className="text-red-500 text-sm">{errors.howToUse}</p>
+        {errors.dosage && (
+          <p className="text-red-500 text-sm">{errors.dosage}</p>
         )}
       </div>
 
-      {/* Safety & Precaution */} 
+      {/* Dietary & Lifestyle Advice */}
       <div>
-        <label className="font-medium block mb-1">Safety & Precaution</label>
-      *changed to Dietary & Lifestyle Advice 
+        <label className="font-medium block mb-1">Dietary & Lifestyle Advice</label>
         <textarea
-          name="safetyPrecaution"
-          placeholder="Write Safety & precaution for product."
+          name="dietary"
+          placeholder="Write Dietary & Lifestyle Advice"
           className="w-full border rounded p-2"
           rows={2}
-          value={form.safetyPrecaution}
+          value={form.dietary}
           onChange={handleChange}
         />
-        {errors.safetyPrecaution && (
-          <p className="text-red-500 text-sm">{errors.safetyPrecaution}</p>
+        {errors.dietary && (
+          <p className="text-red-500 text-sm">{errors.dietary}</p>
         )}
       </div>
 
@@ -547,7 +495,7 @@ setTimeout(() => {
         <label className="font-medium block mb-1">Key Ingredients</label>
         <textarea
           name="ingredients"
-          placeholder="Key Ingredients of product Eg: Amla, Tulsi."
+          placeholder="Key Ingredients of product"
           className="w-full border rounded p-2"
           rows={2}
           value={form.ingredients}
@@ -558,198 +506,16 @@ setTimeout(() => {
         )}
       </div>
 
-      {/* Other Information */}
-      {/* <div>
-        <label className="font-medium block mb-1">Other Information</label>
-        <textarea
-          name="otherInfo"
-          placeholder="Eg: If any adverse reactions occur, discontinue use and seek medical advice."
-          className="w-full border rounded p-2"
-          rows={2}
-          value={form.otherInfo}
-          onChange={handleChange}
-        />
-        {errors.otherInfo && (
-          <p className="text-red-500 text-sm">{errors.otherInfo}</p>
-        )}
-      </div> */}
+      {/* Price Section */}
+      <PriceSection
+        prices={form.prices}
+        setPrices={prices => setForm(f => ({ ...f, prices }))}
+        errors={errors}
+        formType={form.type}
+      />
 
-      {/* GST & Strength */}
-      <div className="flex gap-4">
-        <div className="w-1/2">
-          <label htmlFor="gst" className="block font-medium mb-1">
-            GST
-          </label>
-          <select
-            id="gst"
-            name="gst"
-            value={form.gst}
-            onChange={handleChange}
-            className="w-full border rounded p-2"
-          >
-            <option value="">Select GST</option>
-            <option value={0}>0%</option>
-            <option value={5}>5%</option>
-            <option value={12}>12%</option>
-            <option value={18}>18%</option>
-          </select>
-        </div>
-        {form.type === "tablet" && (
-          <div className="w-1/2">
-            <label htmlFor="strength" className="block font-medium mb-1">
-              Strength
-            </label>
-            <input
-              id="strength"
-              name="strength"
-              value={form.strength}
-              onChange={handleChange}
-              placeholder="Eg:500mg"
-              className="w-full border rounded p-2"
-            />
-            {errors.strength && (
-              <p className="text-red-500 text-sm">{errors.strength}</p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Prices per portion of Size */}
-      <div>
-        <label className="font-medium block mb-1">
-          Prices per portion of Size
-        </label>
-        <div className="space-y-2 ">
-          {form.prices.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div className="w-1/5 relative">
-                <label className="text-sm">Product Size</label>
-                <input
-                  type="text"
-                  placeholder="Eg: 100"
-                  value={item.size}
-                  onChange={(e) =>
-                    handlePriceChange(index, "size", e.target.value)
-                  }
-                  className="border rounded p-1 w-full pr-10"
-                />
-                <span className="absolute right-3 top-7 text-gray-600 pointer-events-none select-none">
-                  {form.type}
-                </span>
-                {errors[`size_${index}`] && (
-                  <p className="text-red-500 text-sm ">
-                    {errors[`size_${index}`]}
-                  </p>
-                )}
-              </div>
-              <div className="w-1/5 relative">
-                <label className="text-sm">Actual Price</label>
-                <span className="absolute left-2 top-7 text-gray-500">₹</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Actual Price "
-                  value={item.actualPrice}
-                  onChange={(e) =>
-                    handlePriceChange(index, "actualPrice", e.target.value)
-                  }
-                  className="border rounded p-1 pl-6 w-full"
-                />
-                {errors[`actualPrice_${index}`] && (
-                  <p className="text-red-500 text-sm">
-                    {errors[`actualPrice_${index}`]}
-                  </p>
-                )}
-              </div>
-              <div className="w-1/5">
-                <label className="text-sm">Discount (%)</label>
-                <input
-                  type="number"
-                  placeholder="Discount %"
-                  value={item.discount}
-                  onChange={(e) =>
-                    handlePriceChange(index, "discount", e.target.value)
-                  }
-                  className="border rounded p-1 w-full"
-                />
-                {errors[`discount_${index}`] && (
-                  <p className="text-red-500 text-sm">
-                    {errors[`discount_${index}`]}
-                  </p>
-                )}
-              </div>
-              <div className="w-1/5 relative">
-                <label className="text-sm">Selling Price</label>
-                <span className="absolute left-2 top-7 text-gray-500">₹</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Selling Price"
-                  value={item.sellingPrice}
-                  onChange={(e) =>
-                    handlePriceChange(index, "sellingPrice", e.target.value)
-                  }
-                  className="border rounded p-1 pl-6 w-full"
-                />
-                {errors[`sellingPrice_${index}`] && (
-                  <p className="text-red-500 text-sm">
-                    {errors[`sellingPrice_${index}`]}
-                  </p>
-                )}
-              </div>
-              <div className="w-1/5">
-                <label className="text-sm">Quantity</label>
-                <input
-                  type="number"
-                  placeholder="Eg:150"
-                  value={item.quantity}
-                  onChange={(e) =>
-                    handlePriceChange(index, "quantity", e.target.value)
-                  }
-                  className="border rounded p-1 w-full"
-                />
-                {errors[`quantity_${index}`] && (
-                  <p className="text-red-500 text-sm">
-                    {errors[`quantity_${index}`]}
-                  </p>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => removePriceRow(index)}
-                className="text-red-600 mt-6"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addPriceRow}
-            className="mt-2 text-blue-600"
-          >
-            + Add More Size
-          </button>
-        </div>
-      </div>
-
-      {/* Prescription Required checkbox */}
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="prescriptionRequired"
-          name="prescriptionRequired"
-          checked={form.prescriptionRequired}
-          onChange={handleChange}
-          className="w-5 h-5"
-        />
-        <label
-          htmlFor="prescriptionRequired"
-          className="select-none font-medium"
-        >
-          Prescription Required
-        </label>
-      </div>
+      {/* Product Flags (Checkboxes) */}
+      <ProductFlags form={form} setForm={setForm} />
 
       <button
         type="submit"
@@ -765,7 +531,11 @@ setTimeout(() => {
                 ? "Tablet"
                 : form.type === "ml"
                 ? "Syrup"
-                : "Powder"
+                : form.type === "gm"
+                ? "Powder"
+                : form.type === "capsule"
+                ? "Capsule"
+                : "Medicine"
             }`}
       </button>
       {editProduct && (
@@ -778,8 +548,21 @@ setTimeout(() => {
           Delete Product
         </button>
       )}
+      {/* Cancel Button for Edit Mode */}
+      {editProduct && (
+        <button
+          type="button"
+          onClick={() => { setForm(initial); setEditProduct(null); }}
+          className="w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-3 rounded mt-2"
+          disabled={loading}
+        >
+          Cancel
+        </button>
+      )}
     </form>
   );
 };
 
 export default MedicineForm;
+
+// TODO: This file is very large. Consider splitting into smaller components for maintainability.
