@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { getOrders, createOrder, updateOrder, deleteOrder } from '../lib/orderApi';
 import { getCustomers } from '../lib/customerApi';
 import { getPayments } from '../lib/paymentApi';
+import CreateOrderForm from '../components/OrderForm';
+
 
 const statusOptions = ['Ordered', 'Shipped', 'Delivered', 'Returned', 'Refunded'];
 
@@ -40,6 +42,25 @@ export default function OrdersPro() {
   });
   const [customers, setCustomers] = useState([]);
   const [payments, setPayments] = useState([]);
+
+
+const [products, setProducts] = useState([]);
+const [selectedProductId, setSelectedProductId] = useState('');
+const [quantity, setQuantity] = useState(1);
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+const [newOrder, setNewOrder] = useState({
+  customer_id: '',
+  items: '',
+  price: '',
+  status: 'Ordered',
+  address: '',
+  payment_id: '',
+  notes: '',
+});
+
+
+
 
   // Sorting
   const handleSort = key => {
@@ -196,6 +217,17 @@ export default function OrdersPro() {
           payment_method: paymentMap[order.payment_id]?.method || '',
         }));
       }
+
+       const [customerData, paymentData, productData] = await Promise.all([
+      getCustomers().catch(() => []),
+      getPayments().catch(() => []),
+      getProducts().catch(() => []),
+    ]);
+    setCustomers(customerData);
+    setPayments(paymentData);
+    setProducts(productData);
+
+
       setOrders(ordersData);
     }).catch(() => setOrders([]));
   }, []);
@@ -203,6 +235,14 @@ export default function OrdersPro() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Orders Dashboard</h1>
+
+      <button
+  onClick={() => setShowCreateModal(true)}
+  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
+>
+  + Create New Order
+</button>
+
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-4">
@@ -447,6 +487,14 @@ export default function OrdersPro() {
           </div>
         </div>
       )}
+  {showCreateModal && (
+  <CreateOrderForm
+    onClose={() => setShowCreateModal(false)}
+    onCreated={newOrder => setOrders(prev => [...prev, newOrder])}
+  />
+)}
+
+
     </div>
   );
 }
