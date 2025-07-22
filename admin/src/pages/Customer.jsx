@@ -225,28 +225,36 @@ export default function CustomerDetails() {
   />
 )}
 
-          {modal.type && (
-            <ConfirmModal
-              title={
-                modal.type === "deactivate"
-                  ? `Deactivate "${modal.customer.name}"?`
-                  : `Delete "${modal.customer.name}"?`
-              }
-              confirmLabel={
-                modal.type === "deactivate" ? "Deactivate" : "Delete"
-              }
-              onConfirm={() =>
-                modal.type === "deactivate"
-                  ? updateCustomer(modal.customer.id, { active: false })
-                  : deleteCustomerHandler(modal.customer.id)
-              }
-              onCancel={closeModal}
-            >
-              Are you sure you want to{" "}
-              {modal.type === "deactivate" ? "deactivate" : "delete"} this
-              customer?
-            </ConfirmModal>
-          )}
+          {modal.type && modal.customer && (
+  <ConfirmModal
+    title={
+      modal.type === "deactivate"
+        ? `Deactivate "${modal.customer.name}"?`
+        : `Delete "${modal.customer.name}"?`
+    }
+    confirmLabel={
+      modal.type === "deactivate" ? "Deactivate" : "Delete"
+    }
+    onConfirm={() =>
+      modal.type === "deactivate"
+        ? updateCustomer(modal.customer.id, { active: false }).then(() => {
+            setCustomers((prev) =>
+              prev.map((cust) =>
+                cust.id === modal.customer.id ? { ...cust, active: false } : cust
+              )
+            );
+            closeModal();
+          })
+        : deleteCustomerHandler(modal.customer.id)
+    }
+    onCancel={closeModal}
+  >
+    Are you sure you want to{" "}
+    {modal.type === "deactivate" ? "deactivate" : "delete"} this
+    customer?
+  </ConfirmModal>
+)}
+
         </>
       )}
     </div>

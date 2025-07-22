@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { createCustomer } from '../lib/customerApi';
+
 export default function CreateCustomerForm({ onClose, onCreated }) {
   const [form, setForm] = useState({
     name: "",
@@ -16,27 +19,40 @@ export default function CreateCustomerForm({ onClose, onCreated }) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    
     try {
+      // Combine address fields into a single address string
+      const address = [
+        form.houseNumber,
+        form.area,
+        form.landmark,
+        form.city,
+        form.state,
+        form.pincode,
+        form.country
+      ].filter(Boolean).join(', ');
+
       const newCustomer = await createCustomer({
         name: form.name,
         email: form.email,
-        phone: form.phone,
-        houseNumber: form.houseNumber,
-        area: form.area,
-        landmark: form.landmark,
-        city: form.city,
-        state: form.state,
-        pincode: form.pincode,
-        country: form.country,
+        mobile: form.phone, // Backend expects 'mobile' not 'phone'
+        address: address,   // Backend expects single 'address' field
         active: true,
-        createdAt: new Date().toISOString(),
       });
       onCreated(newCustomer);
       onClose();
     } catch (err) {
-      alert("Failed to create customer.");
+      console.error('Error creating customer:', err);
+      setError(err.message || 'Failed to create customer. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -50,6 +66,11 @@ export default function CreateCustomerForm({ onClose, onCreated }) {
           &times;
         </button>
         <h2 className="text-xl font-semibold mb-4">Add New Customer</h2>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           <input name="name" value={form.name} onChange={handleChange} placeholder="Full Name" required className="border p-2 rounded col-span-2" />
           <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required className="border p-2 rounded col-span-2" />
@@ -62,8 +83,16 @@ export default function CreateCustomerForm({ onClose, onCreated }) {
           <input name="pincode" value={form.pincode} onChange={handleChange} placeholder="Pincode" required className="border p-2 rounded" />
           <input name="country" value={form.country} onChange={handleChange} placeholder="Country" required className="border p-2 rounded" />
           <div className="col-span-2 text-right mt-4">
-            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-              Create
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className={`px-4 py-2 rounded ${
+                isSubmitting 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-green-600 hover:bg-green-700'
+              } text-white`}
+            >
+              {isSubmitting ? 'Creating...' : 'Create'}
             </button>
           </div>
         </form>
