@@ -3,72 +3,6 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { ProductCardScrollable } from "../components/ProductCard";
 
-const productSimilar = [
-  {
-    id: 1,
-    name: 'Stylish Shoes',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 99.99,
-    sellingPrice: 59.99
-  },
-  {
-    id: 2,
-    name: 'Casual Jacket',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 120.00,
-    sellingPrice: 85.00
-  },
-  {
-    id: 3,
-    name: 'Wrist Watch',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 250.00,
-    sellingPrice: 180.00
-  },
-  {
-    id: 4,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 5,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 6,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 7,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 8,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 9,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  }
-];  
-
 
 export default function Cart() {
   const {
@@ -130,7 +64,7 @@ export default function Cart() {
         <h1 className="text-3xl font-bold text-green-700 mb-4">Your Cart</h1>
         <p className="text-gray-600 mb-8">Your cart is empty</p>
         <Link
-          to="/products"
+          to="/"
           className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
         >
           Continue Shopping
@@ -140,8 +74,15 @@ export default function Cart() {
             <div className="mt-2">
           <h1 className="text-2xl font-bold mb-4">Frequently Bought from Customers </h1>
           <div className="flex overflow-x-auto gap-4">
-            {productSimilar.map((product) => (
-              <ProductCardScrollable key={product.id} {...product} />
+            {frequentlyBoughtProducts.map((product) => (
+              <ProductCardScrollable
+                key={product.id}
+                id={product.id}
+                image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
+                name={product.name}
+                actualPrice={product.actual_price}
+                sellingPrice={product.selling_price}
+              />
             ))}
           </div>
         </div>
