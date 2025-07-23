@@ -9,74 +9,7 @@ import brands from '/assets/brands.svg';
 import order from '/assets/order.svg';
 import products from '/assets/products.svg';
 import { ProductCardScrollable } from "../components/ProductCard";
-
-
-const productSimilar = [
-  {
-    id: 1,
-    name: 'Stylish Shoes',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 99.99,
-    sellingPrice: 59.99
-  },
-  {
-    id: 2,
-    name: 'Casual Jacket',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 120.00,
-    sellingPrice: 85.00
-  },
-  {
-    id: 3,
-    name: 'Wrist Watch',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 250.00,
-    sellingPrice: 180.00
-  },
-  {
-    id: 4,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 5,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 6,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 7,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 8,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  },
-  {
-    id: 9,
-    name: 'Sunglasses',
-    image: 'https://via.placeholder.com/200',
-    actualPrice: 70.00,
-    sellingPrice: 45.00
-  }
-];  
-
+import { Link } from "react-router-dom";
 
 
 export default function ProductDetails() {
@@ -93,6 +26,10 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [prescriptionError, setPrescriptionError] = useState("");
+    const [peoplePreferredProducts, setPeoplePreferredProducts] = useState([]);
+    const [similarProducts, setSimilarProducts] = useState([]);
+
+  
 
   const scrollRef = useRef(null);
 
@@ -136,6 +73,40 @@ export default function ProductDetails() {
         setSelectedImage(
           (Array.isArray(data.images) ? data.images[0] : null) || null
         );
+
+    // After setProduct(data);
+fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.category)}&exclude_id=${data.id}`)
+  .then((res) => res.json())
+  .then((similarData) => {
+    if (Array.isArray(similarData)) {
+      setSimilarProducts(similarData.slice(0, 10)); // limit results
+    } else {
+      setSimilarProducts([]);
+    }
+  })
+  .catch((err) => {
+    console.error("Failed to fetch similar products", err);
+    setSimilarProducts([]);
+  });
+
+
+        // Fetch people preferred products
+    fetch("http://localhost:3001/api/product?people_preferred=true")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setPeoplePreferredProducts(data);
+        } else {
+          setPeoplePreferredProducts([]);
+          console.error("API error (people preferred):", data.error || data);
+        }
+      })
+      .catch((err) => {
+        setPeoplePreferredProducts([]);
+        console.error("Network error (people preferred):", err);
+      });
+
+
         // Fetch prices
         fetch(`http://localhost:3001/api/product_price`)
           .then((res) => res.json())
@@ -394,48 +365,49 @@ export default function ProductDetails() {
           </div>
 
           {/* Prescription Required */}
-          {product.prescription_required && (
-            <div className="mt-4">
-              <div className="text-red-600 font-medium mb-2">
-                * Prescription required for this product
-              </div>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={handlePrescriptionChange}
-                className="block mb-2 p-1"
-              />
-              {prescriptionFile && (
-                <div className="mb-2 flex items-center gap-3">
-                  {/* Preview if image */}
-                  {prescriptionFile.type.startsWith("image/") && (
-                    <img
-                      src={URL.createObjectURL(prescriptionFile)}
-                      alt="Prescription Preview"
-                      className="w-20 h-20 object-contain border rounded shadow"
-                    />
-                  )}
-                  <div className="flex flex-col">
-                    <span className="text-green-700 text-sm">
-                      {prescriptionFile.name}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleRemovePrescription}
-                      className="text-red-600 text-xs underline mt-1 self-start hover:text-red-800"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              )}
-              {prescriptionError && (
-                <div className="text-red-600 text-sm mb-1">
-                  {prescriptionError}
-                </div>
-              )}
-            </div>
-          )}
+{product.prescription_required && (
+  <div className="mt-4 border p-4 rounded bg-gray-50">
+    <label className="block font-medium text-red-600 mb-2">
+      * Prescription required
+    </label>
+    <input
+      type="file"
+      accept="image/*,application/pdf"
+      onChange={handlePrescriptionChange}
+      className="block w-full text-sm text-gray-700 border rounded p-2 mb-2 bg-white"
+    />
+    {prescriptionFile && (
+      <div className="flex items-center gap-4 mt-2">
+        {/* Preview */}
+        {prescriptionFile.type.startsWith("image/") ? (
+          <img
+            src={URL.createObjectURL(prescriptionFile)}
+            alt="Preview"
+            className="w-24 h-24 object-contain border rounded shadow"
+          />
+        ) : (
+          <div className="w-24 h-24 border rounded flex items-center justify-center text-gray-500 bg-white shadow">
+            📄 PDF
+          </div>
+        )}
+        <div>
+          <p className="text-green-700 text-sm">{prescriptionFile.name}</p>
+          <button
+            type="button"
+            onClick={handleRemovePrescription}
+            className="text-red-600 text-xs underline mt-1 hover:text-red-800"
+          >
+            Remove file
+          </button>
+        </div>
+      </div>
+    )}
+    {prescriptionError && (
+      <div className="text-red-600 text-sm mt-2">{prescriptionError}</div>
+    )}
+  </div>
+)}
+
 
           {/* Pricing */}
           <div className="space-y-1 mt-2">
@@ -455,11 +427,11 @@ export default function ProductDetails() {
             <div className="text-sm text-gray-600">Inclusive of all taxes</div>
             {/* Product Notes */}
             <div className="text-xs text-gray-600 mt-4 space-y-1">
-              <p>
+              {/* <p>
                 * 10 Capsules per products.
-              </p>
+              </p> */}
               <p>
-                * Company
+                 Company
               </p>
               <p>* Country of Origin: India</p>
               <p>* Delivery charges will be applied at checkout.</p>
@@ -511,15 +483,39 @@ export default function ProductDetails() {
                 setPrescriptionError("Please upload prescription to proceed.");
                 return;
               }
+              // addToCart({
+              //   id: product.id,
+              //   name: product.name,
+              //   size: selectedSize,
+              //   price: sellingPrice,
+              //   quantity,
+              //   prescriptionFile,
+              //   image: selectedImage,
+              // });
               addToCart({
-                id: product.id,
-                name: product.name,
-                size: selectedSize,
-                price: sellingPrice,
-                quantity,
-                prescriptionFile,
-                image: selectedImage,
-              });
+  id: product.id,
+  name: product.name,
+  size: selectedSize,
+  price: sellingPrice,
+  quantity,
+  image: selectedImage,
+});
+
+// Store prescription file in sessionStorage
+if (prescriptionFile) {
+  sessionStorage.setItem(
+    `prescription_${product.id}`,
+    JSON.stringify({
+      name: prescriptionFile.name,
+      type: prescriptionFile.type,
+    })
+  );
+
+  // Optionally store the actual File object using a workaround:
+  window.__prescriptions__ = window.__prescriptions__ || {};
+  window.__prescriptions__[product.id] = prescriptionFile;
+}
+
               toast.success("Product added to cart");
             }}
           >
@@ -534,11 +530,9 @@ export default function ProductDetails() {
         <div className="hidden md:flex gap-4 border-b pb-2">
           {[
             { key: "description", label: "description" },
-            // { key: "key_benefits", label: "key benefits" },
             { key: "key_ingredients", label: "key ingredients" },
             { key: "how_to_use", label: "Dosage" },
             { key: "safety_precaution", label: "dietary & lifestyle advice" },
-            // { key: "other_info", label: "other information" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -573,9 +567,6 @@ export default function ProductDetails() {
           {activeTab === "key_ingredients" && (
             <p>{product.key_ingredients || "No ingredients found."}</p>
           )}
-          {activeTab === "other_info" && (
-            <p>{product.other_info || "No additional information."}</p>
-          )}
         </div>
 
         {/* Mobile Accordion Tabs */}
@@ -583,13 +574,11 @@ export default function ProductDetails() {
           {[
             { label: "Description", content: product.description },
             { label: "Key Ingredients", content: product.key_ingredients },
-            // { label: "Key Benefits", content: product.key_benefits },
             { label: "Dosage", content: product.how_to_use },
             {
               label: "Dietary & Lifestyle Advice",
               content: product.safety_precaution,
             },
-            // { label: "Other Information", content: product.other_info },
           ].map((section) => (
             <div key={section.label} className="border-b pb-4">
               <h2 className="text-lg font-semibold mb-1">{section.label}</h2>
@@ -600,30 +589,55 @@ export default function ProductDetails() {
       </div>
     </div>
 
-    {/* <Trending/> */}
-
     {/* ----------  */}
-            <div className="">
-          <h1 className="text-2xl font-bold mb-4">Similar Products</h1>
-          <div className="flex overflow-x-auto gap-4">
-            {productSimilar.map((product) => (
-              <ProductCardScrollable key={product.id} {...product} />
-            ))}
-          </div>
-        </div>
+           {similarProducts.length > 0 && (
+  <div className="mt-10">
+    <h1 className="text-2xl font-bold mb-4">Similar Products</h1>
+    <div className="flex overflow-x-auto gap-4">
+      {similarProducts.map((item) => (
+        <Link to={`/product/${item.id}`} key={item.id}>
+          <ProductCardScrollable
+            id={item.id}
+            name={item.name}
+            image={
+              Array.isArray(item.images) && item.images.length > 0
+                ? item.images[0]
+                : "https://via.placeholder.com/200"
+            }
+            actualPrice={item.actual_price}
+            sellingPrice={item.selling_price}
+          />
+        </Link>
+      ))}
+    </div>
+  </div>
+)}
+
         {/* ---------------  */}
 
         {/* ----------  */}
             <div className="mt-2">
-          <h1 className="text-2xl font-bold mb-4">People also Preferred this Product</h1>
-          <div className="flex overflow-x-auto gap-4">
-            {productSimilar.map((product) => (
-              <ProductCardScrollable key={product.id} {...product} />
-            ))}
-          </div>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">People Preferred Products</h1>
+        <div className="flex overflow-x-auto gap-4">
+          {peoplePreferredProducts.map((product) => (
+            <Link
+        key={product.id}
+        to={`/product/${product.id}`}
+        style={{ textDecoration: 'none' }} 
+      >
+            <ProductCardScrollable
+              key={product.id}
+              id={product.id}
+              image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
+              name={product.name}
+              actualPrice={product.actual_price}
+              sellingPrice={product.selling_price}
+            />
+            </Link>
+          ))}
         </div>
+      </div>
         {/* ---------------  */}
-    {/* <Trending/> */}
 
     <Style/>  
 
