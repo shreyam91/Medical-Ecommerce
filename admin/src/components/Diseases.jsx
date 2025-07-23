@@ -11,6 +11,7 @@ const Diseases = () => {
   const [diseaseName, setDiseaseName] = useState("");
   const [diseaseList, setDiseaseList] = useState([]);
   const [editDisease, setEditDisease] = useState(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getDiseases()
@@ -115,33 +116,44 @@ const Diseases = () => {
         {/* Right: Disease List */}
         <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50">
           <h2 className="text-xl font-semibold mb-4">All Diseases</h2>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search diseases..."
+            className="w-full mb-4 p-2 border rounded"
+          />
           {diseaseList.length === 0 ? (
             <p className="text-gray-500">No diseases added yet.</p>
           ) : (
             <div className="max-h-[240px] overflow-y-auto pr-2">
               <ul className="space-y-4">
-                {diseaseList.map((disease) => (
-                  <li
-                    key={disease.id}
-                    className="flex items-center gap-4 bg-white p-3 rounded shadow"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">{disease.name}</p>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveDisease(disease.id)}
-                      className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                {diseaseList
+                  .filter(disease =>
+                    disease.name.toLowerCase().includes(search.toLowerCase())
+                  )
+                  .map((disease) => (
+                    <li
+                      key={disease.id}
+                      className="flex items-center gap-4 bg-white p-3 rounded shadow"
                     >
-                      Remove
-                    </button>
-                    <button
-                      onClick={() => handleEditDisease(disease)}
-                      className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 ml-2"
-                    >
-                      Edit
-                    </button>
-                  </li>
-                ))}
+                      <div className="flex-1">
+                        <p className="font-medium">{disease.name}</p>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveDisease(disease.id)}
+                        className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
+                      <button
+                        onClick={() => handleEditDisease(disease)}
+                        className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 ml-2"
+                      >
+                        Edit
+                      </button>
+                    </li>
+                  ))}
               </ul>
             </div>
           )}

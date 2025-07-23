@@ -1,8 +1,8 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import imageCompression from 'browser-image-compression';
 
-const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUpload }, ref) => {
+const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUpload, previewUrls }, ref) => {
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -13,6 +13,13 @@ const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUplo
       setSelectedFiles([]);
     }
   }));
+
+  // Sync images with previewUrls when editing
+  useEffect(() => {
+    if (previewUrls && Array.isArray(previewUrls)) {
+      setImages(previewUrls.map(url => ({ url, previewUrl: url })));
+    }
+  }, [previewUrls]);
 
   const handleChange = async (e) => {
     const files = Array.from(e.target.files);
