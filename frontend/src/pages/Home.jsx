@@ -14,78 +14,16 @@ import SearchComponent from "../components/SearchComponent";
 import leftImage from "/assets/left.svg";
 import rightImage from "/assets/right.svg";
 
-const products = [
-  {
-    id: 1,
-    name: "Stylish Shoes",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 99.99,
-    sellingPrice: 59.99,
-  },
-  {
-    id: 2,
-    name: "Casual Jacket",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 120.0,
-    sellingPrice: 85.0,
-  },
-  {
-    id: 3,
-    name: "Wrist Watch",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 250.0,
-    sellingPrice: 180.0,
-  },
-  {
-    id: 4,
-    name: "Sunglasses",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 70.0,
-    sellingPrice: 45.0,
-  },
-  {
-    id: 5,
-    name: "Sunglasses",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 70.0,
-    sellingPrice: 45.0,
-  },
-  {
-    id: 6,
-    name: "Sunglasses",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 70.0,
-    sellingPrice: 45.0,
-  },
-  {
-    id: 7,
-    name: "Sunglasses",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 70.0,
-    sellingPrice: 45.0,
-  },
-  {
-    id: 8,
-    name: "Sunglasses",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 70.0,
-    sellingPrice: 45.0,
-  },
-  {
-    id: 9,
-    name: "Sunglasses",
-    image: "https://via.placeholder.com/200",
-    actualPrice: 70.0,
-    sellingPrice: 45.0,
-  },
-];
-
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [topBanners, setTopBanners] = useState([]);
   const [allBanners, setAllBanners] = useState([]);
+  const [seasonalProducts, setSeasonalProducts] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [peoplePreferredProducts, setPeoplePreferredProducts] = useState([]);
+  const [maxDiscountProducts, setMaxDiscountProducts] = useState([]);
 
   const scrollRef = useRef(null);
 
@@ -138,11 +76,74 @@ const Home = () => {
       .then((data) => {
         const filtered = data.filter((b) => b.type === "top");
         setTopBanners(filtered);
-        // console.log('Top banners:', filtered);
         setAllBanners(data);
       })
       .catch(() => setTopBanners([]))
       .catch(() => setAllBanners([]));
+
+    // Fetch seasonal products
+    fetch("http://localhost:3001/api/product?seasonal_medicine=true")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setSeasonalProducts(data);
+        } else {
+          setSeasonalProducts([]);
+          console.error("API error (seasonal):", data.error || data);
+        }
+      })
+      .catch((err) => {
+        setSeasonalProducts([]);
+        console.error("Network error (seasonal):", err);
+      });
+
+    // Fetch top products
+    fetch("http://localhost:3001/api/product?top_products=true")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTopProducts(data);
+        } else {
+          setTopProducts([]);
+          console.error("API error (top):", data.error || data);
+        }
+      })
+      .catch((err) => {
+        setTopProducts([]);
+        console.error("Network error (top):", err);
+      });
+
+    // Fetch people preferred products
+    fetch("http://localhost:3001/api/product?people_preferred=true")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setPeoplePreferredProducts(data);
+        } else {
+          setPeoplePreferredProducts([]);
+          console.error("API error (people preferred):", data.error || data);
+        }
+      })
+      .catch((err) => {
+        setPeoplePreferredProducts([]);
+        console.error("Network error (people preferred):", err);
+      });
+
+    // Fetch maximum discount products (>20% discount)
+    fetch("http://localhost:3001/api/product?discount_percent=20")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setMaxDiscountProducts(data);
+        } else {
+          setMaxDiscountProducts([]);
+          console.error("API error (max discount):", data.error || data);
+        }
+      })
+      .catch((err) => {
+        setMaxDiscountProducts([]);
+        console.error("Network error (max discount):", err);
+      });
   }, []);
 
   const getBannerByType = (type) => allBanners.find((b) => b.type === type);
@@ -170,25 +171,78 @@ const Home = () => {
       {/* banner for ad  */}
       {getBannerByType("ad") && <Banners banners={[getBannerByType("ad")]} />}
       {/* ----------  */}
-      <div className="mt-2">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Seasonal Products</h1>
-        <div className="flex overflow-x-auto gap-4">
-          {products.map((product) => (
-            <ProductCardScrollable key={product.id} {...product} />
-          ))}
-        </div>
-      </div>
+
+<div className="mt-2">
+  <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Seasonal Products</h1>
+  <div className="flex overflow-x-auto gap-4">
+    {seasonalProducts.map((product) => (
+      <Link
+        key={product.id}
+        to={`/product/${product.id}`}
+        style={{ textDecoration: 'none' }} 
+      >
+        {/* <div className="min-w-[200px]"> */}
+          <ProductCardScrollable
+            id={product.id}
+            image={
+              Array.isArray(product.images) && product.images.length > 0
+                ? product.images[0]
+                : undefined
+            }
+            name={product.name}
+            actualPrice={product.actual_price}
+            sellingPrice={product.selling_price}
+          />
+        {/* </div> */}
+      </Link>
+    ))}
+  </div>
+</div>
+
       {/* ---------------  */}
-      {/* ----------  */}
       <div className="mt-2">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Top Products</h1>
         <div className="flex overflow-x-auto gap-4">
-          {products.map((product) => (
-            <ProductCardScrollable key={product.id} {...product} />
+          {topProducts.map((product) => (
+            <Link
+        key={product.id}
+        to={`/product/${product.id}`}
+        style={{ textDecoration: 'none' }} 
+      >
+            <ProductCardScrollable
+              key={product.id}
+              id={product.id}
+              image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
+              name={product.name}
+              actualPrice={product.actual_price}
+              sellingPrice={product.selling_price}
+            />
+            </Link>
           ))}
         </div>
       </div>
       {/* ---------------  */}
+      <div className="mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">People Preferred Products</h1>
+        <div className="flex overflow-x-auto gap-4">
+          {peoplePreferredProducts.map((product) => (
+            <Link
+        key={product.id}
+        to={`/product/${product.id}`}
+        style={{ textDecoration: 'none' }} 
+      >
+            <ProductCardScrollable
+              key={product.id}
+              id={product.id}
+              image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
+              name={product.name}
+              actualPrice={product.actual_price}
+              sellingPrice={product.selling_price}
+            />
+            </Link>
+          ))}
+        </div>
+      </div>
       {/* info banner  */}
       {getBannerByType("info") && (
         <Banners banners={[getBannerByType("info")]} />
@@ -198,8 +252,21 @@ const Home = () => {
       <div className="mt-2">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Maximum Discount Products</h1>
         <div className="flex overflow-x-auto gap-4">
-          {products.map((product) => (
-            <ProductCardScrollable key={product.id} {...product} />
+          {maxDiscountProducts.map((product) => (
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              style={{ textDecoration: 'none' }} 
+            >
+              <ProductCardScrollable
+                key={product.id}
+                id={product.id}
+                image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
+                name={product.name}
+                actualPrice={product.actual_price}
+                sellingPrice={product.selling_price}
+              />
+            </Link>
           ))}
         </div>
       </div>
@@ -255,4 +322,5 @@ const Home = () => {
     </>
   );
 };
+
 export default Home;
