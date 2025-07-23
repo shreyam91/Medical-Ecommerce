@@ -1,33 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { getCustomers, createCustomer, updateCustomer, deleteCustomer } from '../lib/customerApi';
+import {
+  getCustomers,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
+} from "../lib/customerApi";
 
-import CreateCustomerForm from '../components/CustomerForm';
-
-// Sample customer data (replace with real data or API)
-const initialCustomers = [
-  {
-    id: "CUST001",
-    name: "Alice Johnson",
-    mobile: "1234567890",
-    email: "alice@example.com",
-    address: "1234 Elm Street, Springfield, IL 62704",
-    active: true,
-    createdAt: "2024-01-10",
-  },
-  {
-    id: "CUST002",
-    name: "Bob Smith",
-    mobile: "9876543210",
-    email: "bob@example.com",
-    address: "5678 Oak Avenue, Metropolis, NY 10001",
-    active: true,
-    createdAt: "2024-03-15",
-  },
-];
+import CreateCustomerForm from "../components/CustomerForm";
 
 export default function CustomerDetails() {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user.role !== 'admin') {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (user.role !== "admin") {
     return <div className="p-8 text-red-600 font-bold">Access denied</div>;
   }
 
@@ -55,18 +38,16 @@ export default function CustomerDetails() {
       .catch(() => {
         setCustomers([]);
         setLoading(false);
-        setError('Failed to fetch customers');
+        setError("Failed to fetch customers");
       });
   }, []);
 
   const closeModal = () => setModal({ type: null, customer: null });
 
-  // Replace deactivateCustomer and deleteCustomer logic to use updateCustomer and deleteCustomer from API
-  // Example for delete:
   const deleteCustomerHandler = (id) => {
     deleteCustomer(id)
       .then(() => setCustomers((custs) => custs.filter((c) => c.id !== id)))
-      .catch(() => setError('Failed to delete customer'));
+      .catch(() => setError("Failed to delete customer"));
     closeModal();
   };
 
@@ -77,7 +58,7 @@ export default function CustomerDetails() {
         const s = search.toLowerCase();
         return (
           c.name.toLowerCase().includes(s) ||
-          c.id.toLowerCase().includes(s) ||
+          // c.id.toLowerCase().includes(s) ||
           c.mobile.includes(search) ||
           c.email.toLowerCase().includes(s)
         );
@@ -102,15 +83,14 @@ export default function CustomerDetails() {
       <h1 className="text-2xl font-bold mb-4">Customer Details</h1>
 
       <div className="flex justify-between items-center mb-4">
-  <h1 className="text-2xl font-bold">Customer Details</h1>
-  <button
-    onClick={() => setModal({ type: "create", customer: null })}
-    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-  >
-    + Add Customer
-  </button>
-</div>
-
+        <h1 className="text-2xl font-bold">Customer Details</h1>
+        <button
+          onClick={() => setModal({ type: "create", customer: null })}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          + Add Customer
+        </button>
+      </div>
 
       {loading && <div>Loading…</div>}
       {error && <div className="text-red-500">{error}</div>}
@@ -219,42 +199,47 @@ export default function CustomerDetails() {
           </div>
 
           {modal.type === "create" && (
-  <CreateCustomerForm
-    onClose={closeModal}
-    onCreated={(newCustomer) => setCustomers((prev) => [...prev, newCustomer])}
-  />
-)}
+            <CreateCustomerForm
+              onClose={closeModal}
+              onCreated={(newCustomer) =>
+                setCustomers((prev) => [...prev, newCustomer])
+              }
+            />
+          )}
 
           {modal.type && modal.customer && (
-  <ConfirmModal
-    title={
-      modal.type === "deactivate"
-        ? `Deactivate "${modal.customer.name}"?`
-        : `Delete "${modal.customer.name}"?`
-    }
-    confirmLabel={
-      modal.type === "deactivate" ? "Deactivate" : "Delete"
-    }
-    onConfirm={() =>
-      modal.type === "deactivate"
-        ? updateCustomer(modal.customer.id, { active: false }).then(() => {
-            setCustomers((prev) =>
-              prev.map((cust) =>
-                cust.id === modal.customer.id ? { ...cust, active: false } : cust
-              )
-            );
-            closeModal();
-          })
-        : deleteCustomerHandler(modal.customer.id)
-    }
-    onCancel={closeModal}
-  >
-    Are you sure you want to{" "}
-    {modal.type === "deactivate" ? "deactivate" : "delete"} this
-    customer?
-  </ConfirmModal>
-)}
-
+            <ConfirmModal
+              title={
+                modal.type === "deactivate"
+                  ? `Deactivate "${modal.customer.name}"?`
+                  : `Delete "${modal.customer.name}"?`
+              }
+              confirmLabel={
+                modal.type === "deactivate" ? "Deactivate" : "Delete"
+              }
+              onConfirm={() =>
+                modal.type === "deactivate"
+                  ? updateCustomer(modal.customer.id, { active: false }).then(
+                      () => {
+                        setCustomers((prev) =>
+                          prev.map((cust) =>
+                            cust.id === modal.customer.id
+                              ? { ...cust, active: false }
+                              : cust
+                          )
+                        );
+                        closeModal();
+                      }
+                    )
+                  : deleteCustomerHandler(modal.customer.id)
+              }
+              onCancel={closeModal}
+            >
+              Are you sure you want to{" "}
+              {modal.type === "deactivate" ? "deactivate" : "delete"} this
+              customer?
+            </ConfirmModal>
+          )}
         </>
       )}
     </div>
@@ -269,7 +254,7 @@ function CustomerRow({ serial, customer, onDeactivate, onDelete }) {
     <tr className="hover:bg-gray-50">
       <td className="p-2 border text-center">{serial}</td>
       <td className="p-2 border">{customer.name}</td>
-      <td className="p-2 border">{customer.id}</td>
+      <td className="p-2 border">{customer.customer_id}</td>
       <td className="p-2 border">{customer.mobile}</td>
       <td className="p-2 border">{customer.email}</td>
       <td className="p-2 border">
@@ -286,7 +271,7 @@ function CustomerRow({ serial, customer, onDeactivate, onDelete }) {
         )}
       </td>
       <td className="p-2 border">
-        {new Date(customer.createdAt).toLocaleDateString()}
+        {new Date(customer.created_at).toLocaleDateString()}
       </td>
 
       <td className="p-2 border space-x-2 text-sm">
