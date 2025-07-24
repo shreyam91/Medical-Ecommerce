@@ -1,5 +1,6 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const API_URL = `${BASE_URL}/product`;
+const PRICE_API_URL = `${BASE_URL}/product_price`;
 
 function getAuthHeaders(isJson = true) {
   const token = localStorage.getItem('token');
@@ -64,5 +65,11 @@ export async function deleteImage(imageUrl) {
     body: JSON.stringify({ imageUrl }),
   });
   if (!res.ok) throw new Error(`Failed to delete image: ${await res.text()}`);
+  return res.json();
+}
+
+export async function getProductPrices(productId) {
+  const res = await fetch(`${PRICE_API_URL}?product_id=${productId}`, { headers: getAuthHeaders() });
+  if (!res.ok) throw new Error(`Failed to fetch prices for product #${productId}: ${res.statusText}`);
   return res.json();
 }

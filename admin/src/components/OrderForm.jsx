@@ -40,19 +40,47 @@ export default function CreateOrderForm({ onClose, onCreated }) {
   }, []);
 
   useEffect(() => {
-    const customer = customers.find(c => c.id === selectedCustomerId);
+    console.log('Customer selection changed:', selectedCustomerId, typeof selectedCustomerId);
+    console.log('Available customers:', customers);
+    
+    // Try both string and number comparison
+    const customer = customers.find(c => c.id == selectedCustomerId || c.id === parseInt(selectedCustomerId));
+    console.log('Found customer:', customer);
+    
     if (customer) {
-      setCustomerInfo({
+      // Parse address string back into components if needed
+      const addressParts = customer.address ? customer.address.split(', ') : [];
+      console.log('Address parts:', addressParts);
+      
+      const newCustomerInfo = {
         fullName: customer.name || '',
         email: customer.email || '',
-        phone: customer.phone || '',
-        houseNumber: customer.houseNumber || '',
-        area: customer.area || '',
-        landmark: customer.landmark || '',
-        state: customer.state || '',
-        city: customer.city || '',
-        pincode: customer.pincode || '',
-        country: customer.country || '',
+        phone: customer.mobile || '', // Backend uses 'mobile' not 'phone'
+        houseNumber: addressParts[0] || '',
+        area: addressParts[1] || '',
+        landmark: addressParts[2] || '',
+        city: addressParts[3] || '',
+        state: addressParts[4] || '',
+        pincode: addressParts[5] || '',
+        country: addressParts[6] || '',
+      };
+      
+      console.log('Setting customer info:', newCustomerInfo);
+      setCustomerInfo(newCustomerInfo);
+    } else {
+      // Clear form when no customer is selected
+      console.log('Clearing customer info');
+      setCustomerInfo({
+        fullName: '',
+        email: '',
+        phone: '',
+        houseNumber: '',
+        area: '',
+        landmark: '',
+        state: '',
+        city: '',
+        pincode: '',
+        country: '',
       });
     }
   }, [selectedCustomerId, customers]);

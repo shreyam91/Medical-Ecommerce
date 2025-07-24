@@ -21,18 +21,39 @@ function safe(val) {
   return typeof val === 'undefined' ? null : val;
 }
 
-// Get all products, optionally filter by brandId
+// Get all products, optionally filter by brandId, category, and special flags
 router.get('/', async (req, res) => {
   try {
-    const { brandId } = req.query;
-    let products;
+    const { brandId, category, seasonal_medicine, frequently_bought, top_products, people_preferred } = req.query;
+    
+    // Build the query using sql template literals for proper SQL injection protection
+    let query = sql`SELECT * FROM product WHERE 1=1`;
+    
     if (brandId) {
-      products = await sql`SELECT * FROM product WHERE brand_id = ${brandId} ORDER BY id DESC`;
-    } else {
-      products = await sql`SELECT * FROM product ORDER BY id DESC`;
+      query = sql`${query} AND brand_id = ${brandId}`;
     }
+    if (category) {
+      query = sql`${query} AND category = ${category}`;
+    }
+    if (seasonal_medicine !== undefined) {
+      query = sql`${query} AND seasonal_medicine = ${seasonal_medicine === 'true'}`;
+    }
+    if (frequently_bought !== undefined) {
+      query = sql`${query} AND frequently_bought = ${frequently_bought === 'true'}`;
+    }
+    if (top_products !== undefined) {
+      query = sql`${query} AND top_products = ${top_products === 'true'}`;
+    }
+    if (people_preferred !== undefined) {
+      query = sql`${query} AND people_preferred = ${people_preferred === 'true'}`;
+    }
+    
+    query = sql`${query} ORDER BY id DESC`;
+    
+    const products = await query;
     res.json(products);
   } catch (err) {
+    console.error('Product query error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -71,15 +92,19 @@ router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
     actual_price,
     selling_price,
     discount_percent,
-    total_quantity
+    total_quantity,
+    seasonal_medicine,
+    frequently_bought,
+    top_products,
+    people_preferred
   } = req.body;
   try {
     const [product] = await sql`
       INSERT INTO product (
-        name, category, medicine_type, images, brand_id, reference_books, key, key_ingredients, key_benefits, how_to_use, safety_precaution, description, other_info, strength, gst, prescription_required, actual_price, selling_price, discount_percent, total_quantity
+        name, category, medicine_type, images, brand_id, reference_books, key, key_ingredients, key_benefits, how_to_use, safety_precaution, description, other_info, strength, gst, prescription_required, actual_price, selling_price, discount_percent, total_quantity, seasonal_medicine, frequently_bought, top_products, people_preferred
       )
       VALUES (
-        ${safe(name)}, ${safe(category)}, ${safe(medicine_type)}, ${safe(images)}, ${safe(brand_id)}, ${safe(reference_books)}, ${safe(key)}, ${safe(key_ingredients)}, ${safe(key_benefits)}, ${safe(how_to_use)}, ${safe(safety_precaution)}, ${safe(description)}, ${safe(other_info)}, ${safe(strength)}, ${safe(gst)}, ${safe(prescription_required)}, ${safe(actual_price)}, ${safe(selling_price)}, ${safe(discount_percent)}, ${safe(total_quantity)}
+        ${safe(name)}, ${safe(category)}, ${safe(medicine_type)}, ${safe(images)}, ${safe(brand_id)}, ${safe(reference_books)}, ${safe(key)}, ${safe(key_ingredients)}, ${safe(key_benefits)}, ${safe(how_to_use)}, ${safe(safety_precaution)}, ${safe(description)}, ${safe(other_info)}, ${safe(strength)}, ${safe(gst)}, ${safe(prescription_required)}, ${safe(actual_price)}, ${safe(selling_price)}, ${safe(discount_percent)}, ${safe(total_quantity)}, ${safe(seasonal_medicine)}, ${safe(frequently_bought)}, ${safe(top_products)}, ${safe(people_preferred)}
       )
       RETURNING *`;
     res.status(201).json(product);
@@ -112,7 +137,11 @@ router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
     actual_price,
     selling_price,
     discount_percent,
-    total_quantity
+    total_quantity,
+    seasonal_medicine,
+    frequently_bought,
+    top_products,
+    people_preferred
   } = req.body;
   try {
     const [product] = await sql`
@@ -137,6 +166,10 @@ router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
         selling_price=${safe(selling_price)},
         discount_percent=${safe(discount_percent)},
         total_quantity=${safe(total_quantity)},
+        seasonal_medicine=${safe(seasonal_medicine)},
+        frequently_bought=${safe(frequently_bought)},
+        top_products=${safe(top_products)},
+        people_preferred=${safe(people_preferred)},
         updated_at=NOW()
       WHERE id=${req.params.id} RETURNING *`;
     if (!product) return res.status(404).json({ error: 'Not found' });
@@ -187,4 +220,4 @@ router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
 
 // TODO: Add role-based access control middleware. Allow 'admin' and 'limited_admin' to add/edit products.
 
-module.exports = router; 
+module.exports = router;

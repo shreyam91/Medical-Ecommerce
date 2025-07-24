@@ -29,6 +29,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
     mainCategoryId: "",
     subCategoryId: "",
     referenceBook: "",
+    diseaseId: "",
     keyTags: [],
     ingredients: "",
     dosage: "",
@@ -50,7 +51,6 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
     frequentlyBought: false,
     topProducts: false,
     peoplePreferred: false,
-    diseaseId: "",
   };
 
   const [form, setForm] = useState(initial);
@@ -86,7 +86,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
         try {
           pricesArr = await getProductPrices(editProduct.id);
           pricesArr = pricesArr.map(p => ({
-            size: String(p.size || p.unit || p.medicine_type || form.type),
+            size: String(p.size || p.medicine_type || form.type),
             quantity: String(p.quantity || p.total_quantity || ""),
             actualPrice: String(p.actual_price || p.actualPrice || ""),
             discount: String(p.discount_percent || p.discount || ""),
@@ -108,7 +108,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
           type:
             editProduct.medicine_type === "Syrup"
               ? "ml"
-              : editProduct.medicine_type === "Powder"
+              : editProduct.medicine_type === "Gram"
               ? "gm"
               : editProduct.medicine_type === "Capsule"
               ? "capsule"
@@ -187,16 +187,16 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
     const e = {};
     if (!form.name.trim()) e.name = "Required";
     if (!form.brand_id) e.brand_id = "Required";
-    if (!form.mainCategoryId) e.mainCategoryId = "Required";
-    if (!form.subCategoryId) e.subCategoryId = "Required";
+    // if (!form.mainCategoryId) e.mainCategoryId = "Required";
+    // if (!form.subCategoryId) e.subCategoryId = "Required";
     if (!form.keyTags.length) e.keyTags = "Add tags";
     if (!form.description.trim()) e.description = "Required";
     if (!form.dosage.trim()) e.dosage = "Required";
     if (!form.dietary.trim()) e.dietary = "Required";
     if (!form.ingredients.trim()) e.ingredients = "Required";
     if (form.type === "tablet" && !form.strength) e.strength = "Required";
-    if (!form.referenceBook) e.referenceBook = "Required"; // Added error handling for referenceBook
-    if (!form.diseaseId) e.diseaseId = "Required";
+    // if (!form.referenceBook) e.referenceBook = "Required"; // Added error handling for referenceBook
+    // if (!form.diseaseId) e.diseaseId = "Required";
     form.prices.forEach((p, i) => {
       if (!p.size) e[`size_${i}`] = "Required";
       if (!p.quantity) e[`quantity_${i}`] = "Required";
@@ -532,7 +532,7 @@ setTimeout(() => {
                 : form.type === "ml"
                 ? "Syrup"
                 : form.type === "gm"
-                ? "Powder"
+                ? "Gram"
                 : form.type === "capsule"
                 ? "Capsule"
                 : "Medicine"

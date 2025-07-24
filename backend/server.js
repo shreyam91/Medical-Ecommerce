@@ -14,6 +14,7 @@ app.use(express.json());
 
 app.use(cors());
 app.use('/api', uploadRoutes);
+// app.use('/api', locationRoutes);
 app.use('/api/blog', require('./routes/blog'));
 app.use('/api/delivery_status', require('./routes/delivery_status'));
 app.use('/api/user', require('./routes/user'));

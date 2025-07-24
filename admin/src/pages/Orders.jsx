@@ -213,8 +213,8 @@ const [newOrder, setNewOrder] = useState({
         const paymentMap = Object.fromEntries(paymentData.map(p => [p.id, p]));
         ordersData = ordersData.map(order => ({
           ...order,
-          customer_name: customerMap[order.customer_id]?.name || '',
-          payment_method: paymentMap[order.payment_id]?.method || '',
+          customer_name: customer?.name ?? 'Unknown Customer',
+    payment_method: payment?.method ?? 'Unknown Payment',
         }));
       }
 

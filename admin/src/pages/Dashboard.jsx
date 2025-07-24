@@ -408,11 +408,11 @@ const Dashboard = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [chartType, setChartType] = useState({
     orders: 'bar',
-    revenue: 'doughnut',
-    customers: 'pie',
+    revenue: 'bar',
+    customers: 'bar',
     active: 'bar',
     avg: 'bar',
-    status: 'pie',
+    status: 'bar',
     ordersTrend: 'line',
     revenueTrend: 'line',
   });

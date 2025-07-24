@@ -93,6 +93,7 @@ const InventoryPage = () => {
       getProducts().catch(() => []),
       getBrands().catch(() => []),
     ]).then(([inventoryData, productsData, brandsData]) => {
+      debugger; // Debug: after fetching all data
       console.log('Fetched inventory:', inventoryData);
       console.log('Fetched products:', productsData);
       console.log('Fetched brands:', brandsData);
@@ -103,13 +104,15 @@ const InventoryPage = () => {
       const productMap = Object.fromEntries(productsData.map(p => [p.id, p]));
       const merged = inventoryData.map(item => {
         const product = productMap[item.product_id] || {};
-        return {
+        const mergedItem = {
           ...item,
           name: product.name || 'Unknown',
           category: product.category || 'Unknown',
           brand: brandMap[product.brand_id] || 'Unknown',
           total_quantity: item.quantity ?? product.total_quantity ?? 0,
         };
+        // debugger;   // Debug: for each merged inventory item
+        return mergedItem;
       });
       console.log('Merged inventory:', merged);
       setInventory(merged);
