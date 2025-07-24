@@ -24,7 +24,7 @@ const OrderSuccess = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-green-50 px-4 text-center py-10">
+    <div className="flex flex-col items-center justify-center px-4 text-center py-10">
       <div className="text-green-600 text-6xl animate-bounce mb-4">✅</div>
 
       <h1 className="text-4xl font-bold text-green-700 mb-2">Order Successful!</h1>
