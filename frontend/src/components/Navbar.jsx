@@ -45,9 +45,9 @@ export default function NavbarMain() {
 
   const navigationLinks = [
     { name: "Home", link: "/" },
-    { name: "Features", link: "#features" },
-    { name: "Pricing", link: "#pricing" },
-    { name: "Contact", link: "#contact" },
+    { name: "Orders", link: "/order-history" },
+    { name: "Cart", link: "/cart" },
+    // { name: "Contact", link: "#contact" },
   ];
 
   // Click outside to close profile dropdown
@@ -234,13 +234,13 @@ export default function NavbarMain() {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* <Link to="/doctors">
+              <Link to="/order-history">
                 <NavbarButton variant="secondary">
                   <div className="flex items-center gap-2 text-l">
-                    Near By Doctor <FaUserDoctor />
+                    Orders
                   </div>
                 </NavbarButton>
-              </Link> */}
+              </Link>
 
               <Link to="/cart">
                 <NavbarButton variant="secondary">
