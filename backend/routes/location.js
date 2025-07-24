@@ -1,14 +1,68 @@
 const express = require('express');
+const axios = require('axios');
 const router = express.Router();
-const {
-  getPincodeByQuery,
-  detectUserLocation
-} = require('../controllers/locationController');
 
-// Get pincodes by city or pincode
-router.get('/pincodes/:query', getPincodeByQuery);
+/**
+ * POST /api/detect-location
+ * Body: { lat: number, lon: number }
+ * Returns: { pincode: string }
+ */
+router.post('/detect-location', async (req, res) => {
+  const { lat, lon } = req.body;
+  if (!lat || !lon) {
+    return res.status(400).json({ message: 'Latitude and longitude required' });
+  }
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+    const response = await axios.get(url, {
+      headers: { 'User-Agent': 'YourAppName/1.0' }
+    });
 
-// Detect user's location and return pincode
-router.get('/detect-location', detectUserLocation);
+    const data = response.data;
+    const pincode = data.address && (data.address.postcode || data.address.zipcode);
+
+    if (pincode) {
+      return res.json({ pincode });
+    } else {
+      return res.status(404).json({ message: 'Pincode not found for location' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to reverse geocode location' });
+  }
+});
+
+/**
+ * GET /api/pincodes/:query
+ * Search pincodes by city or pincode using postalpincode.in
+ */
+router.get('/pincodes/:query', async (req, res) => {
+  const query = req.params.query;
+  let url;
+  if (/^\d+$/.test(query)) {
+    url = `https://api.postalpincode.in/pincode/${encodeURIComponent(query)}`;
+  } else {
+    url = `https://api.postalpincode.in/postoffice/${encodeURIComponent(query)}`;
+  }
+
+  try {
+    const response = await axios.get(url);
+    const data = response.data;
+
+    if (Array.isArray(data) && data[0].Status === "Success") {
+      const pincodes = data[0].PostOffice.map(po => ({
+        Pincode: po.Pincode,
+        Name: po.Name,
+        District: po.District,
+        State: po.State
+      }));
+      res.json(pincodes);
+    } else {
+      res.status(404).json({ error: "No pincodes found for this query" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch pincodes" });
+  }
+});
 
 module.exports = router;

@@ -15,6 +15,8 @@ import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FaUserDoctor } from "react-icons/fa6";
+import { FaLocationDot } from "react-icons/fa6";
+
 
 export default function NavbarMain() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,6 +39,53 @@ export default function NavbarMain() {
   const [searchError, setSearchError] = useState("");
   const [medicineSearch, setMedicineSearch] = useState("");
   const [isPincodeDropdownOpen, setIsPincodeDropdownOpen] = useState(false);
+
+  const detectUserLocation = async () => {
+  console.log("Manually triggering location detection...");
+
+  if (!("geolocation" in navigator)) {
+    setSearchError("Geolocation is not supported by your browser");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+      console.log("Geolocation coords:", latitude, longitude);
+
+      try {
+        const res = await fetch("http://localhost:3001/api/detect-location", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat: latitude, lon: longitude }),
+        });
+
+        console.log("Detect location response status:", res.status);
+        if (!res.ok) throw new Error("Detect location failed");
+
+        const data = await res.json();
+
+        if (data.pincode) {
+          localStorage.setItem("userPincode", data.pincode);
+          setSelectedPincode(data.pincode);
+          setSearchQuery(data.pincode);
+          fetchPincodes(data.pincode);
+          setSearchError("");
+        } else {
+          setSearchError("No pincode returned from location detection");
+        }
+      } catch (err) {
+        console.error("Error during detect-location fetch:", err);
+        setSearchError("Failed to detect location");
+      }
+    },
+    (error) => {
+      console.warn("Geolocation error callback fired:", error);
+      setSearchError("Location permission denied or unavailable");
+    }
+  );
+};
+
 
   const cartItemCount = cartItems.reduce(
     (total, item) => total + item.quantity,
@@ -66,76 +115,91 @@ export default function NavbarMain() {
 
   // Load cached or detected pincode
   useEffect(() => {
-    const cachedPincode = localStorage.getItem("userPincode");
+  const cachedPincode = localStorage.getItem("userPincode");
+  console.log("Requesting user location...");
 
-    if (cachedPincode) {
-      setSelectedPincode(cachedPincode);
-      setSearchQuery(cachedPincode);
-      fetch(`http://localhost:3001/api/pincodes/${cachedPincode}`)
-        .then((res) => res.json())
-        .then((pincodes) => {
-          if (Array.isArray(pincodes)) setLocations(pincodes);
-        });
-    } else {
-      fetch("http://localhost:3001/api/detect-location")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.pincode) {
-            localStorage.setItem("userPincode", data.pincode);
-            setSelectedPincode(data.pincode);
-            setSearchQuery(data.pincode);
-            fetch(`http://localhost:3001/api/pincodes/${data.pincode}`)
-              .then((res) => res.json())
-              .then((pincodes) => {
-                if (Array.isArray(pincodes)) setLocations(pincodes);
-              });
-          }
-        })
-        .catch((err) => {
-          console.warn("Location detection failed:", err.message);
-          setSearchError("Failed to detect your location.");
-        });
-    }
-  }, []);
+  if (cachedPincode) {
+    setSelectedPincode(cachedPincode);
+    setSearchQuery(cachedPincode);
+    fetchPincodes(cachedPincode);
+  } else {
+    detectUserLocation(); // <-- Use the reusable function here
+  }
+}, []);
 
-  // Debounced pincode search
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (searchQuery.trim() === "") {
+
+
+// Helper function to fetch pincodes and update state
+function fetchPincodes(pincode) {
+  console.log("Fetching pincodes for:", pincode);
+  fetch(`http://localhost:3001/api/pincodes/${pincode}`)
+    .then(res => {
+      console.log("Fetch pincodes status:", res.status);
+      return res.json();
+    })
+    .then(data => {
+      console.log("Fetched pincodes data:", data);
+      if (Array.isArray(data) && data.length > 0) {
+        setLocations(data);
+        setSearchError("");
+      } else {
+        console.warn("No pincodes found for detected location");
         setLocations([]);
-        setIsPincodeDropdownOpen(false);
-        return;
+        setSearchError("No pincodes found for detected location");
       }
+    })
+    .catch(err => {
+      console.error("Failed to fetch pincodes:", err);
+      setLocations([]);
+      setSearchError("Failed to fetch pincodes");
+    });
+}
 
-      fetch(
-        `http://localhost:3001/api/pincodes/${encodeURIComponent(
-          searchQuery.trim()
-        )}`
-      )
-        .then((res) => {
-          if (!res.ok) throw new Error("No pincodes found");
-          return res.json();
-        })
-        .then((pincodes) => {
-          if (Array.isArray(pincodes) && pincodes.length > 0) {
-            setLocations(pincodes);
-            setIsPincodeDropdownOpen(true);
-            setSearchError("");
-          } else {
-            setLocations([]);
-            setIsPincodeDropdownOpen(false);
-            setSearchError("No results found.");
-          }
-        })
-        .catch((err) => {
+// Debounced pincode search
+useEffect(() => {
+  const delayDebounce = setTimeout(() => {
+    if (searchQuery.trim() === "") {
+      setLocations([]);
+      setIsPincodeDropdownOpen(false);
+      return;
+    }
+
+    console.log("Searching pincodes for:", searchQuery);
+
+    fetch(
+      `http://localhost:3001/api/pincodes/${encodeURIComponent(
+        searchQuery.trim()
+      )}`
+    )
+      .then((res) => {
+        console.log("Search pincodes fetch status:", res.status);
+        if (!res.ok) throw new Error("No pincodes found");
+        return res.json();
+      })
+      .then((pincodes) => {
+        console.log("Search pincodes data:", pincodes);
+        if (Array.isArray(pincodes) && pincodes.length > 0) {
+          setLocations(pincodes);
+          setIsPincodeDropdownOpen(true);
+          setSearchError("");
+        } else {
+          console.warn("No results found in search");
           setLocations([]);
           setIsPincodeDropdownOpen(false);
           setSearchError("No results found.");
-        });
-    }, 400);
+        }
+      })
+      .catch((err) => {
+        console.error("Search pincodes fetch error:", err);
+        setLocations([]);
+        setIsPincodeDropdownOpen(false);
+        setSearchError("No results found.");
+      });
+  }, 400);
 
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
+  return () => clearTimeout(delayDebounce);
+}, [searchQuery]);
+
 
   const handleInputChange = (e) => {
     setSearchQuery(e.target.value);
@@ -176,52 +240,66 @@ export default function NavbarMain() {
             <NavbarLogo />
             <div className="flex-1 flex justify-center">
               <div className="flex items-center gap-4 w-full max-w-2xl relative">
-                <div
-                  className="w-full relative"
-                  style={{ maxWidth: 200 }}
-                  ref={pincodeDropdownRef}
-                >
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleInputChange}
-                    onFocus={(e) => {
-                      handleInputFocus();
-                      e.stopPropagation();
-                    }}
-                    onBlur={handleInputBlur}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder="Search or select pincode..."
-                    className="border rounded px-4 py-2 text-sm w-full dark:bg-neutral-800 dark:text-white"
-                  />
-                  {isPincodeDropdownOpen && uniqueLocations.length > 0 && (
-                    <ul
-                      className="absolute z-10 bg-white border rounded w-full max-h-60 overflow-y-auto shadow-lg mt-1"
-                      style={{ maxWidth: 200 }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      {uniqueLocations.map((loc, idx) => (
-                        <li
-                          key={idx}
-                          className={`px-4 py-2 cursor-pointer hover:bg-blue-100 text-sm ${
-                            selectedPincode === loc.Pincode
-                              ? "bg-gray-200"
-                              : ""
-                          }`}
-                          onMouseDown={() => handleSelect(loc)}
-                        >
-                          {loc.Pincode}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {searchError && (
-                    <div className="text-red-500 text-xs mt-1">
-                      {searchError}
-                    </div>
-                  )}
-                </div>
+                <div className="flex items-center gap-3 w-full max-w-2xl">
+  {/* Use Current Location button with icon */}
+  <button
+    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap"
+    onClick={() => {
+      localStorage.removeItem("userPincode");
+      detectUserLocation(); // manually trigger geolocation
+    }}
+  >
+    <FaLocationDot className="w-4 h-4" />
+    <span>Detect Location</span>
+  </button>
+
+  {/* Pincode Input and Dropdown */}
+  <div
+    className="relative w-full"
+    style={{ maxWidth: 200 }}
+    ref={pincodeDropdownRef}
+  >
+    <input
+      ref={inputRef}
+      type="text"
+      value={searchQuery}
+      onChange={handleInputChange}
+      onFocus={(e) => {
+        handleInputFocus();
+        e.stopPropagation();
+      }}
+      onBlur={handleInputBlur}
+      onClick={(e) => e.stopPropagation()}
+      placeholder="Search or select pincode..."
+      className="border rounded px-4 py-2 text-sm w-full dark:bg-neutral-800 dark:text-white"
+    />
+
+    {isPincodeDropdownOpen && uniqueLocations.length > 0 && (
+      <ul
+        className="absolute z-10 bg-white border rounded w-full max-h-60 overflow-y-auto shadow-lg mt-1"
+        style={{ maxWidth: 200 }}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {uniqueLocations.map((loc, idx) => (
+          <li
+            key={idx}
+            className={`px-4 py-2 cursor-pointer hover:bg-blue-100 text-sm  ${
+              selectedPincode === loc.Pincode ? "bg-gray-200" : ""
+            }`}
+            onMouseDown={() => handleSelect(loc)}
+          >
+            {loc.Pincode}
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {searchError && (
+      <div className="text-red-500 text-xs mt-1">{searchError}</div>
+    )}
+  </div>
+</div>
+
                 <input
                   type="text"
                   value={medicineSearch}
