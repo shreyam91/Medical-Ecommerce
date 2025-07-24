@@ -6,7 +6,9 @@ const supabase = require('./config/supabase');
 const sql = require('./config/supabase').default || require('./config/supabase');
 require('dotenv').config(); // This loads .env variables into process.env
 const locationRoutes = require('./routes/location');
+const getSheetsClient = require('./routes/googleSheets');
 
+const SPREADSHEET_ID = '131HPWm3xMiKbbBRAFBDhHQ35NPDhsik2VDeCd0vUC5A';
 
 const app = express();
 const PORT = 3001;
@@ -38,6 +40,52 @@ app.use('/api/payment', require('./routes/payment'));
 app.use('/api', locationRoutes);
 
 // Endpoint to detect user location and return pincode using the public API
+
+// Read data from any sheet
+app.get('/api/sheet/:sheetName', async (req, res) => {
+  try {
+    const sheets = await getSheetsClient();
+    const sheetName = req.params.sheetName;
+    const range = `${sheetName}!A1:Z1000`; // adjust range as needed
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range,
+    });
+
+    res.json(response.data.values || []);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to read sheet data');
+  }
+});
+
+// Append a row to a sheet
+app.post('/api/sheet/:sheetName', async (req, res) => {
+  try {
+    const sheets = await getSheetsClient();
+    const sheetName = req.params.sheetName;
+    const values = req.body.values; // Expect an array of values
+
+    if (!Array.isArray(values)) {
+      return res.status(400).send('Request body must have a "values" array');
+    }
+
+    const response = await sheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${sheetName}!A1`,
+      valueInputOption: 'RAW',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody: { values: [values] },
+    });
+
+    res.json({ updatedRange: response.data.updates.updatedRange });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to append data');
+  }
+});
+
 
 
 // Test route to verify Postgres connection
