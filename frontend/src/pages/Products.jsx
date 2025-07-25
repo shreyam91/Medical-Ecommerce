@@ -344,6 +344,7 @@ const Products = () => {
   const isTopProducts = searchParams.get('top_products') === 'true';
   const isPeoplePreferred = searchParams.get('people_preferred') === 'true';
   const isMaxDiscount = searchParams.get('discount_percent') === '20';
+  const isFrequentlyBought = searchParams.get('frequently_bought') === 'true';
   const initialBrand = searchParams.get('brand') || '';
   const initialDisease = searchParams.get('disease') || '';
   const initialSearch = searchParams.get('search') || '';
@@ -375,6 +376,7 @@ const Products = () => {
       if (isTopProducts) params.append('top_products', 'true');
       if (isPeoplePreferred) params.append('people_preferred', 'true');
       if (isMaxDiscount) params.append('discount_percent', '20');
+      if (isFrequentlyBought) params.append('frequently_bought', 'true');
 
       // Add additional filters from URL
       if (initialBrand) params.append('brand', initialBrand);
@@ -563,6 +565,7 @@ const Products = () => {
     if (isTopProducts) newParams.set('top_products', 'true');
     if (isPeoplePreferred) newParams.set('people_preferred', 'true');
     if (isMaxDiscount) newParams.set('discount_percent', '20');
+    if (isFrequentlyBought) newParams.set('frequently_bought', 'true');
 
     navigate(`/products?${newParams.toString()}`);
   };
@@ -572,6 +575,7 @@ const Products = () => {
     if (isTopProducts) return 'Top Products';
     if (isPeoplePreferred) return 'People Preferred Products';
     if (isMaxDiscount) return 'Maximum Discount Products';
+    if (isFrequentlyBought) return 'Frequently Bought Products';
     return 'All Products';
   };
 

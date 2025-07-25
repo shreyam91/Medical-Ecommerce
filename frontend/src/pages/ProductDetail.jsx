@@ -55,7 +55,7 @@ export default function ProductDetails() {
 
 
   const icons = [
-  { img: badges, title: 'Genuine & Authentic Product' },
+  { img: badges, title: 'Genuine & Authentic ' },
   { img: brands, title: '100+ Top Brands' },
   { img: order, title: 'Fast & Safe Delivery' },
   { img: products, title: '1000+ Products' },
@@ -273,21 +273,21 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
               )
             )}
           </div>
-          <div className="flex-1 flex items-center justify-center">
+          <div className=" flex-1 flex items-center justify-center">
             <img
               src={
                 selectedImage ||
                 "https://via.placeholder.com/300x200?text=No+Image"
               }
               alt="Main product"
-              className="w-full h-[400px] object-contain rounded"
+              className="w-[400px] h-[400px] object-contain rounded"
             />
           </div>
         </div>
 
         {/* Product Info */}
-        <div className="w-full md:w-1/3 space-y-4">
-          <h1 className="text-3xl font-semibold">{product.name}</h1>
+        <div className="w-full md:w-1/2 space-y-4">
+          <h1 className="text-2xl font-semibold">{product.name}</h1>
 
           {/* Key Tags */}
           {product.key &&
@@ -577,7 +577,7 @@ if (prescriptionFile) {
             { label: "Dosage", content: product.how_to_use },
             {
               label: "Dietary & Lifestyle Advice",
-              content: product.safety_precaution,
+              content: product.dietary,
             },
           ].map((section) => (
             <div key={section.label} className="border-b pb-4">
@@ -591,8 +591,16 @@ if (prescriptionFile) {
 
     {/* ----------  */}
            {similarProducts.length > 0 && (
-  <div className="mt-10">
-    <h1 className="text-2xl font-bold mb-4">Similar Products</h1>
+  <div className="mt-10 px-4 sm:px-6">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+      <h1 className="text-xl sm:text-2xl font-bold">Similar Products</h1>
+      <Link
+        to={`/products?category=${encodeURIComponent(product.category)}`}
+        className=" text-blue-700 px-4 py-2 text-m font-medium text-center sm:text-left whitespace-nowrap"
+      >
+        View All
+      </Link>
+    </div>
     <div className="flex overflow-x-auto gap-4">
       {similarProducts.map((item) => (
         <Link to={`/product/${item.id}`} key={item.id}>
@@ -616,8 +624,16 @@ if (prescriptionFile) {
         {/* ---------------  */}
 
         {/* ----------  */}
-            <div className="mt-2">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">People Preferred Products</h1>
+            <div className="mt-8 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-black">People Preferred Products</h1>
+          <Link
+            to="/products?people_preferred=true"
+            className=" text-blue-700 px-4 py-2 rounded-lg transition-colors text-m font-medium text-center sm:text-left whitespace-nowrap"
+          >
+            View All
+          </Link>
+        </div>
         <div className="flex overflow-x-auto gap-4">
           {peoplePreferredProducts.map((product) => (
             <Link
