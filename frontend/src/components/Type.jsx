@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LogoCircles.css";
 
@@ -40,10 +40,7 @@ const data = [
   },
 ];
 
-
-
 function CardItem({ id, title, imageUrl, bgcolor, link }) {
-  
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -81,25 +78,88 @@ function LoadingSkeleton() {
 
 export default function Type() {
   const [loading, setLoading] = useState(true);
-  
+  const scrollRef = useRef(null);
+  const autoScrollInterval = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
+  // Auto-scroll
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || loading) return;
+
+    const startAutoScroll = () => {
+      autoScrollInterval.current = setInterval(() => {
+        if (isHovered) return;
+
+        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+          el.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          el.scrollBy({ left: 200, behavior: "smooth" });
+        }
+      }, 4000);
+    };
+
+    startAutoScroll();
+    return () => clearInterval(autoScrollInterval.current);
+  }, [loading, isHovered]);
+
+  // Touch swipe support
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let startX = 0;
+    let isDown = false;
+
+    const onTouchStart = (e) => {
+      startX = e.touches[0].clientX;
+      isDown = true;
+    };
+
+    const onTouchMove = (e) => {
+      if (!isDown) return;
+      const diff = startX - e.touches[0].clientX;
+      el.scrollLeft += diff;
+      startX = e.touches[0].clientX;
+    };
+
+    const onTouchEnd = () => {
+      isDown = false;
+    };
+
+    el.addEventListener("touchstart", onTouchStart);
+    el.addEventListener("touchmove", onTouchMove);
+    el.addEventListener("touchend", onTouchEnd);
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
   return (
     <div className="py-4 max-w-7xl mx-auto">
       {/* Mobile: Horizontal Scroll */}
-      <div className="sm:hidden overflow-x-auto scrollbar-hide">
-        <div className="flex space-x-4 snap-x snap-mandatory scroll-pl-4">
-          {loading
-            ? Array.from({ length: 5 }).map((_, idx) => <LoadingSkeleton key={idx} />)
-            : data.map((item) => <CardItem key={item.id} {...item} />)}
-        </div>
+      <div
+        ref={scrollRef}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="sm:hidden flex gap-4 overflow-x-auto px-1 no-scrollbar scroll-smooth"
+        style={{ scrollSnapType: "x mandatory" }}
+        aria-label="Horizontal scrollable medicine types"
+      >
+        {loading
+          ? Array.from({ length: 5 }).map((_, idx) => <LoadingSkeleton key={idx} />)
+          : data.map((item) => <CardItem key={item.id} {...item} />)}
       </div>
 
-      {/* Tablet/Desktop: Grid Layout */}
+      {/* Desktop Grid Layout */}
       <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mt-6 sm:mt-0">
         {loading
           ? Array.from({ length: 5 }).map((_, idx) => <LoadingSkeleton key={idx} />)
