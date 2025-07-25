@@ -29,12 +29,14 @@ import Ayurvedic from '../pages/Ayurvedic';
 import Search from '../pages/Search';
 import RequestProduct from '../pages/RequestProduct';
 import CategoryPage from '../pages/CategoryPage';
+import Products from '../pages/Products';
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
+      <Route path="/products" element={<Products />} />
       <Route path="/product/:id" element={<ProductDetail />} />
 
       <Route path="/cart" element={<Cart />} />

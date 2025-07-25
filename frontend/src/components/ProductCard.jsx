@@ -58,7 +58,7 @@ const ProductCard = ({ product }) => {
 
           {/* Product Info */}
           <div className="p-3 sm:p-4">
-            <h3 className="text-base sm:text-lg font-medium text-gray-800 line-clamp-2">{name}</h3>
+            <h3 className="text-base sm:text-sm font-medium text-gray-800 line-clamp-2">{name}</h3>
 
             {/* Price Info */}
             <div className="mt-2 mb-4 flex flex-col">
