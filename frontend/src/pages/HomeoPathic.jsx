@@ -1,173 +1,356 @@
-import React, { useState, useEffect } from 'react'
-import BrandFilterAside, { DiseaseFilterAside } from '../components/BrandFilterAside'
-import ProductCard from '../components/ProductCard'
+// import React, { useState, useEffect } from 'react'
+// import ProductCard from '../components/ProductCard'
+// import ProductFilters from '../components/ProductFilters'
+// import Breadcrumb from '../components/Breadcrumb'
 
-function Homeopathic() {
-  const [products, setProducts] = useState([])
-  const [selectedBrands, setSelectedBrands] = useState([])
-  const [selectedDiseases, setSelectedDiseases] = useState([])
-  const [sortBy, setSortBy] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
-  const [filtering, setFiltering] = useState(false)
+// function Homeopathic() {
+//   const [products, setProducts] = useState([])
+//   const [filteredProducts, setFilteredProducts] = useState([])
+//   const [loading, setLoading] = useState(true)
+//   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    let isMounted = true
-    setLoading(true)
-    setError(null)
+//   // Filter states
+//   const [selectedBrand, setSelectedBrand] = useState('')
+//   const [selectedDisease, setSelectedDisease] = useState('')
+//   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
+//   const [sortBy, setSortBy] = useState('name')
+//   const [showOnlyDiscounted, setShowOnlyDiscounted] = useState(false)
+//   const [showMobileFilters, setShowMobileFilters] = useState(false)
+//   const [searchQuery, setSearchQuery] = useState('')
 
-    fetch('http://localhost:3001/api/product?category=Homeopathic')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch products')
-        return res.json()
-      })
-      .then(data => {
-        if (isMounted) {
-          setProducts(data)
-          setLoading(false)
-        }
-      })
-      .catch(err => {
-        if (isMounted) {
-          setError(err.message)
-          setLoading(false)
-        }
-      })
+//   // Available filter options
+//   const [brands, setBrands] = useState([])
+//   const [diseases, setDiseases] = useState([])
 
-    return () => { isMounted = false }
-  }, [])
+//   useEffect(() => {
+//     fetchProducts()
+//     fetchFilterOptions()
+//   }, [])
 
-  useEffect(() => {
-    if (isMobileFilterOpen) document.body.style.overflow = 'hidden'
-    else document.body.style.overflow = ''
-    return () => { document.body.style.overflow = '' }
-  }, [isMobileFilterOpen])
+//   useEffect(() => {
+//     applyFilters()
+//   }, [products, selectedBrand, selectedDisease, priceRange, sortBy, showOnlyDiscounted, searchQuery])
 
-  useEffect(() => {
-    if (products.length === 0) return
-    setFiltering(true)
-    const timeout = setTimeout(() => setFiltering(false), 300)
-    return () => clearTimeout(timeout)
-  }, [selectedBrands, selectedDiseases, sortBy, products])
+//   const fetchProducts = async () => {
+//     setLoading(true)
+//     setError(null)
 
-  const handleBrandChange = (brands) => {
-    setSelectedBrands(brands)
-    setIsMobileFilterOpen(false)
-  }
-  const handleDiseaseChange = (diseases) => {
-    setSelectedDiseases(diseases)
-    setIsMobileFilterOpen(false)
-  }
-  const handleSortChange = (e) => setSortBy(e.target.value)
+//     try {
+//       const response = await fetch('http://localhost:3001/api/product?category=Homeopathic')
+//       if (!response.ok) throw new Error('Failed to fetch products')
+      
+//       const data = await response.json()
+//       setProducts(Array.isArray(data) ? data : [])
+//     } catch (err) {
+//       setError(err.message)
+//       setProducts([])
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
 
-  const filteredProducts = products
-    .filter(p =>
-      (selectedBrands.length === 0 || selectedBrands.includes(p.brand_id)) &&
-      (selectedDiseases.length === 0 || selectedDiseases.includes(p.disease_id))
-    )
-    .sort((a, b) => {
-      const discountA = a.actual_price > 0 ? (a.actual_price - a.selling_price) / a.actual_price : 0
-      const discountB = b.actual_price > 0 ? (b.actual_price - b.selling_price) / b.actual_price : 0
-      if (sortBy === 'price-asc') return a.selling_price - b.selling_price
-      if (sortBy === 'price-desc') return b.selling_price - a.selling_price
-      if (sortBy === 'discount-asc') return discountA - discountB
-      if (sortBy === 'discount-desc') return discountB - discountA
-      return 0
-    })
+//   const fetchFilterOptions = async () => {
+//     try {
+//       // Fetch brands
+//       const brandsResponse = await fetch('http://localhost:3001/api/brand')
+//       if (brandsResponse.ok) {
+//         const brandsData = await brandsResponse.json()
+//         setBrands(Array.isArray(brandsData) ? brandsData : [])
+//       }
 
+//       // Try to fetch diseases from API, fallback to predefined list
+//       try {
+//         const diseasesResponse = await fetch('http://localhost:3001/api/disease')
+//         if (diseasesResponse.ok) {
+//           const diseasesData = await diseasesResponse.json()
+//           if (Array.isArray(diseasesData) && diseasesData.length > 0) {
+//             setDiseases(diseasesData)
+//           } else {
+//             setDiseases(getPredefinedDiseases())
+//           }
+//         } else {
+//           setDiseases(getPredefinedDiseases())
+//         }
+//       } catch (diseaseErr) {
+//         console.log('Disease API not available, using predefined list')
+//         setDiseases(getPredefinedDiseases())
+//       }
+//     } catch (err) {
+//       console.error('Error fetching filter options:', err)
+//       setBrands([])
+//       setDiseases(getPredefinedDiseases())
+//     }
+//   }
+
+//   const getPredefinedDiseases = () => [
+//     'Diabetes', 'Hypertension', 'Arthritis', 'Asthma', 'Migraine',
+//     'Digestive Issues', 'Skin Problems', 'Respiratory Issues',
+//     'Heart Disease', 'Kidney Problems', 'Liver Issues', 'Anxiety',
+//     'Depression', 'Insomnia', 'Joint Pain', 'Back Pain', 'Cold & Flu',
+//     'Fever', 'Headache', 'Stomach Problems', 'Constipation', 'Acidity'
+//   ]
+
+//   const applyFilters = () => {
+//     let filtered = [...products]
+
+//     // Search filter
+//     if (searchQuery) {
+//       const query = searchQuery.toLowerCase()
+//       filtered = filtered.filter(product => {
+//         return (
+//           product.name?.toLowerCase().includes(query) ||
+//           product.description?.toLowerCase().includes(query) ||
+//           product.brand?.toLowerCase().includes(query) ||
+//           (product.brand && typeof product.brand === 'object' && product.brand.name?.toLowerCase().includes(query)) ||
+//           product.category?.toLowerCase().includes(query) ||
+//           (product.tags && Array.isArray(product.tags) && 
+//            product.tags.some(tag => typeof tag === 'string' && tag.toLowerCase().includes(query)))
+//         )
+//       })
+//     }
+
+//     // Brand filter
+//     if (selectedBrand) {
+//       filtered = filtered.filter(product => {
+//         if (product.brand_id?.toString() === selectedBrand) return true
+//         if (product.brand && typeof product.brand === 'string') {
+//           return product.brand.toLowerCase().includes(selectedBrand.toLowerCase())
+//         }
+//         if (product.brand && typeof product.brand === 'object' && product.brand.name) {
+//           return product.brand.name.toLowerCase().includes(selectedBrand.toLowerCase())
+//         }
+//         return false
+//       })
+//     }
+
+//     // Disease filter
+//     if (selectedDisease) {
+//       const diseaseQuery = selectedDisease.toLowerCase()
+//       filtered = filtered.filter(product => {
+//         if (product.name?.toLowerCase().includes(diseaseQuery)) return true
+//         if (product.description?.toLowerCase().includes(diseaseQuery)) return true
+//         if (product.tags && Array.isArray(product.tags)) {
+//           return product.tags.some(tag => 
+//             typeof tag === 'string' && tag.toLowerCase().includes(diseaseQuery)
+//           )
+//         }
+//         if (product.category?.toLowerCase().includes(diseaseQuery)) return true
+//         if (product.uses?.toLowerCase().includes(diseaseQuery)) return true
+//         if (product.indications?.toLowerCase().includes(diseaseQuery)) return true
+//         return false
+//       })
+//     }
+
+//     // Price range filter
+//     if (priceRange.min) {
+//       filtered = filtered.filter(product => 
+//         Number(product.selling_price || 0) >= Number(priceRange.min)
+//       )
+//     }
+//     if (priceRange.max) {
+//       filtered = filtered.filter(product => 
+//         Number(product.selling_price || 0) <= Number(priceRange.max)
+//       )
+//     }
+
+//     // Discount filter
+//     if (showOnlyDiscounted) {
+//       filtered = filtered.filter(product => {
+//         const actualPrice = Number(product.actual_price || 0)
+//         const sellingPrice = Number(product.selling_price || 0)
+//         return actualPrice > sellingPrice && sellingPrice > 0
+//       })
+//     }
+
+//     // Sorting
+//     filtered.sort((a, b) => {
+//       switch (sortBy) {
+//         case 'price_low':
+//           return Number(a.selling_price || 0) - Number(b.selling_price || 0)
+//         case 'price_high':
+//           return Number(b.selling_price || 0) - Number(a.selling_price || 0)
+//         case 'discount':
+//           const getDiscount = (product) => {
+//             const actual = Number(product.actual_price || 0)
+//             const selling = Number(product.selling_price || 0)
+//             return actual > selling ? ((actual - selling) / actual) * 100 : 0
+//           }
+//           return getDiscount(b) - getDiscount(a)
+//         case 'name':
+//         default:
+//           return (a.name || '').localeCompare(b.name || '')
+//       }
+//     })
+
+//     setFilteredProducts(filtered)
+//   }
+
+//   const clearFilters = () => {
+//     setSelectedBrand('')
+//     setSelectedDisease('')
+//     setPriceRange({ min: '', max: '' })
+//     setSortBy('name')
+//     setShowOnlyDiscounted(false)
+//     setSearchQuery('')
+//   }
+
+//   const breadcrumbItems = [
+//     { label: 'Home', path: '/' },
+//     { label: 'Homeopathic', path: '/homeopathic' }
+//   ]
+
+//   if (loading) {
+//     return (
+//       <div className="container mx-auto px-4 py-8">
+//         <div className="flex justify-center items-center h-64">
+//           <div className="text-lg text-gray-600">Loading Homeopathic products...</div>
+//         </div>
+//       </div>
+//     )
+//   }
+
+//   if (error) {
+//     return (
+//       <div className="container mx-auto px-4 py-8">
+//         <div className="flex justify-center items-center h-64">
+//           <div className="text-lg text-red-600">Error: {error}</div>
+//         </div>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="container mx-auto px-4 py-6">
+//       <Breadcrumb items={breadcrumbItems} />
+      
+//       <div className="mb-6">
+//         <h1 className="text-3xl font-bold text-gray-800 mb-2">Homeopathic Products</h1>
+//         <p className="text-gray-600">
+//           {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+//         </p>
+//       </div>
+
+//       {/* Mobile Filter Toggle Button */}
+//       <div className="lg:hidden flex justify-end mb-4">
+//         <button
+//           onClick={() => setShowMobileFilters(true)}
+//           className="bg-blue-600 text-white px-4 py-2 rounded-md"
+//         >
+//           Filters
+//         </button>
+//       </div>
+
+//       {/* Main Layout */}
+//       <div className="flex flex-col lg:flex-row gap-6">
+//         {/* Sidebar Filters for Desktop/Tablet */}
+//         <div className="hidden lg:block lg:w-1/4">
+//           <ProductFilters
+//             brands={brands}
+//             diseases={diseases}
+//             selectedBrand={selectedBrand}
+//             setSelectedBrand={setSelectedBrand}
+//             selectedDisease={selectedDisease}
+//             setSelectedDisease={setSelectedDisease}
+//             priceRange={priceRange}
+//             setPriceRange={setPriceRange}
+//             showOnlyDiscounted={showOnlyDiscounted}
+//             setShowOnlyDiscounted={setShowOnlyDiscounted}
+//             clearFilters={clearFilters}
+//             searchQuery={searchQuery}
+//             setSearchQuery={setSearchQuery}
+//           />
+//         </div>
+
+//         {/* Products Grid Section */}
+//         <div className="lg:w-3/4">
+//           <div className="flex justify-between items-center mb-6">
+//             <div className="flex items-center gap-2">
+//               <label className="text-sm font-medium text-gray-700">Sort by:</label>
+//               <select
+//                 value={sortBy}
+//                 onChange={(e) => setSortBy(e.target.value)}
+//                 className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               >
+//                 <option value="name">Name (A-Z)</option>
+//                 <option value="price_low">Price (Low to High)</option>
+//                 <option value="price_high">Price (High to Low)</option>
+//                 <option value="discount">Highest Discount</option>
+//               </select>
+//             </div>
+//           </div>
+
+//           {filteredProducts.length > 0 ? (
+//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+//               {filteredProducts.map((product) => (
+//                 <ProductCard key={product.id} product={product} />
+//               ))}
+//             </div>
+//           ) : (
+//             <div className="text-center py-12">
+//               <div className="text-gray-500 text-lg mb-4">No Homeopathic products found</div>
+//               <p className="text-gray-400 mb-6">
+//                 Try adjusting your filters or search criteria
+//               </p>
+//               <button
+//                 onClick={clearFilters}
+//                 className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
+//               >
+//                 Clear Filters
+//               </button>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       {/* Mobile Filter Modal */}
+//       {showMobileFilters && (
+//         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-start pt-12">
+//           <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative">
+//             <button
+//               className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl"
+//               onClick={() => setShowMobileFilters(false)}
+//             >
+//               ✕
+//             </button>
+//             <ProductFilters
+//               brands={brands}
+//               diseases={diseases}
+//               selectedBrand={selectedBrand}
+//               setSelectedBrand={setSelectedBrand}
+//               selectedDisease={selectedDisease}
+//               setSelectedDisease={setSelectedDisease}
+//               priceRange={priceRange}
+//               setPriceRange={setPriceRange}
+//               showOnlyDiscounted={showOnlyDiscounted}
+//               setShowOnlyDiscounted={setShowOnlyDiscounted}
+//               clearFilters={() => {
+//                 clearFilters()
+//                 setShowMobileFilters(false)
+//               }}
+//               searchQuery={searchQuery}
+//               setSearchQuery={setSearchQuery}
+//             />
+//             <button
+//               onClick={() => setShowMobileFilters(false)}
+//               className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+//             >
+//               Apply Filters
+//             </button>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
+
+// export default Homeopathic
+
+
+
+import React from 'react'
+
+export default function HomeoPathic (){
   return (
-    // <div className="p-4 max-w-7xl mx-auto">
-    //   {/* MOBILE filter button + sort */}
-    //   <div className="flex flex-col gap-3 mb-4 md:hidden">
-    //     <button
-    //       onClick={() => setIsMobileFilterOpen(true)}
-    //       className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded"
-    //     >
-    //       Filters
-    //     </button>
-    //     <select
-    //       value={sortBy}
-    //       onChange={handleSortChange}
-    //       className="w-full border border-gray-300 rounded px-3 py-2"
-    //     >
-    //       <option value="">Sort by</option>
-    //       <option value="price-asc">Price: Low to High</option>
-    //       <option value="price-desc">Price: High to Low</option>
-    //       <option value="discount-asc">Discount: Low to High</option>
-    //       <option value="discount-desc">Discount: High to Low</option>
-    //     </select>
-    //   </div>
-
-    //   <div className="flex gap-6">
-    //     {/* TABLET+ sidebar filters */}
-    //     <div className="hidden md:block w-64 flex-shrink-0 space-y-6">
-    //       <BrandFilterAside selectedBrands={selectedBrands} onBrandChange={handleBrandChange} />
-    //       <DiseaseFilterAside selectedDiseases={selectedDiseases} onDiseaseChange={handleDiseaseChange} />
-    //     </div>
-
-    //     {/* Products + sort dropdown */}
-    //     <div className="flex-1">
-    //       {/* Sort dropdown for md+ */}
-    //       <div className="hidden md:flex justify-end mb-4">
-    //         <select
-    //           value={sortBy}
-    //           onChange={handleSortChange}
-    //           className="border border-gray-300 rounded px-3 py-2 w-60"
-    //         >
-    //           <option value="">Sort by</option>
-    //           <option value="price-asc">Price: Low to High</option>
-    //           <option value="price-desc">Price: High to Low</option>
-    //           <option value="discount-asc">Discount: Low to High</option>
-    //           <option value="discount-desc">Discount: High to Low</option>
-    //         </select>
-    //       </div>
-
-    //       {loading && (
-    //         <div className="flex justify-center items-center py-10">
-    //           <img src="/logo.png" alt="Loading" className="w-16 h-16 animate-spin" />
-    //         </div>
-    //       )}
-    //       {error && <div className="text-center text-red-500">{error}</div>}
-
-    //       {!loading && !error && (
-    //         filtering ? (
-    //           <div className="flex justify-center items-center py-10">
-    //             <img src="/logo.png" alt="Loading" className="w-16 h-16 animate-spin" />
-    //           </div>
-    //         ) : (
-    //           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    //             {filteredProducts.length > 0 ? (
-    //               filteredProducts.map(p => <ProductCard key={p.id} product={p} />)
-    //             ) : (
-    //               <div className="col-span-full text-center text-gray-400">No products found in this category.</div>
-    //             )}
-    //           </div>
-    //         )
-    //       )}
-    //     </div>
-    //   </div>
-
-    //   {/* Mobile filter drawer */}
-    //   <div
-    //     className={`fixed inset-0 z-40 bg-black bg-opacity-30 transition-opacity duration-300 ease-in-out
-    //       ${isMobileFilterOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-    //     onClick={() => setIsMobileFilterOpen(false)}
-    //   />
-    //   <div
-    //     className={`fixed top-0 left-0 h-full w-3/4 max-w-sm bg-white z-50 shadow-lg p-4 space-y-6 overflow-y-auto
-    //       transform transition-transform duration-300 ease-in-out
-    //       ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}`}
-    //   >
-    //     <div className="flex justify-between items-center mb-4">
-    //       <h2 className="text-xl font-semibold">Filters</h2>
-    //       <button onClick={() => setIsMobileFilterOpen(false)} className="text-gray-500 text-lg">✕</button>
-    //     </div>
-    //     <BrandFilterAside selectedBrands={selectedBrands} onBrandChange={handleBrandChange} />
-    //     <DiseaseFilterAside selectedDiseases={selectedDiseases} onDiseaseChange={handleDiseaseChange} />
-    //   </div>
-    // </div>
-
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-center px-4">
       <img
         src="https://via.placeholder.com/300x200?text=Coming+Soon"
@@ -183,5 +366,3 @@ function Homeopathic() {
     </div>
   )
 }
-
-export default Homeopathic
