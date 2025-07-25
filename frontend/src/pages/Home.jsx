@@ -171,74 +171,110 @@ const Home = () => {
       {/* banner for ad  */}
       {getBannerByType("ad") && <Banners banners={[getBannerByType("ad")]} />}
       {/* ----------  */}
-
-<div className="mt-2">
-  <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Seasonal Products</h1>
-  <div className="flex overflow-x-auto gap-4">
-    {seasonalProducts.map((product) => (
-      <Link
-        key={product.id}
-        to={`/product/${product.id}`}
-        style={{ textDecoration: 'none' }} 
-      >
-        {/* <div className="min-w-[200px]"> */}
-          <ProductCardScrollable
-            id={product.id}
-            image={
-              Array.isArray(product.images) && product.images.length > 0
-                ? product.images[0]
-                : undefined
-            }
-            name={product.name}
-            actualPrice={product.actual_price}
-            sellingPrice={product.selling_price}
-          />
-        {/* </div> */}
-      </Link>
-    ))}
-  </div>
-</div>
-
-      {/* ---------------  */}
       <div className="mt-2">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Top Products</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            Seasonal Products
+          </h1>
+          <Link
+            to="/products?seasonal_medicine=true"
+            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
+          >
+            View All
+          </Link>
+        </div>
         <div className="flex overflow-x-auto gap-4">
-          {topProducts.map((product) => (
+          {seasonalProducts.map((product) => (
             <Link
-        key={product.id}
-        to={`/product/${product.id}`}
-        style={{ textDecoration: 'none' }} 
-      >
-            <ProductCardScrollable
               key={product.id}
-              id={product.id}
-              image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
-              name={product.name}
-              actualPrice={product.actual_price}
-              sellingPrice={product.selling_price}
-            />
+              to={`/product/${product.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              {/* <div className="min-w-[200px]"> */}
+              <ProductCardScrollable
+                id={product.id}
+                image={
+                  Array.isArray(product.images) && product.images.length > 0
+                    ? product.images[0]
+                    : undefined
+                }
+                name={product.name}
+                actualPrice={product.actual_price}
+                sellingPrice={product.selling_price}
+              />
+              {/* </div> */}
             </Link>
           ))}
         </div>
       </div>
       {/* ---------------  */}
       <div className="mt-2">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">People Preferred Products</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            Top Products
+          </h1>
+          <Link
+            to="/products?top_products=true"
+            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
+          >
+            View All
+          </Link>
+        </div>
+        <div className="flex overflow-x-auto gap-4">
+          {topProducts.map((product) => (
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              <ProductCardScrollable
+                key={product.id}
+                id={product.id}
+                image={
+                  Array.isArray(product.images) && product.images.length > 0
+                    ? product.images[0]
+                    : undefined
+                }
+                name={product.name}
+                actualPrice={product.actual_price}
+                sellingPrice={product.selling_price}
+              />
+            </Link>
+          ))}
+        </div>
+      </div>
+      {/* ---------------  */}
+      <div className="mt-2">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            People Preferred Products
+          </h1>
+          <Link
+            to="/products?people_preferred=true"
+            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
+          >
+            View All
+          </Link>
+        </div>
         <div className="flex overflow-x-auto gap-4">
           {peoplePreferredProducts.map((product) => (
             <Link
-        key={product.id}
-        to={`/product/${product.id}`}
-        style={{ textDecoration: 'none' }} 
-      >
-            <ProductCardScrollable
               key={product.id}
-              id={product.id}
-              image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
-              name={product.name}
-              actualPrice={product.actual_price}
-              sellingPrice={product.selling_price}
-            />
+              to={`/product/${product.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              <ProductCardScrollable
+                key={product.id}
+                id={product.id}
+                image={
+                  Array.isArray(product.images) && product.images.length > 0
+                    ? product.images[0]
+                    : undefined
+                }
+                name={product.name}
+                actualPrice={product.actual_price}
+                sellingPrice={product.selling_price}
+              />
             </Link>
           ))}
         </div>
@@ -250,18 +286,32 @@ const Home = () => {
       <Brands />
       {/* ----------  */}
       <div className="mt-2">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">Maximum Discount Products</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            Maximum Discount Products
+          </h1>
+          <Link
+            to="/products?discount_percent=20"
+            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
+          >
+            View All
+          </Link>
+        </div>
         <div className="flex overflow-x-auto gap-4">
           {maxDiscountProducts.map((product) => (
             <Link
               key={product.id}
               to={`/product/${product.id}`}
-              style={{ textDecoration: 'none' }} 
+              style={{ textDecoration: "none" }}
             >
               <ProductCardScrollable
                 key={product.id}
                 id={product.id}
-                image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
+                image={
+                  Array.isArray(product.images) && product.images.length > 0
+                    ? product.images[0]
+                    : undefined
+                }
                 name={product.name}
                 actualPrice={product.actual_price}
                 sellingPrice={product.selling_price}
