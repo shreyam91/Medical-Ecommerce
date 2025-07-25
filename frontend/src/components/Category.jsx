@@ -1,26 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const data = [
-  { id: 1, title: "Diabetes", imageUrl: "/assets/diabetes.svg", link: "/categories/diabetes" },
-  { id: 2, title: "Skin Care", imageUrl: "/assets/skin.svg", link: "/categories/skin-care" },
-  { id: 3, title: "Hair Care", imageUrl: "/assets/hair.svg", link: "/categories/hair-care" },
-  { id: 4, title: "Joint, Bone & Muscle Care", imageUrl: "/assets/joint.svg", link: "/categories/joint-care" },
-  { id: 5, title: "Kidney Care", imageUrl: "/assets/Kidney.svg", link: "/categories/kidney-care" },
-  { id: 6, title: "Liver Care", imageUrl: "/assets/liver.svg", link: "/categories/liver-care" },
-  { id: 7, title: "Heart Care", imageUrl: "/assets/heart.svg", link: "/categories/heart-care" },
-  { id: 8, title: "Men Wellness", imageUrl: "/assets/men.svg", link: "/categories/men-care" },
-  { id: 9, title: "Women Wellness", imageUrl: "/assets/women.svg", link: "/categories/women-care" },
-  { id: 10, title: "Digestive Care", imageUrl: "/assets/digestive.svg", link: "/categories/digestive-care" },
-];
-
 export default function Category() {
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fallback data in case API fails
+  const fallbackData = [
+    { id: 1, title: "Diabetes", imageUrl: "/assets/diabetes.svg", slug: "diabetes" },
+    { id: 2, title: "Skin Care", imageUrl: "/assets/skin.svg", slug: "skin-care" },
+    { id: 3, title: "Hair Care", imageUrl: "/assets/hair.svg", slug: "hair-care" },
+    { id: 4, title: "Joint, Bone & Muscle Care", imageUrl: "/assets/joint.svg", slug: "joint-care" },
+    { id: 5, title: "Kidney Care", imageUrl: "/assets/Kidney.svg", slug: "kidney-care" },
+    { id: 6, title: "Liver Care", imageUrl: "/assets/liver.svg", slug: "liver-care" },
+    { id: 7, title: "Heart Care", imageUrl: "/assets/heart.svg", slug: "heart-care" },
+    { id: 8, title: "Men Wellness", imageUrl: "/assets/men.svg", slug: "men-care" },
+    { id: 9, title: "Women Wellness", imageUrl: "/assets/women.svg", slug: "women-care" },
+    { id: 10, title: "Digestive Care", imageUrl: "/assets/digestive.svg", slug: "digestive-care" },
+  ];
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500);
-    return () => clearTimeout(timer);
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3001/api/category');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          // Map API data to include proper links
+          const categoriesWithLinks = data.map(category => ({
+            ...category,
+            link: `/categories/${category.slug || category.name.toLowerCase().replace(/\s+/g, '-')}`
+          }));
+          setCategories(categoriesWithLinks);
+        } else {
+          setCategories(fallbackData.map(cat => ({ ...cat, link: `/categories/${cat.slug}` })));
+        }
+      } else {
+        setCategories(fallbackData.map(cat => ({ ...cat, link: `/categories/${cat.slug}` })));
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories(fallbackData.map(cat => ({ ...cat, link: `/categories/${cat.slug}` })));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className=" py-8 max-w-7xl mx-auto">
@@ -41,19 +69,19 @@ export default function Category() {
                   <div className="h-4 w-24 bg-gray-300 rounded" />
                 </div>
               ))
-            : data.map(({ id, title, imageUrl, link }) => (
+            : categories.map(({ id, title, name, imageUrl, image_url, link }) => (
                 <Link
                   to={link}
                   key={id}
                   className="flex items-center min-w-[200px] bg-white rounded-md shadow-md p-4 hover:shadow-lg transition duration-300 hover:bg-gray-50 snap-start"
                 >
                   <img
-                    src={imageUrl}
-                    alt={title}
+                    src={imageUrl || image_url || "/assets/default-category.svg"}
+                    alt={title || name}
                     className="w-16 h-16 object-cover mr-4"
                     loading="lazy"
                   />
-                  <p className="text-md font-medium text-gray-800">{title}</p>
+                  <p className="text-md font-medium text-gray-800">{title || name}</p>
                 </Link>
               ))}
         </div>
@@ -71,19 +99,19 @@ export default function Category() {
                 <div className="h-4 w-24 bg-gray-300 rounded" />
               </div>
             ))
-          : data.map(({ id, title, imageUrl, link }) => (
+          : categories.map(({ id, title, name, imageUrl, image_url, link }) => (
               <Link
                 to={link}
                 key={id}
                 className="flex items-center bg-white rounded-md shadow-md p-4 hover:shadow-lg transition duration-300 hover:bg-gray-50"
               >
                 <img
-                  src={imageUrl}
-                  alt={title}
+                  src={imageUrl || image_url || "/assets/default-category.svg"}
+                  alt={title || name}
                   className="w-16 h-16 object-cover mr-4"
                   loading="lazy"
                 />
-                <p className="text-md font-semibold text-gray-800">{title}</p>
+                <p className="text-md font-semibold text-gray-800">{title || name}</p>
               </Link>
             ))}
       </div>
