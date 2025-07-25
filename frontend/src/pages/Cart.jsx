@@ -62,7 +62,7 @@ export default function Cart() {
     return (
       <div className="max-w-6xl mx-auto p-6 text-center">
         <h1 className="text-3xl font-bold text-green-700 mb-4">Your Cart</h1>
-        <p className="text-gray-600 mb-8">Your cart is empty</p>
+        <p className="text-gray-600 mb-8">You haven’t added anything to your cart yet.</p>
         <Link
           to="/"
           className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
@@ -72,7 +72,15 @@ export default function Cart() {
 
         {/* ----------  */}
             <div className="mt-2">
-          <h1 className="text-2xl font-bold mb-4">Frequently Bought from Customers </h1>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold">Frequently Bought from Customers</h1>
+            <Link
+              to="/products?frequently_bought=true"
+              className=" text-blue-700 px-4 py-2 rounded-lg transition-colors text-m font-medium text-center sm:text-left whitespace-nowrap"
+            >
+              View All
+            </Link>
+          </div>
           <div className="flex overflow-x-auto gap-4">
             {frequentlyBoughtProducts.map((product) => (
               <ProductCardScrollable
@@ -263,7 +271,7 @@ export default function Cart() {
           </div>
           <button
             onClick={() => removeFromCart(item.id)}
-            className="text-red-600 hover:text-red-700 text-sm"
+            className="text-red-500 hover:text-red-700 text-m "
           >
             Remove
           </button>
@@ -362,8 +370,16 @@ export default function Cart() {
 </div>
 
 {/* ----------  */}
-            <div className="mt-2">
-          <h1 className="text-2xl font-bold mb-4">Frequently Bought from Customers </h1>
+            <div className="mt-8 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold">Frequently Bought from Customers</h1>
+            <Link
+              to="/products?frequently_bought=true"
+              className=" text-blue-600 px-4 py-2 rounded-lg transition-colors text-m font-medium text-center sm:text-left whitespace-nowrap"
+            >
+              View All
+            </Link>
+          </div>
           <div className="flex overflow-x-auto gap-4">
             {frequentlyBoughtProducts.map((product) => (
               <ProductCardScrollable

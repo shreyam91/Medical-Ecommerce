@@ -36,7 +36,7 @@ const ProductCard = ({ product }) => {
       <Toaster position="top-right" />
       
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative bg-white rounded-lg shadow-md overflow-hidden w-full max-w-[90vw] sm:max-w-[300px] md:max-w-[340px] lg:max-w-[360px] xl:max-w-[400px] group transition-transform duration-300 hover:scale-[1.02] mx-auto">
+        <div className="relative bg-white rounded-lg shadow-md overflow-hidden w-full max-w-[90vw] sm:max-w-[300px] md:max-w-[340px] lg:max-w-[360px] xl:max-w-[400px] group transition-transform duration-300 hover:scale-[1.02] mx-auto ">
 
           
           {/* Discount Badge */}
@@ -95,9 +95,12 @@ export default ProductCard;
 // Updated ProductCardScrollable
 export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPrice }) => {
   const { addToCart, cartItems } = useCart();
+  const navigate = useNavigate();
   const isInCart = cartItems.some(item => item.id === id);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     addToCart({
       id,
       name,
@@ -108,8 +111,15 @@ export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPri
     toast.success("Added to cart!");
   };
 
+  const handleCardClick = () => {
+    navigate(`/product/${id}`);
+  };
+
   return (
-    <div className="w-64 p-4 bg-white rounded-lg shadow-md flex-shrink-0 transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
+    <div 
+      className="w-64 p-4 bg-white rounded-lg shadow-md flex-shrink-0 cursor-pointer border-2"
+      onClick={handleCardClick}
+    >
       {/* <Toaster position="top-right" /> */}
       <img src={image} alt={name} className="h-40 w-full object-cover rounded-md mb-4" />
       <h2 className="text-lg font-semibold">{name}</h2>
@@ -118,7 +128,7 @@ export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPri
         <span className="text-red-600 font-bold">₹{sellingPrice}</span>
       </div>
       <button
-        className={`mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200 w-full`}
+        className={`mt-auto bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition duration-200 w-full`}
         onClick={handleAddToCart}
       >
         { 'Add to Cart'}

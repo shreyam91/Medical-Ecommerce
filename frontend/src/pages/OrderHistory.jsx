@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+
 
 // Sample order data
 const initialOrders = [
@@ -39,10 +41,8 @@ const initialOrders = [
   },
 ];
 
-// Filter options
 const statuses = ['All', 'Delivered', 'Shipped', 'Processing', 'Returned', 'Cancelled'];
 
-// Return eligibility: within 2 days of delivery
 const isReturnEligible = (deliveryDateStr) => {
   const deliveryDate = new Date(deliveryDateStr);
   const returnDeadline = new Date(deliveryDate);
@@ -58,7 +58,6 @@ const OrderHistory = () => {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('All');
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOrder, setModalOrder] = useState(null);
   const [modalAction, setModalAction] = useState(null); // 'cancel' or 'return'
@@ -79,24 +78,23 @@ const OrderHistory = () => {
   };
 
   const confirmAction = () => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === modalOrder.id
-          ? { ...order, status: modalAction === 'cancel' ? 'Cancelled' : 'Returned' }
-          : order
-      )
-    );
+  setOrders((prev) =>
+    prev.map((order) =>
+      order.id === modalOrder.id
+        ? { ...order, status: modalAction === 'cancel' ? 'Cancelled' : 'Returned' }
+        : order
+    )
+  );
 
-    alert(
-      `${modalAction === 'cancel' ? 'Cancel' : 'Return'} request for ${
-        modalOrder.id
-      } submitted. Refund will be processed within 7 days.`
-    );
+  toast.success(
+    `${modalAction === 'cancel' ? 'Cancel' : 'Return'} request submitted.`
+  );
 
-    setModalOpen(false);
-    setModalOrder(null);
-    setModalAction(null);
-  };
+  setModalOpen(false);
+  setModalOrder(null);
+  setModalAction(null);
+};
+
 
   const closeModal = () => {
     setModalOpen(false);
@@ -105,25 +103,25 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-4 sm:p-6 ">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">📦 Order History</h1>
 
       {/* Filter Dropdown */}
-      <div className="flex justify-end max-w-4xl mx-auto mb-4">
+      <div className="flex flex-wrap justify-end max-w-4xl mx-auto mb-4">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="border px-4 py-2 rounded-md shadow-sm"
         >
-          {statuses.map((status) => ( 
+          {statuses.map((status) => (
             <option key={status}>{status}</option>
           ))}
         </select>
       </div>
 
       {/* Orders Table */}
-      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-md overflow-hidden">
-        <table className="w-full table-auto text-left">
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-md overflow-x-auto">
+        <table className="min-w-full table-auto text-left text-sm sm:text-base">
           <thead className="bg-gray-200 text-gray-700">
             <tr>
               <th className="py-3 px-4">Order ID</th>
@@ -162,14 +160,14 @@ const OrderHistory = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4">{order.total}</td>
-                    <td className="py-3 px-4 space-x-2">
+                    <td className="py-3 px-4 flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                       {order.status === 'Processing' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             openModal(order, 'cancel');
                           }}
-                          className="text-red-600 font-bold bg-amber-200 px-4 rounded"
+                          className="text-red-600 font-bold bg-amber-200 px-4 py-1 rounded"
                         >
                           Cancel
                         </button>
@@ -187,14 +185,16 @@ const OrderHistory = () => {
                             disabled={!returnEligible}
                             className={`${
                               returnEligible
-                                ? 'text-purple-600  font-bold bg-gray-200 px-4 rounded'
+                                ? 'text-purple-600 font-bold bg-gray-200 px-4 py-1 rounded'
                                 : 'text-gray-400 cursor-not-allowed'
                             }`}
                           >
                             Return
                           </button>
                           {!returnEligible && (
-                            <div className="text-xs text-red-500 mt-1">Return window expired</div>
+                            <div className="text-xs text-red-500 mt-1 sm:mt-0 sm:ml-2">
+                              Return window expired
+                            </div>
                           )}
                         </>
                       )}
@@ -231,8 +231,8 @@ const OrderHistory = () => {
 
       {/* Confirmation Modal */}
       {modalOpen && modalOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 sm:mx-0 p-4 sm:p-6">
             <h2 className="text-xl font-semibold mb-4">
               {modalAction === 'cancel' ? 'Cancel Order' : 'Return Order'}
             </h2>

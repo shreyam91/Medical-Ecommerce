@@ -333,7 +333,7 @@ const Home = () => {
             className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
           >
             {" "}
-            See all
+            Read all
           </Link>
           {/* <h2 className="text-md font-semibold text-blue-600 cursor-pointer hover:underline">See all</h2> */}
         </div>
