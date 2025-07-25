@@ -74,10 +74,16 @@ export default function CreateCustomerForm({ onClose, onCreated }) {
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           <input name="name" value={form.name} onChange={handleChange} placeholder="Full Name" required className="border p-2 rounded col-span-2" />
           <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required className="border p-2 rounded col-span-2" />
-          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required className="border p-2 rounded col-span-2" />
+          <div className="flex">
+          <span className="inline-flex items-center px-3 border border-r-0 rounded-l bg-gray-100 text-gray-600">
+      +91
+    </span>
+          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required className="w-full border p-2 rounded col-span-2" />
+          </div>
+
           <input name="houseNumber" value={form.houseNumber} onChange={handleChange} placeholder="House Number" required className="border p-2 rounded" />
-          <input name="area" value={form.area} onChange={handleChange} placeholder="Area" required className="border p-2 rounded" />
-          <input name="landmark" value={form.landmark} onChange={handleChange} placeholder="Landmark" className="border p-2 rounded col-span-2" />
+          <input name="area" value={form.area} onChange={handleChange} placeholder="Area" required className="border p-2 rounded " />
+          <input name="landmark" value={form.landmark} onChange={handleChange} placeholder="Landmark" className="border p-2 rounded " />
           <input name="city" value={form.city} onChange={handleChange} placeholder="City" required className="border p-2 rounded" />
           <input name="state" value={form.state} onChange={handleChange} placeholder="State" required className="border p-2 rounded" />
           <input name="pincode" value={form.pincode} onChange={handleChange} placeholder="Pincode" required className="border p-2 rounded" />

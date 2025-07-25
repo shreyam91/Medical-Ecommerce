@@ -58,8 +58,8 @@ export default function CustomerDetails() {
         const s = search.toLowerCase();
         return (
           c.name.toLowerCase().includes(s) ||
-          // c.id.toLowerCase().includes(s) ||
-          c.mobile.includes(search) ||
+String(c.customer_id).toLowerCase().includes(s)      ||
+    c.mobile.includes(search) ||
           c.email.toLowerCase().includes(s)
         );
       })

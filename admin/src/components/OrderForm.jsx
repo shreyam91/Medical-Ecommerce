@@ -178,7 +178,12 @@ export default function CreateOrderForm({ onClose, onCreated }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input placeholder="Full Name" className="border px-3 py-2 rounded" value={customerInfo.fullName} onChange={e => handleCustomerInputChange('fullName', e.target.value)} required />
             <input placeholder="Email" type="email" className="border px-3 py-2 rounded" value={customerInfo.email} onChange={e => handleCustomerInputChange('email', e.target.value)} required />
-            <input placeholder="Phone Number" className="border px-3 py-2 rounded" value={customerInfo.phone} onChange={e => handleCustomerInputChange('phone', e.target.value)} required />
+           <div className="flex">
+            <span className="inline-flex items-center px-3 border border-r-0 rounded-l bg-gray-100 text-gray-600">
+      +91
+    </span>
+            <input placeholder="Phone Number" className="border px-3 py-2 w-full rounded" value={customerInfo.phone} onChange={e => handleCustomerInputChange('phone', e.target.value)} required />
+          </div>
             <input placeholder="House Number" className="border px-3 py-2 rounded" value={customerInfo.houseNumber} onChange={e => handleCustomerInputChange('houseNumber', e.target.value)} required />
             <input placeholder="Area" className="border px-3 py-2 rounded" value={customerInfo.area} onChange={e => handleCustomerInputChange('area', e.target.value)} required />
             <input placeholder="Landmark" className="border px-3 py-2 rounded" value={customerInfo.landmark} onChange={e => handleCustomerInputChange('landmark', e.target.value)} />
