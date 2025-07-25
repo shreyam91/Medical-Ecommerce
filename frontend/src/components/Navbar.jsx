@@ -14,8 +14,9 @@ import { MdAddShoppingCart } from "react-icons/md";
 import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { FaUserDoctor } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
+import { FaHome } from "react-icons/fa";
+
 
 
 export default function NavbarMain() {
@@ -250,7 +251,7 @@ useEffect(() => {
     }}
   >
     <FaLocationDot className="w-4 h-4" />
-    <span>Detect Location</span>
+    <span> Location</span>
   </button>
 
   {/* Pincode Input and Dropdown */}
@@ -312,13 +313,13 @@ useEffect(() => {
             </div>
 
             <div className="flex items-center gap-4">
-              <Link to="/order-history">
+              {/* <Link to="/order-history">
                 <NavbarButton variant="secondary">
                   <div className="flex items-center gap-2 text-l">
                     Orders
                   </div>
                 </NavbarButton>
-              </Link>
+              </Link> */}
 
               <Link to="/cart">
                 <NavbarButton variant="secondary">
@@ -352,7 +353,7 @@ useEffect(() => {
                   </button>
 
                   {isProfileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
+                    <div className="absolute right-0 mt-2 bg-white border rounded shadow-md z-50">
                       <Link
                         to="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -360,6 +361,7 @@ useEffect(() => {
                       >
                         Profile
                       </Link>
+                      
                       <button
                         onClick={() => {
                           setUser({ isLoggedIn: false });
@@ -392,39 +394,148 @@ useEffect(() => {
         <div className="block md:hidden">
           <MobileNav>
             <MobileNavHeader>
-              <NavbarLogo />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={toggleMobileMenu}
-              />
-            </MobileNavHeader>
+  <div className="flex flex-col w-full gap-2 p-2">
+
+    {/* Top Row: Location + Login/Profile */}
+    <div className="flex items-center justify-between w-full">
+
+      {/* Location Detection + Pincode */}
+      <div className="flex items-center gap-2">
+        <button
+          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 whitespace-nowrap"
+          onClick={() => {
+            localStorage.removeItem("userPincode");
+            detectUserLocation();
+          }}
+        >
+          <FaLocationDot className="w-3 h-3" />
+          <span>Location</span>
+        </button>
+
+        <div className="relative max-w-[100px]" ref={pincodeDropdownRef}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={searchQuery}
+            onChange={handleInputChange}
+            onFocus={(e) => {
+              handleInputFocus();
+              e.stopPropagation();
+            }}
+            onBlur={handleInputBlur}
+            onClick={(e) => e.stopPropagation()}
+            placeholder="Pincode"
+            className="border rounded px-2 py-1 text-xs w-full dark:bg-neutral-800 dark:text-white"
+          />
+
+          {isPincodeDropdownOpen && uniqueLocations.length > 0 && (
+            <ul
+              className="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto shadow-lg mt-1"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              {uniqueLocations.map((loc, idx) => (
+                <li
+                  key={idx}
+                  className={`px-2 py-1 cursor-pointer hover:bg-blue-100 text-xs ${
+                    selectedPincode === loc.Pincode ? "bg-gray-200" : ""
+                  }`}
+                  onMouseDown={() => handleSelect(loc)}
+                >
+                  {loc.Pincode}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* Login / Profile */}
+      <div className="flex items-center gap-2">
+        {user.isLoggedIn ? (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsProfileDropdownOpen((prev) => !prev)}
+              className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+            >
+              {user.name}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {isProfileDropdownOpen && (
+              <div className="absolute left-0 mt-1 w-20 bg-white border rounded shadow-md z-50">
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                  onClick={() => setIsProfileDropdownOpen(false)}
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={() => {
+                    setUser({ isLoggedIn: false });
+                    localStorage.removeItem("userPincode");
+                    setIsProfileDropdownOpen(false);
+                    navigate("/");
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link to="/login">
+            <button className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
+              Login
+            </button>
+          </Link>
+        )}
+      </div>
+    </div>
+
+    {/* Second Row: Search + Cart */}
+    <div className="flex items-center gap-2 w-full">
+      <input
+        type="text"
+        value={medicineSearch}
+        onChange={(e) => setMedicineSearch(e.target.value)}
+        placeholder="Search medicines..."
+        className="border rounded px-2 py-1 text-xs flex-1 dark:bg-neutral-800 dark:text-white"
+      />
+      
+      <Link to="/cart" className="flex items-center">
+        <div className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded text-xs">
+          <MdAddShoppingCart className="w-4 h-4" />
+          <span>{cartItemCount}</span>
+        </div>
+      </Link>
+    </div>
+
+    {/* Error Message */}
+    {searchError && (
+      <div className="text-red-500 text-xs">{searchError}</div>
+    )}
+  </div>
+</MobileNavHeader>
+
 
             <MobileNavMenu
               isOpen={isMobileMenuOpen}
               onClose={() => setIsMobileMenuOpen(false)}
             >
-              <div className="flex flex-col gap-4 px-4 py-2">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="border rounded px-4 py-2 text-sm dark:bg-neutral-800 dark:text-white"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2 px-4 pt-4">
-                {navigationLinks.map((item, idx) => (
-                  <a
-                    key={idx}
-                    href={item.link}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-sm text-neutral-700 dark:text-neutral-200 hover:underline"
-                  >
-                    {item.name}
-                  </a>
-                ))}
-              </div>
-
               <div className="flex flex-col gap-4 px-4 py-4">
+                <Link to="/order-history">
+                  <NavbarButton
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    Order
+                  </NavbarButton>
+                </Link>
                 <Link to="/cart">
                   <NavbarButton
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -477,6 +588,18 @@ useEffect(() => {
           </MobileNav>
         </div>
       </Navbar>
+      {/* Centered Home Button at Bottom - Mobile Only */}
+<div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 sm:hidden z-50">
+  <Link
+    to="/"
+    className="bg-blue-600 text-white px-6 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm hover:bg-blue-700"
+  >
+    <FaHome className="w-4 h-4" />
+    Home
+  </Link>
+</div>
+
+
     </div>
   );
 }
