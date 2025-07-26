@@ -1,10 +1,13 @@
-const API_URL = 'http://localhost:3001/api/inventory';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = `${API_BASE}/inventory`;
 
 function getAuthHeaders() {
-  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const token = user.token;
+  
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(token && { 'Authorization': `Bearer ${token}` })
   };
 }
 
@@ -51,4 +54,4 @@ export async function deleteInventory(id) {
   });
   if (!res.ok) throw new Error('Failed to delete inventory item');
   return res.json();
-} 
+}

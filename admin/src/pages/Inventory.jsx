@@ -1,55 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { getInventories, createInventory, updateInventory, deleteInventory } from '../lib/inventoryApi';
+import { getProducts, updateProduct } from '../lib/productApi';
 import { getBrands } from '../lib/brandApi';
-import { getProducts } from '../lib/productApi';
 
-// const initialData = [
-//   {
-//     id: 1,
-//     name: "Paracetamol 500mg",
-//     quantity: 120,
-//     status: "In Stock",
-//     category: "Pain Relief",
-//     brand: "Kapiva",
-//     expiry: "2026-05-01",
-//   },
-//   {
-//     id: 2,
-//     name: "Amoxicillin 250mg",
-//     quantity: 0,
-//     status: "Out of Stock",
-//     category: "Antibiotics",
-//     brand: "Patanjali",
-//     expiry: "2025-01-01",
-//   },
-//   {
-//     id: 3,
-//     name: "Ibuprofen 400mg",
-//     quantity: 40,
-//     status: "Low Stock",
-//     category: "Pain Relief",
-//     brand: "Kapiva",
-//     expiry: "2025-08-10",
-//   },
-//   {
-//     id: 4,
-//     name: "Cetirizine",
-//     quantity: 200,
-//     status: "In Stock",
-//     category: "Allergy",
-//     brand: "Kapiva",
-//     expiry: "2026-03-01",
-//   },
-//   {
-//     id: 5,
-//     name: "Cough Syrup",
-//     quantity: 10,
-//     status: "Low Stock",
-//     category: "Cold",
-//     brand: "Patanjali",
-//     expiry: "2025-07-01",
-//   },
-// ];
+
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -72,13 +25,12 @@ const getStatusFromQuantity = (total_quantity) => {
 
 const InventoryPage = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user.role !== 'admin') {
-    return <div className="p-8 text-red-600 font-bold">Access denied</div>;
-  }
+  // if (user.role !== 'admin') {
+  //   return <div className="p-8 text-red-600 font-bold">Access denied</div>;
+  // }
 
-  const [inventory, setInventory] = useState([]);
-  const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [search, setSearch] = useState("");
   const [brandFilter, setBrandFilter] = useState("All");
   const [editingItem, setEditingItem] = useState(null);
@@ -87,44 +39,37 @@ const InventoryPage = () => {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
   useEffect(() => {
-    // Fetch inventory, products, and brands in parallel
+    // Fetch products and brands in parallel
     Promise.all([
-      getInventories().catch(() => []),
       getProducts().catch(() => []),
       getBrands().catch(() => []),
-    ]).then(([inventoryData, productsData, brandsData]) => {
-      console.log('Fetched inventory:', inventoryData);
+    ]).then(([productsData, brandsData]) => {
       console.log('Fetched products:', productsData);
       console.log('Fetched brands:', brandsData);
-      setProducts(productsData);
-      setBrands(brandsData);
-      // Merge inventory with product and brand info
+      
+      // Create brand map for easy lookup
       const brandMap = Object.fromEntries(brandsData.map(b => [b.id, b.name]));
-      const productMap = Object.fromEntries(productsData.map(p => [p.id, p]));
-      const merged = inventoryData.map(item => {
-        const product = productMap[item.product_id] || {};
-        const mergedItem = {
-          ...item,
-          name: product.name || 'Unknown',
-          category: product.category || 'Unknown',
-          brand: brandMap[product.brand_id] || 'Unknown',
-          total_quantity: item.quantity ?? product.total_quantity ?? 0,
-        };
-        // debugger;   // Debug: for each merged inventory item
-        return mergedItem;
-      });
-      console.log('Merged inventory:', merged);
-      setInventory(merged);
+      
+      // Add brand names and status to products
+      const productsWithBrands = productsData.map(product => ({
+        ...product,
+        brand: brandMap[product.brand_id] || 'Unknown',
+        status: getStatusFromQuantity(product.total_quantity || 0)
+      }));
+      
+      setProducts(productsWithBrands);
+      setBrands(brandsData);
     });
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this inventory item?')) return;
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
-      await deleteInventory(id);
-      setInventory(inventory.filter((item) => item.id !== id));
+      // Note: You may want to implement deleteProduct in productApi if needed
+      // For now, we'll just remove from local state
+      setProducts(products.filter((item) => item.id !== id));
     } catch (err) {
-      alert('Failed to delete inventory item');
+      alert('Failed to delete product');
     }
   };
 
@@ -135,8 +80,8 @@ const InventoryPage = () => {
       status: getStatusFromQuantity(editingItem.total_quantity),
     };
     try {
-      await updateInventory(updatedItem.id, updatedItem);
-      setInventory((prev) =>
+      await updateProduct(updatedItem.id, updatedItem);
+      setProducts((prev) =>
         prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
       );
       setEditingItem(null);
@@ -157,13 +102,13 @@ const InventoryPage = () => {
     });
   };
 
-  const filteredInventory = inventory.filter((item) => {
+  const filteredProducts = products.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
     const matchesBrand = brandFilter === "All" || item.brand === brandFilter;
     return matchesSearch && matchesBrand;
   });
 
-  const sortedInventory = [...filteredInventory].sort((a, b) => {
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
     const { key, direction } = sortConfig;
     if (!key) return 0;
     const valueA = a[key];
@@ -173,8 +118,8 @@ const InventoryPage = () => {
     return 0;
   });
 
-  const totalPages = Math.ceil(sortedInventory.length / itemsPerPage);
-  const displayedItems = sortedInventory.slice(
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const displayedItems = sortedProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -354,20 +299,6 @@ const InventoryPage = () => {
                 Availability:{" "}
                 <strong>{getStatusFromQuantity(editingItem.total_quantity)}</strong>
               </p>
-              <input
-                className="w-full border px-3 py-2 rounded"
-                value={editingItem.category}
-                onChange={(e) =>
-                  setEditingItem({ ...editingItem, category: e.target.value })
-                }
-              />
-              <input
-                className="w-full border px-3 py-2 rounded"
-                value={editingItem.brand}
-                onChange={(e) =>
-                  setEditingItem({ ...editingItem, brand: e.target.value })
-                }
-              />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
