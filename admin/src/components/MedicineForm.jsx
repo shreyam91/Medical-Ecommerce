@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ImageUploader from "./ImageUploader";
 import toast, { Toaster } from "react-hot-toast";
-import { createProduct, updateProduct, deleteProduct, deleteImage, getProductPrices } from "../lib/productApi";
+import { createProduct, updateProduct, deleteProduct, deleteImage, getProductPrices, createProductPrices, updateProductPrices } from "../lib/productApi";
 import { getBrands } from "../lib/brandApi";
 import { getReferenceBooks } from "../lib/referenceBookApi";
 import { getMainCategories } from "../lib/mainCategoryApi";
@@ -13,7 +13,7 @@ import ProductSelects from './ProductSelects';
 import ProductFlags from './ProductFlags';
 import PriceSection from './PriceSection';
 
-const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
+const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSuccess, onCancel }) => {
   const imageRef = useRef();
   const typeOptions = [
     { value: "tablet", label: "Tablet" },
@@ -22,8 +22,15 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
     { value: "gm", label: "Gram (gm)" },
   ];
 
+  const categoryOptions = [
+    { value: "Ayurvedic", label: "Ayurvedic" },
+    { value: "Unani", label: "Unani" },
+    { value: "Homeopathic", label: "Homeopathic" },
+  ];
+
   const initial = {
     type: "tablet",
+    category: category || "Ayurvedic",
     name: "",
     brand_id: "",
     mainCategoryId: "",
@@ -113,6 +120,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete }) => {
               : editProduct.medicine_type === "Capsule"
               ? "capsule"
               : "tablet",
+          category: editProduct.category || "Ayurvedic",
           name: editProduct.name || "",
           brand_id: String(editProduct.brand_id || ""),
           mainCategoryId: String(editProduct.main_category_id || ""),
@@ -254,7 +262,7 @@ setTimeout(() => {
     try {
       const common = {
         name: form.name.trim(),
-        category: category || "Ayurvedic",
+        category: form.category,
         medicine_type:
           form.type === "ml"
             ? "Liquid"
@@ -264,8 +272,8 @@ setTimeout(() => {
             ? "Capsule"
             : "Tablet",
         brand_id: parseInt(form.brand_id, 10),
-        main_category_id: parseInt(form.mainCategoryId, 10),
-        sub_category_id: parseInt(form.subCategoryId, 10),
+        main_category_id: form.mainCategoryId ? parseInt(form.mainCategoryId, 10) : null,
+        sub_category_id: form.subCategoryId ? parseInt(form.subCategoryId, 10) : null,
         reference_books: form.referenceBook ? [form.referenceBook] : [],
         key: form.keyTags.join(", "),
         key_ingredients: form.ingredients.trim(),
@@ -274,7 +282,7 @@ setTimeout(() => {
         description: form.description.trim(),
         strength: form.strength.trim(),
         prescription_required: form.prescriptionRequired,
-        actual_price: parseFloat(form.prices[0].actualPrice), // Only the first price row is submitted. // TODO: Support multiple price rows in backend and here.
+        actual_price: parseFloat(form.prices[0].actualPrice),
         selling_price: parseFloat(form.prices[0].sellingPrice),
         discount_percent: parseFloat(form.prices[0].discount),
         total_quantity: parseInt(form.prices[0].quantity, 10),
@@ -283,7 +291,7 @@ setTimeout(() => {
         frequently_bought: form.frequentlyBought,
         top_products: form.topProducts,
         people_preferred: form.peoplePreferred,
-        disease_id: form.diseaseId ? parseInt(form.diseaseId, 10) : undefined,
+        disease_id: form.diseaseId ? parseInt(form.diseaseId, 10) : null,
       };
       console.log("Submitting to API:", editProduct ? "update" : "create", common);
 
@@ -297,16 +305,49 @@ setTimeout(() => {
         toast.success("Product added successfully");
       }
 
+      // Handle multiple price rows
+      if (form.prices.length > 1) {
+        try {
+          const priceData = form.prices.map(price => ({
+            size: price.size,
+            quantity: parseInt(price.quantity, 10),
+            actual_price: parseFloat(price.actualPrice),
+            discount_percent: parseFloat(price.discount),
+            selling_price: parseFloat(price.sellingPrice)
+          }));
+
+          if (editProduct) {
+            await updateProductPrices(productId, priceData);
+          } else {
+            await createProductPrices(productId, priceData);
+          }
+          toast.success("Product prices updated successfully");
+        } catch (priceErr) {
+          console.error("Error updating prices:", priceErr);
+          toast.error("Product saved but failed to update prices");
+        }
+      }
+
+      // Handle image uploads
       for (const img of form.selectedImages) {
         if (typeof img === "string") {
           uploadedUrls.push(img);
         } else {
           const fd = new FormData();
           fd.append("image", img);
+          
+          // Get auth token
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const headers = {};
+          if (user.token) {
+            headers['Authorization'] = `Bearer ${user.token}`;
+          }
+          
           const res = await fetch(
-            `${ "http://localhost:3001/api"}/upload`,
+            `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload`,
             {
               method: "POST",
+              headers,
               body: fd,
             }
           );
@@ -331,6 +372,11 @@ setTimeout(() => {
         console.warn("ImageUploader is missing clearImages method. Please implement it for proper reset.");
       }
       setEditProduct?.(null);
+      
+      // Call success callback if provided
+      if (typeof onSuccess === 'function') {
+        onSuccess();
+      }
     } catch (err) {
       console.error("Error submitting product:", err);
       toast.error(err.message || "Failed to submit product");
@@ -351,28 +397,57 @@ setTimeout(() => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Toaster position="top-right" />
+      {/* Category Selector */}
+      <div>
+        <label className="font-medium block mb-2">Medicine Category</label>
+        <div className="flex gap-2">
+          {categoryOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`flex-1 font-semibold px-4 py-3 rounded transition-colors ${
+                form.category === option.value
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  category: option.value,
+                }))
+              }
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Type selectors */}
-      <div className="flex gap-2">
-        {typeOptions.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            className={`w-full font-semibold px-6 py-3 rounded ${
-              form.type === o.value
-                ? "bg-orange-600 text-white"
-                : "bg-green-600 text-white hover:bg-green-700"
-            }`}
-            onClick={() =>
-              setForm((f) => ({
-                ...f,
-                type: o.value,
-                prices: [{ ...f.prices[0], size: "" }],
-              }))
-            }
-          >
-            {o.label}
-          </button>
-        ))}
+      <div>
+        <label className="font-medium block mb-2">Medicine Type</label>
+        <div className="flex gap-2">
+          {typeOptions.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              className={`w-full font-semibold px-6 py-3 rounded ${
+                form.type === o.value
+                  ? "bg-orange-600 text-white"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  type: o.value,
+                  prices: [{ ...f.prices[0], size: "" }],
+                }))
+              }
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Image Uploader */}
@@ -506,6 +581,24 @@ setTimeout(() => {
         )}
       </div>
 
+      {/* Strength (for tablets) */}
+      {form.type === "tablet" && (
+        <div>
+          <label className="font-medium block mb-1">Strength *</label>
+          <input
+            type="text"
+            name="strength"
+            placeholder="e.g., 500mg, 250mg"
+            className="w-full border rounded p-2"
+            value={form.strength}
+            onChange={handleChange}
+          />
+          {errors.strength && (
+            <p className="text-red-500 text-sm">{errors.strength}</p>
+          )}
+        </div>
+      )}
+
       {/* Price Section */}
       <PriceSection
         prices={form.prices}
@@ -548,7 +641,17 @@ setTimeout(() => {
           Delete Product
         </button>
       )}
-      {/* Cancel Button for Edit Mode */}
+      {/* Cancel Button */}
+      {onCancel && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded"
+          disabled={loading}
+        >
+          Cancel
+        </button>
+      )}
       {editProduct && (
         <button
           type="button"

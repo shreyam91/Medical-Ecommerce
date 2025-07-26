@@ -364,8 +364,20 @@
 
 
 import React, { useState, useEffect } from "react";
+import { getProducts } from '../lib/productApi';
+import { getBrands } from '../lib/brandApi';
+import { getMainCategories } from '../lib/categoryApi';
+import { getDiseases } from '../lib/diseaseApi';
 import { getCustomers } from '../lib/customerApi';
 import { getOrders } from '../lib/orderApi';
+import {
+  CubeIcon,
+  TagIcon,
+  FolderIcon,
+  UserGroupIcon,
+  ArrowTrendingUpIcon,
+  StarIcon
+} from '@heroicons/react/24/outline';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -401,52 +413,120 @@ ChartJS.register(
 );
 
 const Dashboard = () => {
-  const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-  const [endDate, setEndDate] = useState(new Date());
-  const [chartType, setChartType] = useState({
-    orders: 'bar',
-    revenue: 'bar',
-    customers: 'bar',
-    active: 'bar',
-    avg: 'bar',
-    status: 'bar',
-    ordersTrend: 'line',
-    revenueTrend: 'line',
+  const [stats, setStats] = useState({
+    products: 0,
+    brands: 0,
+    categories: 0,
+    diseases: 0,
+    seasonalProducts: 0,
+    topProducts: 0,
+    frequentlyBought: 0,
+    peoplePreferred: 0
   });
+  const [loading, setLoading] = useState(true);
+  const [recentProducts, setRecentProducts] = useState([]);
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      getOrders().catch(() => []),
-      getCustomers().catch(() => []),
-    ]).then(([ordersData, customersData]) => {
-      setOrders(ordersData);
-      setCustomers(customersData);
-      setLoading(false);
-    });
+    fetchDashboardData();
   }, []);
 
-  const parseDate = obj => new Date(obj.order_date || obj.date || obj.createdAt || obj.created_at);
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    
+    try {
+      const [products, brands, categories, diseases] = await Promise.all([
+        getProducts().catch(() => []),
+        getBrands().catch(() => []),
+        getMainCategories().catch(() => []),
+        getDiseases().catch(() => [])
+      ]);
 
-  const filteredOrders = orders.filter(o => {
-    const d = parseDate(o);
-    return d >= startDate && d <= endDate;
-  });
+      // Calculate product statistics
+      const seasonalProducts = products.filter(p => p.seasonal_medicine).length;
+      const topProducts = products.filter(p => p.top_products).length;
+      const frequentlyBought = products.filter(p => p.frequently_bought).length;
+      const peoplePreferred = products.filter(p => p.people_preferred).length;
 
-  const filteredCustomers = customers.filter(c => {
-    const d = new Date(c.createdAt || c.created_at);
-    return d >= startDate && d <= endDate;
-  });
+      setStats({
+        products: products.length,
+        brands: brands.length,
+        categories: categories.length,
+        diseases: diseases.length,
+        seasonalProducts,
+        topProducts,
+        frequentlyBought,
+        peoplePreferred
+      });
 
-  const totalOrders = filteredOrders.length;
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
-  const newCustomerCount = filteredCustomers.length;
-  const activeCustomerIds = new Set(filteredOrders.map(o => o.customer_id));
-  const activeCustomers = customers.filter(c => activeCustomerIds.has(c.id));
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+      // Get recent products (last 5)
+      const recent = products
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 5);
+      setRecentProducts(recent);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const statCards = [
+    {
+      name: 'Total Products',
+      value: stats.products,
+      icon: CubeIcon,
+      color: 'bg-blue-500',
+      href: '/product-management'
+    },
+    {
+      name: 'Total Brands',
+      value: stats.brands,
+      icon: TagIcon,
+      color: 'bg-green-500',
+      href: '/brand-management'
+    },
+    {
+      name: 'Categories',
+      value: stats.categories,
+      icon: FolderIcon,
+      color: 'bg-yellow-500',
+      href: '/products'
+    },
+    {
+      name: 'Diseases',
+      value: stats.diseases,
+      icon: UserGroupIcon,
+      color: 'bg-purple-500',
+      href: '/products'
+    }
+  ];
+
+  const productStats = [
+    {
+      name: 'Seasonal Products',
+      value: stats.seasonalProducts,
+      icon: ArrowTrendingUpIcon,
+      color: 'bg-orange-500'
+    },
+    {
+      name: 'Top Products',
+      value: stats.topProducts,
+      icon: StarIcon,
+      color: 'bg-red-500'
+    },
+    {
+      name: 'Frequently Bought',
+      value: stats.frequentlyBought,
+      icon: ArrowTrendingUpIcon,
+      color: 'bg-indigo-500'
+    },
+    {
+      name: 'People Preferred',
+      value: stats.peoplePreferred,
+      icon: StarIcon,
+      color: 'bg-pink-500'
+    }
+  ];
 
   const dayMap = {};
   const revMap = {};
@@ -486,14 +566,17 @@ const Dashboard = () => {
     switch (type) {
       case 'bar': return <Bar data={data} options={baseChartOptions} />;
       case 'line': return <Line data={data} options={baseChartOptions} />;
-      case 'pie': return <Pie data={data} options={baseChartOptions} />;
-      case 'doughnut': return <Doughnut data={data} options={baseChartOptions} />;
-      case 'polarArea': return <PolarArea data={data} options={baseChartOptions} />;
       default: return <Bar data={data} options={baseChartOptions} />;
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading dashboard...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg text-gray-600">Loading dashboard...</div>
+      </div>
+    );
+  }
 
   const ordersChart = {
     labels: ['Orders'],

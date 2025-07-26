@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import CategoryFilters from '../components/CategoryFilters'
 import Breadcrumb from '../components/Breadcrumb'
+import { slugToText, extractIdFromSlug, createBreadcrumb, createSlug } from '../utils/slugUtils'
 
 function CategoryPage() {
   const { categorySlug } = useParams();
@@ -38,38 +39,74 @@ function CategoryPage() {
     setError(null)
 
     try {
-      const response = await fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(categorySlug)}`)
-      if (!response.ok) throw new Error('Failed to fetch products')
+      // Try to extract ID from slug, otherwise use slug as category name
+      const categoryId = extractIdFromSlug(categorySlug);
+      const categoryName = slugToText(categorySlug.replace(`-${categoryId}`, ''));
       
-      const data = await response.json()
-      setProducts(Array.isArray(data) ? data : [])
+      let url = 'http://localhost:3001/api/product';
+      if (categoryId) {
+        url += `?categoryId=${categoryId}`;
+      } else {
+        // Try with slug first, then fallback to name
+        url += `?categorySlug=${categorySlug}`;
+      }
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        // Fallback to category name if slug doesn't work
+        if (!categoryId) {
+          const fallbackUrl = `http://localhost:3001/api/product?category=${encodeURIComponent(categoryName)}`;
+          const fallbackResponse = await fetch(fallbackUrl);
+          if (!fallbackResponse.ok) throw new Error('Failed to fetch products');
+          const data = await fallbackResponse.json();
+          setProducts(Array.isArray(data) ? data : []);
+          return;
+        }
+        throw new Error('Failed to fetch products');
+      }
+      
+      const data = await response.json();
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message)
-      setProducts([])
+      setError(err.message);
+      setProducts([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const fetchCategoryInfo = async () => {
     try {
-      // Try to fetch by slug first
-      let response = await fetch(`http://localhost:3001/api/category?slug=${categorySlug}`)
-      if (!response.ok) {
-        // If slug doesn't work, try by name
-        response = await fetch(`http://localhost:3001/api/category?name=${categorySlug.replace(/-/g, ' ')}`)
-      }
-      if (response.ok) {
-        const data = await response.json()
-        // Handle both single object and array responses
-        if (Array.isArray(data) && data.length > 0) {
-          setCategory(data[0])
-        } else if (data && !Array.isArray(data)) {
-          setCategory(data)
+      const categoryId = extractIdFromSlug(categorySlug);
+      
+      if (categoryId) {
+        // Try to fetch by ID first
+        const response = await fetch(`http://localhost:3001/api/category/${categoryId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setCategory(data);
+          return;
         }
       }
+      
+      // Try to fetch by slug
+      const slugResponse = await fetch(`http://localhost:3001/api/category/slug/${categorySlug}`);
+      if (slugResponse.ok) {
+        const data = await slugResponse.json();
+        setCategory(data);
+      } else {
+        // Create a mock category object from slug
+        setCategory({
+          name: slugToText(categorySlug),
+          slug: categorySlug
+        });
+      }
     } catch (err) {
-      console.error('Error fetching category info:', err)
+      console.error('Error fetching category info:', err);
+      setCategory({
+        name: slugToText(categorySlug),
+        slug: categorySlug
+      });
     }
   }
 
@@ -96,10 +133,7 @@ function CategoryPage() {
         return (
           product.name?.toLowerCase().includes(query) ||
           product.description?.toLowerCase().includes(query) ||
-          product.brand?.toLowerCase().includes(query) ||
-          (product.brand && typeof product.brand === 'object' && product.brand.name?.toLowerCase().includes(query)) ||
-          (product.tags && Array.isArray(product.tags) && 
-           product.tags.some(tag => typeof tag === 'string' && tag.toLowerCase().includes(query)))
+          product.brand?.toLowerCase().includes(query)
         )
       })
     }
@@ -171,21 +205,16 @@ function CategoryPage() {
   }
 
   const getCategoryTitle = () => {
-    if (category && category.name) return category.name
-    return categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    return category?.name || slugToText(categorySlug);
   }
 
-  const breadcrumbItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Categories', path: '/categories' },
-    { label: getCategoryTitle(), path: `/categories/${categorySlug}` }
-  ]
+  const breadcrumbItems = createBreadcrumb('category', categorySlug, getCategoryTitle());
 
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
-          <div className="text-lg text-gray-600">Loading category products...</div>
+          <div className="text-lg text-gray-600">Loading {getCategoryTitle()} products...</div>
         </div>
       </div>
     )
@@ -205,24 +234,10 @@ function CategoryPage() {
     <div className="container mx-auto px-4 py-6">
       <Breadcrumb items={breadcrumbItems} />
       
-      {/* Category Banner */}
-      {category && category.banner_url && (
-        <div className="w-full mb-6">
-          <img
-            src={category.banner_url}
-            alt={getCategoryTitle() + ' banner'}
-            className="w-full h-48 object-cover rounded-lg shadow-md"
-          />
-        </div>
-      )}
-      
       <div className="mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
           {getCategoryTitle()}
         </h1>
-        {category && category.description && (
-          <p className="text-gray-600 mb-2">{category.description}</p>
-        )}
         <p className="text-gray-600">
           {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
         </p>
@@ -282,7 +297,7 @@ function CategoryPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-gray-500 text-lg mb-4">No products found in this category</div>
+              <div className="text-gray-500 text-lg mb-4">No products found in {getCategoryTitle()}</div>
               <p className="text-gray-400 mb-6">
                 Try adjusting your filters or search criteria
               </p>

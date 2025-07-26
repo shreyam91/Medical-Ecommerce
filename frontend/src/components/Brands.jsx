@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import "./LogoCircles.css";
 import { useNavigate } from "react-router-dom";
+import { createSlug } from "../utils/slugUtils";
 
 const Brands = () => {
   const scrollRef = useRef(null);
@@ -117,7 +118,7 @@ const Brands = () => {
               role="img"
               aria-label={`Brand logo of ${brand.name}`}
               title={brand.name}
-              onClick={() => navigate(`/brand/${brand.id}`)}
+              onClick={() => navigate(`/brand/${brand.slug || createSlug(brand.name)}`)}
             >
               <img
                 src={brand.logo_url}
@@ -140,6 +141,8 @@ export default Brands;
 
 
 export function PopularBrand() {
+  const navigate = useNavigate();
+  
   // Dummy data for demonstration
   const dummyBrands = [
     { id: 1, name: "Herbal Life", logo_url: "https://via.placeholder.com/100?text=Brand+1" },
@@ -169,7 +172,10 @@ export function PopularBrand() {
             className="flex-shrink-0 w-24 sm:w-28 md:w-32 text-center"
             style={{ scrollSnapAlign: "center" }}
           >
-            <div className="w-full h-24 sm:h-28 md:h-32 bg-white border shadow-md flex items-center justify-center transition-transform hover:scale-90 cursor-pointer rounded-2xl">
+            <div 
+              className="w-full h-24 sm:h-28 md:h-32 bg-white border shadow-md flex items-center justify-center transition-transform hover:scale-90 cursor-pointer rounded-2xl"
+              onClick={() => navigate(`/brand/${brand.slug || createSlug(brand.name)}`)}
+            >
               <img
                 src={brand.logo_url}
                 alt={brand.name}

@@ -29,6 +29,9 @@ import Ayurvedic from '../pages/Ayurvedic';
 import Search from '../pages/Search';
 import RequestProduct from '../pages/RequestProduct';
 import CategoryPage from '../pages/CategoryPage';
+import CategoriesPage from '../pages/CategoriesPage';
+import DiseasePage from '../pages/DiseasePage';
+import BrandsPage from '../pages/BrandsPage';
 import Products from '../pages/Products';
 
 const AppRoutes = () => {
@@ -56,14 +59,20 @@ const AppRoutes = () => {
       <Route path="/offers" element={<Offers />} />
       <Route path="/contact" element={<Contact/>} />
       <Route path="/homeopathic" element={<HomeoPathic/>} />
+      <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/categories/:categorySlug" element={<CategoryPage />} />
+      <Route path="/category/:categorySlug" element={<CategoryPage />} />
+      <Route path="/disease/:diseaseSlug" element={<DiseasePage />} />
+      <Route path="/health-concern/:diseaseSlug" element={<DiseasePage />} />
+      <Route path="/brands" element={<BrandsPage />} />
 
       <Route path="/unani" element={<Unani/>} />
       <Route path='/ayurvedic' element={<Ayurvedic/>} />
 
       <Route path="/profile" element={<UserProfile/>} />
       <Route path="/doctors" element={<DoctorPage/>} />
-      <Route path="/brand/:brandId" element={<BrandProducts />} />
+      <Route path="/brand/:brandSlug" element={<BrandProducts />} />
+      <Route path="/brands/:brandSlug" element={<BrandProducts />} />
       <Route path="*" element={<NotFound />} />
 
       <Route path="/search" element={<Search />} />

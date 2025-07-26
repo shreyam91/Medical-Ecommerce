@@ -93,7 +93,6 @@ const InventoryPage = () => {
       getProducts().catch(() => []),
       getBrands().catch(() => []),
     ]).then(([inventoryData, productsData, brandsData]) => {
-      debugger; // Debug: after fetching all data
       console.log('Fetched inventory:', inventoryData);
       console.log('Fetched products:', productsData);
       console.log('Fetched brands:', brandsData);

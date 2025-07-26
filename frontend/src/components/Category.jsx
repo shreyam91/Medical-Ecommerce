@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./LogoCircles.css";
+import { createSlug } from "../utils/slugUtils";
 
 export default function Category() {
   const [categories, setCategories] = useState([]);
@@ -91,15 +92,15 @@ export default function Category() {
       if (response.ok && Array.isArray(data) && data.length > 0) {
         const categoriesWithLinks = data.map((category) => ({
           ...category,
-          link: `/categories/${category.slug || category.name.toLowerCase().replace(/\s+/g, "-")}`,
+          link: `/category/${category.slug || createSlug(category.name)}`,
         }));
         setCategories(categoriesWithLinks);
       } else {
-        setCategories(fallbackData.map((cat) => ({ ...cat, link: `/categories/${cat.slug}` })));
+        setCategories(fallbackData.map((cat) => ({ ...cat, link: `/category/${cat.slug}` })));
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
-      setCategories(fallbackData.map((cat) => ({ ...cat, link: `/categories/${cat.slug}` })));
+      setCategories(fallbackData.map((cat) => ({ ...cat, link: `/category/${cat.slug}` })));
     } finally {
       setLoading(false);
     }
