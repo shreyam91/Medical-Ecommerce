@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
 import Dashboard from '../pages/Dashboard';
 import EnhancedDashboard from '../pages/EnhancedDashboard';
-import Product from '../pages/Product';
+import Management from '../pages/Management';
 import ProductManagement from '../pages/ProductManagement';
 import BrandManagement from '../pages/BrandManagement';
 import Orders from '../pages/Orders';
@@ -19,7 +19,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/dashboard" element={<PrivateRoute><EnhancedDashboard /></PrivateRoute>} />
-      <Route path="/products" element={<PrivateRoute><Product /></PrivateRoute>} />
+      <Route path="/management" element={<PrivateRoute><Management /></PrivateRoute>} />
       <Route path="/product-management" element={<PrivateRoute><ProductManagement /></PrivateRoute>} />
       <Route path="/brand-management" element={<PrivateRoute><BrandManagement /></PrivateRoute>} />
       <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />

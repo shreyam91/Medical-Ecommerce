@@ -642,7 +642,7 @@ setTimeout(() => {
         </button>
       )}
       {/* Cancel Button */}
-      {onCancel && (
+      {/* {onCancel && (
         <button
           type="button"
           onClick={onCancel}
@@ -651,7 +651,7 @@ setTimeout(() => {
         >
           Cancel
         </button>
-      )}
+      )} */}
       {editProduct && (
         <button
           type="button"

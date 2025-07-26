@@ -80,7 +80,7 @@ String(c.customer_id).toLowerCase().includes(s)      ||
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Customer Details</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">Customer Details</h1> */}
 
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Customer Details</h1>
@@ -100,7 +100,7 @@ String(c.customer_id).toLowerCase().includes(s)      ||
           <div className="flex flex-wrap gap-4 mb-4">
             <input
               className="border px-3 py-2"
-              placeholder="Name / ID / mobile / email"
+              placeholder="Search customer.."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -124,7 +124,7 @@ String(c.customer_id).toLowerCase().includes(s)      ||
             </label>
 
             <label className="ml-4">
-              Start date:
+              From:
               <input
                 type="date"
                 className="border px-2 py-1 ml-2"
@@ -137,7 +137,7 @@ String(c.customer_id).toLowerCase().includes(s)      ||
             </label>
 
             <label className="ml-4">
-              End date:
+              To:
               <input
                 type="date"
                 className="border px-2 py-1 ml-2"

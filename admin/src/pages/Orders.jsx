@@ -248,7 +248,7 @@ const [newOrder, setNewOrder] = useState({
       <div className="flex flex-wrap gap-4 mb-4">
         <input
           type="search"
-          placeholder="Search customer, items, date..."
+          placeholder="Search orders..."
           className="border rounded px-3 py-1 w-64"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}

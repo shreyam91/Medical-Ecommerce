@@ -9,7 +9,7 @@ import MainCategory from '@/components/MainCategory';
 import SubCategory from '@/components/SubCategory';
 
 const TABS = {
-  PRODUCT: 'Product',
+  // PRODUCT: 'Product',
   BRAND: 'Brand',
   BOOKS: 'Books',
   BANNER: 'Banner',
@@ -19,34 +19,34 @@ const TABS = {
   SUBCATEGORY: 'Sub Category'
 };
 
-const Product = () => {
-  const [activeTab, setActiveTab] = useState(TABS.PRODUCT);
+const Management = () => {
+  const [activeTab, setActiveTab] = useState(TABS.BRAND);
   const [category, setCategory] = useState('');
 
   const renderContent = () => {
     switch (activeTab) {
-      case TABS.PRODUCT:
-        return (
-          <div>
-            <h2 className="text-2xl font-semibold mb-6">Product</h2>
-            <div className="mb-6">
-              <label className="block font-medium mb-2">Select Category of Medicine</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full border rounded p-2"
-              >
-                <option value="">-- Select Category --</option>
-                <option value="Ayurvedic">Ayurvedic Medicine</option>
-                <option value="Homeopathic">Homeopathic Medicine</option>
-                <option value="Unani">Unani Medicine</option>
-              </select>
-            </div>
-            {(category === 'Ayurvedic' || category === 'Homeopathic' || category === 'Unani') && (
-              <MedicineType category={category} />
-            )}
-          </div>
-        );
+      // case TABS.PRODUCT:
+      //   return (
+      //     <div>
+      //       <h2 className="text-2xl font-semibold mb-6">Product</h2>
+      //       <div className="mb-6">
+      //         <label className="block font-medium mb-2">Select Category of Medicine</label>
+      //         <select
+      //           value={category}
+      //           onChange={(e) => setCategory(e.target.value)}
+      //           className="w-full border rounded p-2"
+      //         >
+      //           <option value="">-- Select Category --</option>
+      //           <option value="Ayurvedic">Ayurvedic Medicine</option>
+      //           <option value="Homeopathic">Homeopathic Medicine</option>
+      //           <option value="Unani">Unani Medicine</option>
+      //         </select>
+      //       </div>
+      //       {(category === 'Ayurvedic' || category === 'Homeopathic' || category === 'Unani') && (
+      //         <MedicineType category={category} />
+      //       )}
+      //     </div>
+      //   );
       case TABS.BRAND:
         return (
           <div>
@@ -126,4 +126,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default Management;

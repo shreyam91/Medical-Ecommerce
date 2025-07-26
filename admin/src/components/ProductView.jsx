@@ -82,17 +82,17 @@ const ProductView = ({ productId, productSlug, onClose, onEdit }) => {
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-2xl font-bold text-gray-900">Product Details</h2>
           <div className="flex space-x-2">
-            {onEdit && (
+            {/* {onEdit && (
               <button
                 onClick={() => onEdit(product)}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Edit
               </button>
-            )}
+            )} */}
             <button
               onClick={onClose}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             >
               Close
             </button>
@@ -105,6 +105,22 @@ const ProductView = ({ productId, productSlug, onClose, onEdit }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+              {/* Images */}
+          {product.images && product.images.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Images</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {product.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg border"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -195,22 +211,7 @@ const ProductView = ({ productId, productSlug, onClose, onEdit }) => {
             </div>
           </div>
 
-          {/* Images */}
-          {product.images && product.images.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Images</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {product.images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg border"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          
 
           {/* Pricing Information */}
           <div>

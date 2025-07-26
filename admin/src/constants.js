@@ -1,9 +1,7 @@
 export const chartTypes = [
   { value: 'bar', label: 'Bar' },
   { value: 'line', label: 'Line' },
-  { value: 'pie', label: 'Pie' },
-  { value: 'doughnut', label: 'Doughnut' },
-  { value: 'polarArea', label: 'Polar Area' },
+
 ];
 
 export const colorMap = {

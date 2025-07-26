@@ -4,11 +4,12 @@ const pathNameMap = {
   "/": "Dashboard",
   "/orders": "Orders",
   "/inventory": "Inventory",
-  "/products": "Products",
+  "/management": "Management",
   "/customers": "Customers",
   "/delivery-status": "Delivery Status",
   "/blogs": "Blogs",
   "/payment": "Payment",
+  "/product-management": "Product Managment"
 };
 
 const Navbar = ({ onLogout }) => {
@@ -36,7 +37,7 @@ const Navbar = ({ onLogout }) => {
   };
 
   return (
-    <header className="w-full bg-white shadow px-6 py-4 flex justify-between items-center">
+    <header className="w-full bg-white shadow px-6 py-4 flex justify-between items-center ml-2">
       <div className="text-lg font-semibold">{title}</div>
       <div className="flex items-center gap-4">
         {user.username && (

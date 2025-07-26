@@ -24,6 +24,7 @@ app.use('/api/user', require('./routes/user'));
 app.use('/api/product_price', require('./routes/product_price'));
 app.use('/api/product', require('./routes/product'));
 app.use('/api/doctor', require('./routes/doctor'));
+app.use('/api/inventory', require('./routes/inventory')); // Add this line
 app.use('/api/banner', require('./routes/banner'));
 app.use('/api/book', require('./routes/book'));
 app.use('/api/brand', require('./routes/brand'));
