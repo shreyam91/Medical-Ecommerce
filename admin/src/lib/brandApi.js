@@ -1,63 +1,143 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const API_URL = `${BASE_URL}/brand`;
-function getAuthHeaders() {
-  const token = localStorage.getItem('token');
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const token = user.token;
+  
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(token && { 'Authorization': `Bearer ${token}` })
   };
-}
+};
 
-export async function getBrands() {
-  const res = await fetch(API_URL, {
-    headers: getAuthHeaders(),
-  });
-  if (!res.ok) throw new Error('Failed to fetch brands');
-  return res.json();
-}
-
-export async function createBrand(brand) {
-  const payload = { ...brand };
-  if (payload.image_url) {
-    payload.logo_url = payload.image_url;
-    delete payload.image_url;
+// Get all brands
+export const getBrands = async () => {
+  try {
+    const response = await fetch(`${API_BASE}/brand`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch brands: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching brands:', error);
+    throw error;
   }
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Failed to create brand');
-  return res.json();
-}
+};
 
-export async function updateBrand(id, brand) {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(brand),
-  });
-  if (!res.ok) throw new Error('Failed to update brand');
-  return res.json();
-}
+// Get brand by ID
+export const getBrand = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE}/brand/${id}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch brand: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching brand:', error);
+    throw error;
+  }
+};
 
-export async function deleteBrand(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  if (!res.ok) throw new Error('Failed to delete brand');
-  return res.json();
-}
+// Get brand by slug
+export const getBrandBySlug = async (slug) => {
+  try {
+    const response = await fetch(`${API_BASE}/brand/slug/${slug}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch brand: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching brand by slug:', error);
+    throw error;
+  }
+};
 
-// New helper for deleting uploaded image
-export async function deleteUploadedImage(imageUrl) {
-  // Assumes your backend supports deleting by imageUrl via POST request
-  const res = await fetch('http://localhost:3001/api/upload/delete', {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ imageUrl }),
-  });
-  if (!res.ok) throw new Error('Failed to delete uploaded image');
-  return res.json();
-}
+// Create brand
+export const createBrand = async (brandData) => {
+  try {
+    const response = await fetch(`${API_BASE}/brand`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(brandData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to create brand: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating brand:', error);
+    throw error;
+  }
+};
+
+// Update brand
+export const updateBrand = async (id, brandData) => {
+  try {
+    const response = await fetch(`${API_BASE}/brand/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(brandData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to update brand: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating brand:', error);
+    throw error;
+  }
+};
+
+// Delete brand
+export const deleteBrand = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE}/brand/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to delete brand: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting brand:', error);
+    throw error;
+  }
+};
+
+// Delete uploaded image
+export const deleteUploadedImage = async (imageUrl) => {
+  try {
+    const response = await fetch(`${API_BASE}/upload/delete`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ imageUrl }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to delete image: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting uploaded image:', error);
+    throw error;
+  }
+};

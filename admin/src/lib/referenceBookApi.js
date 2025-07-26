@@ -1,54 +1,106 @@
-const API_URL = 'http://localhost:3001/api/reference_book';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-function getAuthHeaders() {
-  const token = localStorage.getItem('token');
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const token = user.token;
+  
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(token && { 'Authorization': `Bearer ${token}` })
   };
-}
+};
 
-export async function getReferenceBooks() {
-  const res = await fetch(API_URL, {
-    headers: getAuthHeaders(),
-  });
-  if (!res.ok) throw new Error('Failed to fetch reference books');
-  return res.json();
-}
+// Get all reference books
+export const getReferenceBooks = async () => {
+  try {
+    const response = await fetch(`${API_BASE}/reference-book`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch reference books: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching reference books:', error);
+    throw error;
+  }
+};
 
-export async function getReferenceBook(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
-    headers: getAuthHeaders(),
-  });
-  if (!res.ok) throw new Error('Failed to fetch reference book');
-  return res.json();
-}
+// Get reference book by ID
+export const getReferenceBook = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE}/reference-book/${id}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch reference book: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching reference book:', error);
+    throw error;
+  }
+};
 
-export async function createReferenceBook(book) {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(book),
-  });
-  if (!res.ok) throw new Error('Failed to create reference book');
-  return res.json();
-}
+// Create reference book
+export const createReferenceBook = async (bookData) => {
+  try {
+    const response = await fetch(`${API_BASE}/reference-book`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(bookData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to create reference book: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating reference book:', error);
+    throw error;
+  }
+};
 
-export async function updateReferenceBook(id, book) {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(book),
-  });
-  if (!res.ok) throw new Error('Failed to update reference book');
-  return res.json();
-}
+// Update reference book
+export const updateReferenceBook = async (id, bookData) => {
+  try {
+    const response = await fetch(`${API_BASE}/reference-book/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(bookData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to update reference book: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating reference book:', error);
+    throw error;
+  }
+};
 
-export async function deleteReferenceBook(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  if (!res.ok) throw new Error('Failed to delete reference book');
-  return res.json();
-} 
+// Delete reference book
+export const deleteReferenceBook = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE}/reference-book/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to delete reference book: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting reference book:', error);
+    throw error;
+  }
+};

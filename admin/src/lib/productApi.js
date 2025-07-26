@@ -1,75 +1,234 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const API_URL = `${BASE_URL}/product`;
-const PRICE_API_URL = `${BASE_URL}/product_price`;
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-function getAuthHeaders(isJson = true) {
-  const token = localStorage.getItem('token');
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const token = user.token;
+  
   return {
-    ...(isJson ? { 'Content-Type': 'application/json' } : {}),
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
   };
-}
+};
 
-export async function getProducts() {
-  const res = await fetch(API_URL, { headers: getAuthHeaders() });
-  if (!res.ok) throw new Error(`Failed to fetch products: ${res.statusText}`);
-  return res.json();
-}
-
-export async function getProduct(id) {
-  const res = await fetch(`${API_URL}/${id}`, { headers: getAuthHeaders() });
-  if (!res.ok) throw new Error(`Failed to fetch product #${id}: ${res.statusText}`);
-  return res.json();
-}
-
-export async function createProduct(product) {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(product),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Create product failed: ${err}`);
+// Get all products with enhanced filtering
+export const getProducts = async (filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    
+    // Add filters to params
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value);
+      }
+    });
+    
+    const url = `${API_BASE}/product${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch products: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw error;
   }
-  return res.json();
-}
+};
 
-export async function updateProduct(id, product) {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(product),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Update product #${id} failed: ${err}`);
+// Get product by ID
+export const getProduct = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE}/product/${id}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch product: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    throw error;
   }
-  return res.json();
-}
+};
 
-export async function deleteProduct(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  if (!res.ok) throw new Error(`Delete product #${id} failed: ${res.statusText}`);
-  return res.json();
-}
+// Get product by slug
+export const getProductBySlug = async (slug) => {
+  try {
+    const response = await fetch(`${API_BASE}/product/slug/${slug}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch product: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching product by slug:', error);
+    throw error;
+  }
+};
 
-// New helper to allow cleanup of orphaned images
-export async function deleteImage(imageUrl) {
-  const res = await fetch(`${BASE_URL}/upload/delete`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ imageUrl }),
-  });
-  if (!res.ok) throw new Error(`Failed to delete image: ${await res.text()}`);
-  return res.json();
-}
+// Get product prices
+export const getProductPrices = async (productId) => {
+  try {
+    const response = await fetch(`${API_BASE}/product-price/${productId}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch product prices: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching product prices:', error);
+    throw error;
+  }
+};
 
-export async function getProductPrices(productId) {
-  const res = await fetch(`${PRICE_API_URL}?product_id=${productId}`, { headers: getAuthHeaders() });
-  if (!res.ok) throw new Error(`Failed to fetch prices for product #${productId}: ${res.statusText}`);
-  return res.json();
-}
+// Create product
+export const createProduct = async (productData) => {
+  try {
+    const response = await fetch(`${API_BASE}/product`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(productData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to create product: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating product:', error);
+    throw error;
+  }
+};
+
+// Update product
+export const updateProduct = async (id, productData) => {
+  try {
+    const response = await fetch(`${API_BASE}/product/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(productData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to update product: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating product:', error);
+    throw error;
+  }
+};
+
+// Delete product
+export const deleteProduct = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE}/product/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to delete product: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    throw error;
+  }
+};
+
+// Create product prices
+export const createProductPrices = async (productId, prices) => {
+  try {
+    const response = await fetch(`${API_BASE}/product-price`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ productId, prices }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to create product prices: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating product prices:', error);
+    throw error;
+  }
+};
+
+// Update product prices
+export const updateProductPrices = async (productId, prices) => {
+  try {
+    const response = await fetch(`${API_BASE}/product-price/${productId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ prices }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to update product prices: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating product prices:', error);
+    throw error;
+  }
+};
+
+// Delete image
+export const deleteImage = async (imageUrl) => {
+  try {
+    const response = await fetch(`${API_BASE}/image`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to delete image: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    throw error;
+  }
+};
+
+// Search products
+export const searchProducts = async (searchTerm, filters = {}) => {
+  try {
+    const params = new URLSearchParams({
+      search: searchTerm,
+      ...filters
+    });
+    
+    const response = await fetch(`${API_BASE}/product?${params.toString()}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to search products: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error searching products:', error);
+    throw error;
+  }
+};
