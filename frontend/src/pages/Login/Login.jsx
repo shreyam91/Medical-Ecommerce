@@ -25,7 +25,7 @@ const Login = () => {
   return (
    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-6">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-center mb-6">
           {step === 'phone' ? 'Login with Mobile' : 'Enter OTP'}
         </h1>
 

@@ -80,7 +80,7 @@ export default function ProfileForm() {
   return (
     <div className="min-h-screen  py-10 px-4">
       <div className="max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 bg-white shadow-md rounded-md">
-        <h2 className="text-2xl font-semibold mb-6">User Profile</h2>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-6">User Profile</h2>
         <form onSubmit={handleSave} noValidate>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Full Name */}
@@ -300,7 +300,7 @@ export default function ProfileForm() {
 
         {/* Order History */}
         <div className="mt-10">
-          <h3 className="text-xl font-semibold mb-4">Order History</h3>
+          <h3 className="text-lg sm:text-xl font-semibold mb-4">Order History</h3>
           <div className="overflow-x-auto w-full">
             <table className="min-w-full text-left border">
               <thead className="bg-gray-200">

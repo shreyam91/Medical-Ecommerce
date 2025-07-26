@@ -56,7 +56,7 @@ const BlogPost = () => {
   if (error || !blog) {
     return (
       <div className="text-center mt-20">
-        <h2 className="text-2xl font-semibold">Blog Not Found</h2>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">Blog Not Found</h2>
         <button onClick={() => navigate('/blog')} className="mt-4 text-blue-500 underline">
           Go Back
         </button>
@@ -86,7 +86,7 @@ const BlogPost = () => {
       </div>
 
       {/* Title */}
-      <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">{blog.title}</h1>
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3">{blog.title}</h1>
 
       {/* Meta Row */}
       <div className="flex flex-wrap justify-between items-center text-sm text-gray-500 border-b pb-4 mb-6 gap-2">
@@ -190,7 +190,7 @@ const BlogPost = () => {
                             <img src={meta.image} alt={meta.title || link} className="w-20 h-20 object-cover rounded" />
                           )}
                           <div>
-                            <div className="font-semibold text-lg mb-1">{meta?.title || link}</div>
+                            <div className="font-semibold text-base sm:text-lg mb-1">{meta?.title || link}</div>
                             {meta?.description && (
                               <div className="text-gray-600 text-sm mb-1">{meta.description}</div>
                             )}
@@ -212,7 +212,7 @@ const BlogPost = () => {
 
         {/* Right: Related Blogs */}
         <aside className="lg:w-1/3 w-full mt-10 lg:mt-0">
-          <h2 className="text-xl font-bold mb-4">Related Blogs</h2>
+          <h2 className="text-lg sm:text-xl font-bold mb-4">Related Blogs</h2>
           {relatedBlogs.length === 0 && <div className="text-gray-500">No related blogs found.</div>}
           <div className="space-y-6">
             {relatedBlogs.map((b) => (
@@ -220,7 +220,7 @@ const BlogPost = () => {
                 <div className="flex gap-4 items-center">
                   <img src={b.image_url} alt={b.title} className="w-20 h-20 object-cover rounded" />
                   <div>
-                    <div className="font-semibold text-lg mb-1 text-orange-700">{b.title}</div>
+                    <div className="font-semibold text-base sm:text-lg mb-1 text-orange-700">{b.title}</div>
                     <div className="text-gray-600 text-sm mb-1 line-clamp-2">{b.short_description}</div>
                     <div className="flex gap-2 flex-wrap mt-1">
                       {b.tags && b.tags.length > 0 && b.tags.slice(0, 3).map((tag, i) => (

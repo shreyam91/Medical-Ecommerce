@@ -13,7 +13,7 @@ const Footer = () => {
 
         {/* Row 1: Logo and Description side by side */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <h2 className="text-2xl font-bold text-green-600">HerbalMG</h2>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">HerbalMG</h2>
           <p className="text-sm sm:text-base text-gray-900 max-w-3xl">
             HerbalMG is your trusted online medical store, offering genuine medicines,
             health supplements, and wellness products — delivered with care and convenience.

@@ -61,7 +61,7 @@ export default function Cart() {
   if (cartItems.length === 0) {
     return (
       <div className="max-w-6xl mx-auto p-6 text-center">
-        <h1 className="text-3xl font-bold text-green-700 mb-4">Your Cart</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-green-700 mb-4">Your Cart</h1>
         <p className="text-gray-600 mb-8">You haven’t added anything to your cart yet.</p>
         <Link
           to="/"
@@ -81,7 +81,18 @@ export default function Cart() {
               View All
             </Link>
           </div>
-          <div className="flex overflow-x-auto gap-4">
+          <div 
+            className="flex overflow-x-auto gap-4 scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none', /* Firefox */
+              msOverflowStyle: 'none', /* Internet Explorer 10+ */
+            }}
+          >
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                display: none; /* Safari and Chrome */
+              }
+            `}</style>
             {frequentlyBoughtProducts.map((product) => (
               <ProductCardScrollable
                 key={product.id}
@@ -282,7 +293,7 @@ export default function Cart() {
     {/* Order Summary */}
     <div className="md:col-span-1">
       <div className="border rounded-lg p-4 sm:p-6 space-y-4">
-        <h2 className="text-lg sm:text-xl font-semibold">Order Summary</h2>
+        <h2 className="text-base sm:text-lg md:text-xl font-semibold">Order Summary</h2>
 
         <div className="space-y-2 text-sm sm:text-base">
           {/* Show total actual price (MRP) if any item has a discount */}
@@ -380,7 +391,18 @@ export default function Cart() {
               View All
             </Link>
           </div>
-          <div className="flex overflow-x-auto gap-4">
+          <div 
+            className="flex overflow-x-auto gap-4 scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none', /* Firefox */
+              msOverflowStyle: 'none', /* Internet Explorer 10+ */
+            }}
+          >
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                display: none; /* Safari and Chrome */
+              }
+            `}</style>
             {frequentlyBoughtProducts.map((product) => (
               <ProductCardScrollable
                 key={product.id}

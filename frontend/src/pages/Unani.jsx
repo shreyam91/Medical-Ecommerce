@@ -82,13 +82,13 @@ function Unani() {
     }
   }
 
-  const getPredefinedDiseases = () => [
-    'Diabetes', 'Hypertension', 'Arthritis', 'Asthma', 'Migraine',
-    'Digestive Issues', 'Skin Problems', 'Respiratory Issues',
-    'Heart Disease', 'Kidney Problems', 'Liver Issues', 'Anxiety',
-    'Depression', 'Insomnia', 'Joint Pain', 'Back Pain', 'Cold & Flu',
-    'Fever', 'Headache', 'Stomach Problems', 'Constipation', 'Acidity'
-  ]
+  // const getPredefinedDiseases = () => [
+  //   'Diabetes', 'Hypertension', 'Arthritis', 'Asthma', 'Migraine',
+  //   'Digestive Issues', 'Skin Problems', 'Respiratory Issues',
+  //   'Heart Disease', 'Kidney Problems', 'Liver Issues', 'Anxiety',
+  //   'Depression', 'Insomnia', 'Joint Pain', 'Back Pain', 'Cold & Flu',
+  //   'Fever', 'Headache', 'Stomach Problems', 'Constipation', 'Acidity'
+  // ]
 
   const applyFilters = () => {
     let filtered = [...products]
@@ -224,7 +224,7 @@ function Unani() {
       <Breadcrumb items={breadcrumbItems} />
       
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Unani Products</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Unani Products</h1>
         <p className="text-gray-600">
           {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
         </p>
@@ -280,7 +280,7 @@ function Unani() {
           </div>
 
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

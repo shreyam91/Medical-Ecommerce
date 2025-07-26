@@ -5,7 +5,7 @@ const Terms = () => {
     <div className="min-h-screen px-4 py-10 sm:px-8 lg:px-24">
       {/* Top Banner */}
       <div className=" p-6 sm:p-10 rounded-md text-center mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-green-600">Terms & Conditions</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-green-600">Terms & Conditions</h1>
         <p className="mt-2 text-gray-600 text-sm sm:text-base">
           Please read the terms carefully before using our services.
         </p>
@@ -14,14 +14,14 @@ const Terms = () => {
       {/* Terms Content */}
       <div className="space-y-6 text-gray-700 text-sm sm:text-base leading-relaxed max-w-4xl mx-auto">
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">1. ACCEPTANCE OF TERMS</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">1. ACCEPTANCE OF TERMS</h2>
           <p>
             By accessing, browsing, or using this website (the “Service”), you acknowledge that you have read, understood, and agree to be legally bound by these Terms and Conditions (“Terms”). These Terms govern your access to and use of all content, features, services, and functionality made available through the website.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">2. MODIFICATIONS OF TERMS</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">2. MODIFICATIONS OF TERMS</h2>
           <p>
             We reserve the right to modify, update, or revise these Terms and Conditions at any time, at our sole discretion. Any changes will be posted on this page, and the "Last Updated" date at the below of the document will reflect the effective date of those changes.
             <br />
@@ -31,7 +31,7 @@ Unless otherwise stated, modifications will become effective immediately upon po
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">3. USE OF WEBSITE</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">3. USE OF WEBSITE</h2>
           <p>
             By accessing or using this website, you agree to use it solely for lawful purposes and in a manner that does not infringe upon the rights of others, restrict, or inhibit anyone else's use and enjoyment of the site.
           </p>
@@ -49,14 +49,14 @@ Unless otherwise stated, modifications will become effective immediately upon po
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">4. PRIVACY POLICY</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">4. PRIVACY POLICY</h2>
           <p>
             Your privacy is important to us. Please refer to our <a href="/privacy" className="text-blue-600 underline">Privacy Policy</a> for detailed information on how we collect, use, store, and protect your personal data when you use our website or services. By using this site, you consent to the collection and use of your information in accordance with our Privacy Policy.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">5. LIMITATIONS OF LIABIALITY</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">5. LIMITATIONS OF LIABIALITY</h2>
           <p>
             To the fullest extent permitted by applicable law, HerbalMG shall not be liable for any direct, indirect, incidental, consequential, or punitive damages, including but not limited to loss of profits, data, use, goodwill, or other intangible losses, resulting from:
 
@@ -69,7 +69,7 @@ Unless otherwise stated, modifications will become effective immediately upon po
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">6. GOVERNING LAW</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">6. GOVERNING LAW</h2>
           <p>
             These Terms and any disputes or claims arising out of or in connection with them shall be governed by and construed in accordance with the laws of your local jurisdiction, without regard to its conflict of law principles. By using the website, you agree to submit to the exclusive jurisdiction of the courts located in your jurisdiction for the resolution of any disputes arising under these Terms.
           </p>

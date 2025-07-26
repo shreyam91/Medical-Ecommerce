@@ -7,7 +7,7 @@ const BlogCard = ({ image, title, description, tags, link }) => {
     <div className="max-w-md bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <img src={image} alt={title} className="w-full h-48 object-cover" />
       <div className="p-4">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">{title}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">{title}</h2>
         <div className="flex flex-wrap gap-2 mb-3">
           {tags.map((tag, index) => (
             <span

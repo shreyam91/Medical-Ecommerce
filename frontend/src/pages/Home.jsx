@@ -150,7 +150,8 @@ const Home = () => {
 
   return (
     <>
-      <div className="relative bg-gradient-to-tr from-orange-50 via-green-100 to-blue-50 overflow-hidden flex flex-col items-center rounded-2xl">
+      <div className="hidden sm:relative sm:bg-gradient-to-tr sm:from-orange-50 sm:via-green-100 sm:to-blue-50 sm:overflow-hidden sm:flex sm:flex-col sm:items-center sm:rounded-2xl">
+
         {/* Images on Left & Right */}
         <img
           src={leftImage}
@@ -173,7 +174,7 @@ const Home = () => {
       {/* ----------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
             Seasonal Products
           </h1>
           <Link
@@ -183,7 +184,18 @@ const Home = () => {
             View All
           </Link>
         </div>
-        <div className="flex overflow-x-auto gap-4">
+        <div 
+          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+          `}</style>
           {seasonalProducts.map((product) => (
             <Link
               key={product.id}
@@ -210,7 +222,7 @@ const Home = () => {
       {/* ---------------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
             Top Products
           </h1>
           <Link
@@ -220,7 +232,18 @@ const Home = () => {
             View All
           </Link>
         </div>
-        <div className="flex overflow-x-auto gap-4">
+        <div 
+          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+          `}</style>
           {topProducts.map((product) => (
             <Link
               key={product.id}
@@ -246,7 +269,7 @@ const Home = () => {
       {/* ---------------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
             People Preferred Products
           </h1>
           <Link
@@ -256,7 +279,18 @@ const Home = () => {
             View All
           </Link>
         </div>
-        <div className="flex overflow-x-auto gap-4">
+        <div 
+          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+          `}</style>
           {peoplePreferredProducts.map((product) => (
             <Link
               key={product.id}
@@ -287,7 +321,7 @@ const Home = () => {
       {/* ----------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
             Maximum Discount Products
           </h1>
           <Link
@@ -297,7 +331,18 @@ const Home = () => {
             View All
           </Link>
         </div>
-        <div className="flex overflow-x-auto gap-4">
+        <div 
+          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+          `}</style>
           {maxDiscountProducts.map((product) => (
             <Link
               key={product.id}
@@ -325,7 +370,7 @@ const Home = () => {
       {/* Blog Section */}
       <div className="my-10">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-black">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
             Discover Ayurveda
           </h2>
           <Link

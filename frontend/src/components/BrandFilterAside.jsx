@@ -26,7 +26,7 @@ export default function BrandFilterAside({ selectedBrands, onBrandChange }) {
 
   return (
     <aside className="w-full sm:w-64 p-4 bg-white shadow rounded">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">Filter by Brand</h2>
+      <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-700">Filter by Brand</h2>
 
       <input
         type="text"
@@ -87,7 +87,7 @@ export const DiseaseFilterAside = ({ selectedDiseases, onDiseaseChange }) => {
 
   return (
     <aside className="w-full sm:w-64 p-4 bg-white shadow rounded">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">Filter by Disease</h2>
+      <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-700">Filter by Disease</h2>
 
       <input
         type="text"

@@ -5,7 +5,7 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen px-4 py-10 sm:px-8 lg:px-24">
       {/* Header */}
       <div className=" p-6 sm:p-10 rounded-md text-center mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-green-600">Privacy Policy</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-green-600">Privacy Policy</h1>
         <p className="mt-2 text-gray-600 text-sm sm:text-base">
           Your privacy is important to us. This policy explains how we handle your data.
         </p>
@@ -14,7 +14,7 @@ const PrivacyPolicy = () => {
       {/* Content */}
       <div className="space-y-6 text-gray-700 text-sm sm:text-base leading-relaxed max-w-4xl mx-auto">
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">1. WHAT DATA DO WE COLLECT ABOUT YOU</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">1. WHAT DATA DO WE COLLECT ABOUT YOU</h2>
 
             We collects Data for various purposes set out in this Privacy Notice.
           <ol className='text-gray-500'>
@@ -31,7 +31,7 @@ const PrivacyPolicy = () => {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">2. HOW WE USE INFORMATION</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">2. HOW WE USE INFORMATION</h2>
           <ol className='text-gray-500'>
             <li><span className='text-black font-bold'>A. To Send Emails and Communications:</span> We may use your email address or other contact information to send you important updates related to your account or transaction, such as payment receipts, shipping notifications, or customer support responses. With your consent, we may also send promotional emails about new products, special offers, newsletters, or company news. You can opt out of these marketing communications at any time. </li>
 
@@ -43,7 +43,7 @@ const PrivacyPolicy = () => {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">3. COOKIES & TRACKING</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">3. COOKIES & TRACKING</h2>
           <p>
             We use cookies and similar tracking technologies to enhance your browsing experience, analyze website traffic, and understand user behavior. Cookies are small data files that are stored on your device when you visit our website. They help us remember your preferences, enable certain site features, and collect anonymous usage data for analytics purposes.
           </p>
@@ -57,21 +57,21 @@ const PrivacyPolicy = () => {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">4. DATA SHARING</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">4. DATA SHARING</h2>
           <p>
             We do not sell, trade, or rent your personal information to others. We may share data with trusted third parties who help us operate our site, so long as they agree to keep this information confidential.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">5. SECURITY</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">5. SECURITY</h2>
           <p>
             We take the security of your personal information seriously and implement a range of technical, administrative, and physical safeguards to protect it from unauthorized access, disclosure, alteration, or destruction.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">6. YOUR RIGHTS</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">6. YOUR RIGHTS</h2>
           <p>
             We are committed to protecting your privacy and ensuring transparency about how your personal information is handled. As a user, you have certain rights regarding your personal data, which may vary depending on your location and applicable privacy laws (such as the GDPR or CCPA). These rights include, but may not be limited to:
           </p>

@@ -287,7 +287,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
         {/* Product Info */}
         <div className="w-full md:w-1/2 space-y-4">
-          <h1 className="text-2xl font-semibold">{product.name}</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">{product.name}</h1>
 
           {/* Key Tags */}
           {product.key &&
@@ -592,16 +592,27 @@ if (prescriptionFile) {
     {/* ----------  */}
            {similarProducts.length > 0 && (
   <div className="mt-10 px-4 sm:px-6">
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-      <h1 className="text-xl sm:text-2xl font-bold">Similar Products</h1>
+    <div className="flex justify-between items-center mb-4 gap-2">
+      <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Similar Products</h1>
       <Link
         to={`/products?category=${encodeURIComponent(product.category)}`}
-        className=" text-blue-700 px-4 py-2 text-m font-medium text-center sm:text-left whitespace-nowrap"
+        className=" text-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg  transition-colors text-s sm:text-sm font-medium whitespace-nowrap"
       >
         View All
       </Link>
     </div>
-    <div className="flex overflow-x-auto gap-4">
+    <div 
+      className="flex overflow-x-auto gap-4 scrollbar-hide"
+      style={{
+        scrollbarWidth: 'none', /* Firefox */
+        msOverflowStyle: 'none', /* Internet Explorer 10+ */
+      }}
+    >
+      <style jsx>{`
+        div::-webkit-scrollbar {
+          display: none; /* Safari and Chrome */
+        }
+      `}</style>
       {similarProducts.map((item) => (
         <Link to={`/product/${item.id}`} key={item.id}>
           <ProductCardScrollable
@@ -625,16 +636,27 @@ if (prescriptionFile) {
 
         {/* ----------  */}
             <div className="mt-8 px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-          <h1 className="text-xl sm:text-2xl font-bold text-black">People Preferred Products</h1>
+        <div className="flex justify-between items-center mb-4 gap-2">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-black">People Preferred Products</h1>
           <Link
             to="/products?people_preferred=true"
-            className=" text-blue-700 px-4 py-2 rounded-lg transition-colors text-m font-medium text-center sm:text-left whitespace-nowrap"
+            className=" text-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg  transition-colors text-s sm:text-sm font-medium whitespace-nowrap"
           >
             View All
           </Link>
         </div>
-        <div className="flex overflow-x-auto gap-4">
+        <div 
+          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+          `}</style>
           {peoplePreferredProducts.map((product) => (
             <Link
         key={product.id}

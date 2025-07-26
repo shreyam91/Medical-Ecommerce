@@ -47,7 +47,7 @@ export default function SearchComponent() {
       className="flex flex-col items-center justify-center w-full min-h-[120px] py-12"
       ref={dropdownRef}
     >
-      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-700 drop-shadow-sm">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 text-gray-700 drop-shadow-sm">
         Search your medicine here
       </h1>
       <div className={`relative w-full max-w-xl transition-all duration-300 ease-in-out`}>  

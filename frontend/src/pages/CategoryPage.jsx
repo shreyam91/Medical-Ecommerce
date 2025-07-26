@@ -217,7 +217,7 @@ function CategoryPage() {
       )}
       
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
           {getCategoryTitle()}
         </h1>
         {category && category.description && (
@@ -275,7 +275,7 @@ function CategoryPage() {
           </div>
 
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

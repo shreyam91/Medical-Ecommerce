@@ -13,7 +13,7 @@ const FrequentlyBuying = () => {
 
   return (
     <div className="mt-2">
-      <h1 className="text-2xl font-bold mb-4">Frequently Bought from Customers</h1>
+      <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">Frequently Bought from Customers</h1>
       <div className="flex overflow-x-auto gap-4">
         {products.map((product) => (
           <ProductCardScrollable
