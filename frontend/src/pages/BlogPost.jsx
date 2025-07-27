@@ -77,7 +77,7 @@ const BlogPost = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 lg:px-12">
+    <div className="max-w-7xl mx-auto lg:px-12">
       {/* Back Link */}
       <div className="mb-4">
         <Link to="/blog" className="text-blue-600 hover:underline text-sm">

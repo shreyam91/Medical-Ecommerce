@@ -51,7 +51,7 @@ const Blog = () => {
   const currentBlogs = sortedBlogs.slice(startIndex, startIndex + postsPerPage);
 
   return (
-    <div className="min-h-screen px-4 py-10 sm:px-8 lg:px-24 max-w-6xl mx-auto ">
+    <div className="min-h-screen px-4 sm:px-8 max-w-6xl mx-auto ">
       <h1 className="text-3xl font-bold text-green-600 mb-8">Our Blog Posts</h1>
 
       {/* Filters */}
