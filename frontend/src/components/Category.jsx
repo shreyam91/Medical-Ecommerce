@@ -8,7 +8,6 @@ export default function Category() {
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
-  const autoScrollInterval = useRef(null);
 
   // Fallback data
   const fallbackData = [
@@ -28,27 +27,9 @@ export default function Category() {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || loading) return;
+  // Removed auto-scroll logic entirely.
 
-    const startAutoScroll = () => {
-      autoScrollInterval.current = setInterval(() => {
-        if (!el || isHovered) return;
-
-        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
-          el.scrollTo({ left: 0, behavior: "smooth" });
-        } else {
-          el.scrollBy({ left: 200, behavior: "smooth" });
-        }
-      }, 4000);
-    };
-
-    startAutoScroll();
-    return () => clearInterval(autoScrollInterval.current);
-  }, [loading, isHovered]);
-
-  // Touch support
+  // Touch support remains unchanged
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -107,45 +88,41 @@ export default function Category() {
   };
 
   return (
-    <div className="py-8 max-w-7xl mx-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-black">
+    <div className=" max-w-7xl mx-auto">
+      <h1 className="text-xl sm:text-3xl font-semibold mb-6 text-black">
         Shop by Health Concern
       </h1>
 
-      {/* Mobile Scrollable */}
-      <div
-        ref={scrollRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className="sm:hidden flex gap-4 overflow-x-auto px-1 no-scrollbar scroll-smooth"
-        style={{ scrollSnapType: "x mandatory" }}
-      >
-        {loading
-          ? Array.from({ length: 8 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="animate-pulse bg-gray-200 rounded-md shadow-md min-w-[200px] h-20 flex items-center px-4 snap-start"
-              >
-                <div className="w-16 h-16 bg-gray-300 rounded-full mr-4" />
-                <div className="h-4 w-24 bg-gray-300 rounded" />
-              </div>
-            ))
-          : categories.map(({ id, title, name, imageUrl, image_url, link }) => (
-              <Link
-                to={link}
-                key={id}
-                className="flex items-center min-w-[200px] bg-white rounded-md shadow-md p-4 hover:shadow-lg transition duration-300 hover:bg-gray-50 snap-start"
-              >
-                <img
-                  src={imageUrl || image_url || "/assets/default-category.svg"}
-                  alt={title || name}
-                  className="w-16 h-16 object-cover mr-4"
-                  loading="lazy"
-                />
-                <p className="text-md font-medium text-gray-800">{title || name}</p>
-              </Link>
-            ))}
-      </div>
+      {/* Mobile Grid - multiple rows, no scroll, no background */}
+<div className="sm:hidden grid grid-cols-3 gap-4 px-2">
+  {loading
+    ? Array.from({ length: 8 }).map((_, idx) => (
+        <div
+          key={idx}
+          className="animate-pulse flex flex-col items-center"
+        >
+          <div className="w-16 h-16 bg-gray-300 rounded-full mb-2" />
+          <div className="h-4 w-20 bg-gray-300 rounded" />
+        </div>
+      ))
+    : categories.map(({ id, title, name, imageUrl, image_url, link }) => (
+        <Link
+          to={link}
+          key={id}
+          className="flex flex-col items-center no-bg p-0"
+          style={{ textDecoration: "none" }}
+        >
+          <img
+            src={imageUrl || image_url || "/assets/default-category.svg"}
+            alt={title || name}
+            className="w-10 h-10 object-cover rounded-full"
+            loading="lazy"
+          />
+          <p className="text-xs text-center text-gray-800">{title || name}</p>
+        </Link>
+      ))}
+</div>
+
 
       {/* Desktop Grid */}
       <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -155,8 +132,8 @@ export default function Category() {
                 key={idx}
                 className="animate-pulse bg-gray-200 rounded-md shadow-md h-20 flex items-center px-4"
               >
-                <div className="w-16 h-16 bg-gray-300 rounded-full mr-4" />
-                <div className="h-4 w-24 bg-gray-300 rounded" />
+                <div className="w-12 h-12 bg-gray-300 rounded-full mr-4" />
+                <div className="h-4 w-20 bg-gray-300 rounded" />
               </div>
             ))
           : categories.map(({ id, title, name, imageUrl, image_url, link }) => (
