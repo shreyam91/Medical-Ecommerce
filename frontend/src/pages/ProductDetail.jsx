@@ -433,8 +433,10 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
               <p>
                  Company
               </p>
-              <p>* Country of Origin: India</p>
-              <p>* Delivery charges will be applied at checkout.</p>
+              <p>* For safety & hygiene reasons, this product can't be returned, we ensure 100% genuine & quality check delivery.</p>
+              <p>* Country of Origin: <span className="font-bold">India</span></p>
+              <p>* To be taken under Medical Supervision. </p>
+              <p>* Delivery charges may be applied on checkout.</p>
             </div>
           </div>
 
@@ -593,7 +595,7 @@ if (prescriptionFile) {
            {similarProducts.length > 0 && (
   <div className="mt-10 px-4 sm:px-6">
     <div className="flex justify-between items-center mb-4 gap-2">
-      <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Similar Products</h1>
+      <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">Similar Products</h1>
       <Link
         to={`/products?category=${encodeURIComponent(product.category)}`}
         className=" text-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg  transition-colors text-s sm:text-sm font-medium whitespace-nowrap"
@@ -602,7 +604,7 @@ if (prescriptionFile) {
       </Link>
     </div>
     <div 
-      className="flex overflow-x-auto gap-4 scrollbar-hide"
+      className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
       style={{
         scrollbarWidth: 'none', /* Firefox */
         msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -637,7 +639,7 @@ if (prescriptionFile) {
         {/* ----------  */}
             <div className="mt-8 px-4 sm:px-6">
         <div className="flex justify-between items-center mb-4 gap-2">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-black">People Preferred Products</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-black">People Preferred Products</h1>
           <Link
             to="/products?people_preferred=true"
             className=" text-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg  transition-colors text-s sm:text-sm font-medium whitespace-nowrap"
@@ -646,7 +648,7 @@ if (prescriptionFile) {
           </Link>
         </div>
         <div 
-          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
           style={{
             scrollbarWidth: 'none', /* Firefox */
             msOverflowStyle: 'none', /* Internet Explorer 10+ */
