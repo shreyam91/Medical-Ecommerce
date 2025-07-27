@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
-
 // Sample order data
 const initialOrders = [
   {
@@ -9,45 +8,64 @@ const initialOrders = [
     date: '2025-07-24',
     status: 'Delivered',
     total: '₹89.99',
-    items: ['T-shirt', 'Sneakers'],
+   items: [
+  { name: 'T-shirt', price: '₹40.00' },
+  { name: 'Sneakers', price: '₹49.99' },
+]
+,
   },
   {
     id: 'ORD-20250715-XYZ789',
     date: '2025-07-15',
     status: 'Shipped',
     total: '₹49.50',
-    items: ['Hoodie'],
+   items: [
+  { name: 'T-shirt', price: '₹40.00' },
+  { name: 'Sneakers', price: '₹49.99' },
+]
+
   },
   {
     id: 'ORD-20250710-QWE456',
     date: '2025-07-10',
-    status: 'Processing',
+    status: 'Shipped',
     total: '₹120.00',
-    items: ['Backpack', 'Sunglasses'],
+    items: [
+  { name: 'T-shirt', price: '₹40.00' },
+  { name: 'Sneakers', price: '₹49.99' },
+]
+
   },
   {
     id: 'ORD-20250710-QWE467',
     date: '2025-07-10',
     status: 'Returned',
     total: '₹120.00',
-    items: ['Backpack', 'Sunglasses'],
+    items: [
+  { name: 'T-shirt', price: '₹40.00' },
+  { name: 'Sneakers', price: '₹49.99' },
+]
+
   },
   {
     id: 'ORD-20250710-QWE434',
     date: '2025-07-10',
     status: 'Cancelled',
     total: '₹120.00',
-    items: ['Backpack', 'Sunglasses'],
+   items: [
+  { name: 'T-shirt', price: '₹40.00' },
+  { name: 'Sneakers', price: '₹49.99' },
+]
+
   },
 ];
 
-const statuses = ['All', 'Delivered', 'Shipped', 'Processing', 'Returned', 'Cancelled'];
+const statuses = ['All', 'Delivered', 'Shipped', 'Processing', 'Replacement', 'Cancelled'];
 
 const isReturnEligible = (deliveryDateStr) => {
   const deliveryDate = new Date(deliveryDateStr);
   const returnDeadline = new Date(deliveryDate);
   returnDeadline.setDate(returnDeadline.getDate() + 2);
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today <= returnDeadline;
@@ -60,7 +78,11 @@ const OrderHistory = () => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOrder, setModalOrder] = useState(null);
-  const [modalAction, setModalAction] = useState(null); // 'cancel' or 'return'
+  const [modalAction, setModalAction] = useState(null);
+
+  const [replacementIssues, setReplacementIssues] = useState([]);
+  const [replacementReason, setReplacementReason] = useState('');
+  const [replacementImage, setReplacementImage] = useState(null);
 
   const filteredOrders =
     statusFilter === 'All'
@@ -74,27 +96,11 @@ const OrderHistory = () => {
   const openModal = (order, action) => {
     setModalOrder(order);
     setModalAction(action);
+    setReplacementIssues([]);
+    setReplacementReason('');
+    setReplacementImage(null);
     setModalOpen(true);
   };
-
-  const confirmAction = () => {
-  setOrders((prev) =>
-    prev.map((order) =>
-      order.id === modalOrder.id
-        ? { ...order, status: modalAction === 'cancel' ? 'Cancelled' : 'Returned' }
-        : order
-    )
-  );
-
-  toast.success(
-    `${modalAction === 'cancel' ? 'Cancel' : 'Return'} request submitted.`
-  );
-
-  setModalOpen(false);
-  setModalOrder(null);
-  setModalAction(null);
-};
-
 
   const closeModal = () => {
     setModalOpen(false);
@@ -102,8 +108,33 @@ const OrderHistory = () => {
     setModalAction(null);
   };
 
+  const confirmAction = () => {
+    if (modalAction === 'replacement') {
+      if (replacementIssues.length === 0 || !replacementReason.trim() || !replacementImage) {
+        toast.error('Please fill in all fields and upload an image.');
+        return;
+      }
+    }
+
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === modalOrder.id
+          ? { ...order, status: modalAction === 'cancel' ? 'Cancelled' : 'Replacement' }
+          : order
+      )
+    );
+
+    toast.success(
+      `${modalAction === 'cancel' ? 'Cancel' : 'Replacement'} request submitted.`
+    );
+
+    setModalOpen(false);
+    setModalOrder(null);
+    setModalAction(null);
+  };
+
   return (
-    <div className="min-h-screen p-4 sm:p-6 ">
+    <div className="min-h-screen p-4 sm:p-6">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">📦 Order History</h1>
 
       {/* Filter Dropdown */}
@@ -153,6 +184,8 @@ const OrderHistory = () => {
                             ? 'bg-orange-100 text-orange-700'
                             : order.status === 'Cancelled'
                             ? 'bg-red-100 text-red-700'
+                            : order.status === 'Replacement'
+                            ? 'bg-purple-100 text-purple-700'
                             : 'bg-yellow-100 text-yellow-700'
                         }`}
                       >
@@ -174,29 +207,22 @@ const OrderHistory = () => {
                       )}
 
                       {order.status === 'Delivered' && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (returnEligible) {
-                                openModal(order, 'return');
-                              }
-                            }}
-                            disabled={!returnEligible}
-                            className={`${
-                              returnEligible
-                                ? 'text-purple-600 font-bold bg-gray-200 px-4 py-1 rounded'
-                                : 'text-gray-400 cursor-not-allowed'
-                            }`}
-                          >
-                            Return
-                          </button>
-                          {!returnEligible && (
-                            <div className="text-xs text-red-500 mt-1 sm:mt-0 sm:ml-2">
-                              Return window expired
-                            </div>
-                          )}
-                        </>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (returnEligible) {
+                              openModal(order, 'replacement');
+                            }
+                          }}
+                          disabled={!returnEligible}
+                          className={`${
+                            returnEligible
+                              ? 'text-purple-600 font-bold bg-gray-200 px-4 py-1 rounded'
+                              : 'text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          Replacement
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -206,11 +232,15 @@ const OrderHistory = () => {
                     <tr className="bg-gray-50">
                       <td colSpan={5} className="px-6 py-4">
                         <h3 className="font-semibold mb-2 text-gray-700">Items:</h3>
-                        <ul className="list-disc list-inside text-gray-600">
-                          {order.items.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
+                        <ul className="text-gray-600 text-sm space-y-1">
+  {order.items.map((item, index) => (
+    <li key={index} className="flex justify-between">
+      <span>{item.name}</span>
+      <span className="text-gray-500">{item.price}</span>
+    </li>
+  ))}
+</ul>
+
                       </td>
                     </tr>
                   )}
@@ -229,26 +259,84 @@ const OrderHistory = () => {
         </table>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Modal */}
       {modalOpen && modalOrder && (
-        <div className="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-50 bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 sm:mx-0 p-4 sm:p-6">
             <h2 className="text-xl font-semibold mb-4">
-              {modalAction === 'cancel' ? 'Cancel Order' : 'Return Order'}
+              {modalAction === 'cancel' ? 'Cancel Order' : 'Replacement Request'}
             </h2>
+
             <p className="mb-4">
-              Are you sure you want to{' '}
-              <span className="font-semibold text-red-600">
-                {modalAction === 'cancel' ? 'cancel' : 'return'}
-              </span>{' '}
-              order <span className="font-mono text-blue-600">{modalOrder.id}</span>?
+              {modalAction === 'cancel' ? (
+                <>
+                  Are you sure you want to{' '}
+                  <span className="text-red-600 font-semibold">cancel</span> order{' '}
+                  <span className="font-mono text-blue-600">{modalOrder.id}</span>?
+                </>
+              ) : (
+                <>
+                  Please select the issue(s) and provide a reason for requesting a{' '}
+                  <span className="text-purple-600 font-semibold">replacement</span> of order{' '}
+                  <span className="font-mono text-blue-600">{modalOrder.id}</span>.
+                </>
+              )}
             </p>
 
-            <p className="mb-6 text-sm text-gray-600">
-              {modalAction === 'cancel'
-                ? 'Refund will be initiated or refunded within 7 days after cancellation.'
-                : 'Refund will be initiated or refunded within 7 days after receiving the order.'}
-            </p>
+            {modalAction === 'replacement' && (
+              <>
+                <div className="mb-4">
+                  <label className="block font-semibold mb-2">Select Issue(s):</label>
+                  {['Wrong product delivered', 'Damaged product delivered', 'Expired product delivered'].map(
+                    (issue) => (
+                      <label key={issue} className="block text-sm mb-1">
+                        <input
+                          type="checkbox"
+                          className="mr-2"
+                          checked={replacementIssues.includes(issue)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setReplacementIssues((prev) => [...prev, issue]);
+                            } else {
+                              setReplacementIssues((prev) =>
+                                prev.filter((item) => item !== issue)
+                              );
+                            }
+                          }}
+                        />
+                        {issue}
+                      </label>
+                    )
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label className="block font-semibold mb-2">Reason:</label>
+                  <textarea
+                    value={replacementReason}
+                    onChange={(e) => setReplacementReason(e.target.value)}
+                    className="w-full border rounded p-2"
+                    placeholder="Please describe the issue..."
+                    rows={3}
+                    required
+                  ></textarea>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block font-semibold mb-2">Upload Image (required):</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setReplacementImage(e.target.files[0])}
+                  />
+                  {replacementImage && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Selected: {replacementImage.name}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
 
             <div className="flex justify-end space-x-4">
               <button
@@ -265,12 +353,14 @@ const OrderHistory = () => {
                     : 'bg-purple-600 hover:bg-purple-700'
                 }`}
               >
-                Yes, {modalAction === 'cancel' ? 'Cancel' : 'Return'}
+                Yes, {modalAction === 'cancel' ? 'Cancel' : 'Submit Replacement'}
               </button>
             </div>
           </div>
         </div>
+        
       )}
+      <p className='font-medium text-xl'>Customer Support: 1234567898</p>
     </div>
   );
 };

@@ -25,12 +25,13 @@ const OrderSuccess = () => {
 
   return (
     <div className="flex flex-col items-center justify-center px-4 text-center py-10">
-      <div className="text-green-600 text-6xl animate-bounce mb-4">✅</div>
+      {/* <div className="text-green-600 text-6xl animate-bounce mb-4">✅</div> */}
 
-      <h1 className="text-4xl font-bold text-green-700 mb-2">Order Successful!</h1>
+      <h1 className="text-4xl font-bold text-green-700 mb-2">Your Order is Confirmed !</h1>
       <p className="text-lg text-gray-700 mb-4 max-w-md">
-        Thank you for your purchase. Your order has been placed successfully.
+        Thank you for shopping with Herbalmg Your order has been placed succesfully!
       </p>
+      {/* <p>Your order has been placed succesfully</p> */}
 
       <div className="bg-white px-6 py-3 rounded-md shadow-md border text-gray-800 font-mono mb-6">
         Order ID: <span className="font-semibold text-green-700">{orderId}</span>
