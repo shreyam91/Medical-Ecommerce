@@ -117,22 +117,27 @@ export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPri
 
   return (
     <div 
-      className="w-[calc(50vw-24px)] sm:w-48 md:w-56 lg:w-64 p-3 sm:p-4 bg-white rounded-lg shadow-md flex-shrink-0 cursor-pointer border-2"
+      className="w-[calc(50vw-24px)] sm:w-48 md:w-56 lg:w-64 p-3 sm:p-4 bg-white rounded-lg shadow-md flex-shrink-0 cursor-pointer border-2 flex flex-col h-[250px] sm:h-[300px] md:h-[320px]"
       onClick={handleCardClick}
     >
-      {/* <Toaster position="top-right" /> */}
       <img src={image} alt={name} className="h-32 sm:h-36 md:h-40 w-full object-cover rounded-md mb-3 sm:mb-4" />
+      
       <h2 className="text-xs sm:text-sm md:text-base line-clamp-2">{name}</h2>
+      
       <div className="flex items-center gap-1 sm:gap-2 my-2">
         <span className="text-gray-500 line-through text-xs sm:text-sm">₹{actualPrice}</span>
         <span className="text-red-600 font-bold text-sm sm:text-base">₹{sellingPrice}</span>
       </div>
-      <button
-        className={`mt-auto bg-green-600 text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded hover:bg-green-700 transition duration-200 w-full`}
-        onClick={handleAddToCart}
-      >
-        { 'Add to Cart'}
-      </button>
+
+      <div className="mt-auto">
+        <button
+          className="bg-green-600 text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded hover:bg-green-700 transition duration-200 w-full"
+          onClick={handleAddToCart}
+        >
+          {'Add to Cart'}
+        </button>
+      </div>
     </div>
   );
 };
+
