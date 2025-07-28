@@ -155,7 +155,16 @@ const BrandProducts = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <Breadcrumb items={breadcrumbItems} />
+      {brand?.banner_url && (
+  <div className="mb-6">
+    <img
+      src={brand.banner_url}
+      alt={`${brand.name} banner`}
+      className="w-full h-48 sm:h-64 md:h-72 object-cover rounded-md shadow"
+    />
+  </div>
+)}
+      {/* <Breadcrumb items={breadcrumbItems} /> */}
       
       <div className="mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">

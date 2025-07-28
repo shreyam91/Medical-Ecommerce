@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LogoCircles.css";
 
@@ -6,6 +6,7 @@ const data = [
   {
     id: 1,
     title: "Ayurvedic Medicine",
+    shortTitle: "Ayurvedic",
     imageUrl: "/assets/med.svg",
     bgcolor: "bg-gradient-to-tr from-orange-100 via-green-50 to-blue-300",
     link: "/ayurvedic",
@@ -13,6 +14,7 @@ const data = [
   {
     id: 2,
     title: "Homeopathic Medicine",
+    shortTitle: "Homeopathy",
     imageUrl: "/assets/medicine.svg",
     bgcolor: "bg-gradient-to-tr from-yellow-200 via-green-50 to-green-400",
     link: "/homeopathic",
@@ -20,6 +22,7 @@ const data = [
   {
     id: 3,
     title: "Unani Medicine",
+    shortTitle: "Unani",
     imageUrl: "/assets/medi.svg",
     bgcolor: "bg-gradient-to-tr from-green-50 via-violet-100 to-orange-50",
     link: "/unani",
@@ -27,20 +30,31 @@ const data = [
   {
     id: 4,
     title: "Prescription",
+    shortTitle: "Prescription",
     imageUrl: "/assets/prescription.svg",
     bgcolor: "bg-gradient-to-tr from-green-50 via-orange-100 to-blue-500",
-    link: "https://wa.me/1234567898", 
+    link: "https://wa.me/1234567898",
   },
   {
     id: 5,
     title: "Near by Doctor",
+    shortTitle: "Doctors",
     imageUrl: "/assets/doctor.svg",
     bgcolor: "bg-gradient-to-tr from-red-50 via-green-100 to-orange-200",
     link: "/doctors",
   },
 ];
 
-function CardItem({ id, title, imageUrl, bgcolor, link }) {
+function CardItem({
+  id,
+  title,
+  shortTitle,
+  imageUrl,
+  bgcolor,
+  link,
+  isMobile,
+  className = "",
+}) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -54,116 +68,71 @@ function CardItem({ id, title, imageUrl, bgcolor, link }) {
   return (
     <div
       onClick={handleClick}
-      className={`cursor-pointer flex items-center ${bgcolor} rounded-md shadow-md px-4 py-3 hover:shadow-lg transition duration-300 min-w-[180px] snap-start`}
+      className={`cursor-pointer transition duration-300 ${
+        isMobile
+          ? `flex flex-col items-center text-center ${className}`
+          : `flex items-center min-w-[180px] px-3 py-3 rounded-md shadow-md hover:shadow-lg ${bgcolor}`
+      }`}
     >
       <img
         src={imageUrl}
         alt={title}
-        className="w-12 h-12 object-contain mr-4"
+        className={`object-contain ${
+          isMobile ? "w-10 h-10 mb-1" : "w-12 h-12 mr-4"
+        }`}
         loading="lazy"
       />
-      <p className="text-sm sm:text-base font-medium text-gray-800">{title}</p>
-    </div>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="animate-pulse bg-gray-200 rounded-md shadow-md h-20 flex items-center px-4 min-w-[180px] snap-start">
-      <div className="w-14 h-14 bg-gray-300 rounded-full mr-4" />
-      <div className="h-4 w-24 bg-gray-300 rounded" />
+      <p
+        className={`font-medium text-gray-800 ${
+          isMobile ? "text-[10px] leading-tight" : "text-sm sm:text-base"
+        }`}
+      >
+        {isMobile ? shortTitle : title}
+      </p>
     </div>
   );
 }
 
 export default function Type() {
-  const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
   const autoScrollInterval = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Auto-scroll
-  useEffect(() => {
     const el = scrollRef.current;
-    if (!el || loading) return;
+    if (!el || window.innerWidth < 640) return;
 
-    const startAutoScroll = () => {
-      autoScrollInterval.current = setInterval(() => {
-        if (isHovered) return;
+    autoScrollInterval.current = setInterval(() => {
+      if (isHovered) return;
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 200, behavior: "smooth" });
+      }
+    }, 4000);
 
-        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
-          el.scrollTo({ left: 0, behavior: "smooth" });
-        } else {
-          el.scrollBy({ left: 200, behavior: "smooth" });
-        }
-      }, 4000);
-    };
-
-    startAutoScroll();
     return () => clearInterval(autoScrollInterval.current);
-  }, [loading, isHovered]);
-
-  // Touch swipe support
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    let startX = 0;
-    let isDown = false;
-
-    const onTouchStart = (e) => {
-      startX = e.touches[0].clientX;
-      isDown = true;
-    };
-
-    const onTouchMove = (e) => {
-      if (!isDown) return;
-      const diff = startX - e.touches[0].clientX;
-      el.scrollLeft += diff;
-      startX = e.touches[0].clientX;
-    };
-
-    const onTouchEnd = () => {
-      isDown = false;
-    };
-
-    el.addEventListener("touchstart", onTouchStart);
-    el.addEventListener("touchmove", onTouchMove);
-    el.addEventListener("touchend", onTouchEnd);
-
-    return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
-      el.removeEventListener("touchend", onTouchEnd);
-    };
-  }, []);
+  }, [isHovered]);
 
   return (
-    <div className="py-4 max-w-7xl mx-auto">
-      {/* Mobile: Horizontal Scroll */}
+    <div className="max-w-8xl mx-auto">
+      {/* Mobile: 3 items per row, no box/background */}
+      <div className="sm:hidden flex flex-wrap justify-start gap-y-4"> 
+        {data.map((item) => (
+          <CardItem key={item.id} {...item} isMobile className="w-1/5" />
+        ))}
+      </div>
+
+      {/* Desktop: Grid layout with gradient bg and box */}
       <div
         ref={scrollRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="sm:hidden flex gap-4 overflow-x-auto px-1 no-scrollbar scroll-smooth"
-        style={{ scrollSnapType: "x mandatory" }}
-        aria-label="Horizontal scrollable medicine types"
+        className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mt-6"
       >
-        {loading
-          ? Array.from({ length: 5 }).map((_, idx) => <LoadingSkeleton key={idx} />)
-          : data.map((item) => <CardItem key={item.id} {...item} />)}
-      </div>
-
-      {/* Desktop Grid Layout */}
-      <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mt-6 sm:mt-0">
-        {loading
-          ? Array.from({ length: 5 }).map((_, idx) => <LoadingSkeleton key={idx} />)
-          : data.map((item) => <CardItem key={item.id} {...item} />)}
+        {data.map((item) => (
+          <CardItem key={item.id} {...item} isMobile={false} />
+        ))}
       </div>
     </div>
   );
