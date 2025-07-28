@@ -2,9 +2,9 @@ import React from "react";
 
 const RefundPolicy = () => {
   return (
-    <div className="min-h-screen px-4 py-10 sm:px-8 lg:px-24">
+    <div className="min-h-screen ">
       {/* Header */}
-      <div className=" p-6 sm:p-10 rounded-md text-center mb-10">
+      <div className=" rounded-md text-center mb-4">
         <h1 className="text-3xl sm:text-4xl font-bold text-green-600">
           Return, Refund and Cancellation Policy
         </h1>
@@ -22,7 +22,7 @@ const RefundPolicy = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-2">
             1. DEFINITION
           </h2>
-          <span className="text-xl">
+          <span className="text-l">
             {" "}
             'Return' means an action of giving back the product ordered at 1mg
             portal by the consumer. The following situations may arise which may
@@ -102,7 +102,7 @@ const RefundPolicy = () => {
                 4. The customer will be required to pack the product(s) in original manufacturer’s packaging.
               </li>
               <li>
-                5. Refund will be completed within 30 (thirty) days from date of
+                5. Refund will be completed within 15 (thirty) days from date of
                 reverse pick up (if required).
               </li>
             </ol>
@@ -120,16 +120,16 @@ const RefundPolicy = () => {
             will review your claim and notify you within 5 business days about
             the approval or rejection of your refund.
           </p>
-          <p className="text-gray-500">
+          {/* <p className="text-gray-500">
             2. To request a refund, please contact our support team at{" "}
             <a
               href="mailto:support@herbalmg.com"
               className="text-blue-600 underline"
             >
-              {/* info@herbalmg.com  */} email
+              { info@herbalmg.com } email
             </a>{" "}
             with your order details and reason for the request.
-          </p>
+          </p> */}
         </section>
 
         <section>
@@ -186,7 +186,7 @@ const RefundPolicy = () => {
             
         </section>
 
-        <p className="text-xs text-gray-500">Last updated: July 2025</p>
+        <p className="text-xs text-gray-500">Last updated: August 2025</p>
       </div>
     </div>
   );

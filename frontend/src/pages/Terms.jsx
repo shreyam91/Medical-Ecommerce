@@ -2,9 +2,9 @@ import React from 'react';
 
 const Terms = () => {
   return (
-    <div className="min-h-screen px-4 py-10 sm:px-8 lg:px-24">
+    <div className="min-h-screen">
       {/* Top Banner */}
-      <div className=" p-6 sm:p-10 rounded-md text-center mb-10">
+      <div className="rounded-md text-center mb-2">
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-green-600">Terms & Conditions</h1>
         <p className="mt-2 text-gray-600 text-sm sm:text-base">
           Please read the terms carefully before using our services.
@@ -76,7 +76,7 @@ Unless otherwise stated, modifications will become effective immediately upon po
         </section>
 
         <p className="text-xs text-gray-500">
-          Last updated: July 2025
+          Last updated: August 2025
         </p>
       </div>
     </div>
