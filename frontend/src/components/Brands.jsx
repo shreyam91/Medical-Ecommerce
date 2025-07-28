@@ -86,8 +86,8 @@ const Brands = () => {
 
   return (
     <div className="relative mt-3 max-w-full md:max-w-7xl mx-auto">
-<h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-black">
-        Our Top Brands
+<h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-black">
+        Shop by Brands
       </h1>
 
       {/* Scrollable area */}
@@ -142,8 +142,7 @@ export default Brands;
 
 export function PopularBrand() {
   const navigate = useNavigate();
-  
-  // Dummy data for demonstration
+
   const dummyBrands = [
     { id: 1, name: "Herbal Life", logo_url: "https://via.placeholder.com/100?text=Brand+1" },
     { id: 2, name: "AyurCare", logo_url: "https://via.placeholder.com/100?text=Brand+2" },
@@ -151,35 +150,28 @@ export function PopularBrand() {
     { id: 4, name: "GreenRoots", logo_url: "https://via.placeholder.com/100?text=Brand+4" },
     { id: 5, name: "AyushWell", logo_url: "https://via.placeholder.com/100?text=Brand+5" },
     { id: 6, name: "OrganicVeda", logo_url: "https://via.placeholder.com/100?text=Brand+6" },
-    { id: 7, name: "OrganicVeda", logo_url: "https://via.placeholder.com/100?text=Brand+6" },
-    { id: 8, name: "OrganicVeda", logo_url: "https://via.placeholder.com/100?text=Brand+6" },
   ];
+
+  const createSlug = (name) => name.toLowerCase().replace(/\s+/g, '-');
 
   return (
     <div className="relative mt-3 max-w-full md:max-w-7xl mx-auto rounded-1xl">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-black">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-black">
         Popular Brands
       </h1>
 
-      <div
-        className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth"
-        style={{ scrollSnapType: "x mandatory" }}
-        aria-label="Popular brands of our site."
-      >
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
         {dummyBrands.map((brand) => (
           <div
             key={brand.id}
-            className="flex-shrink-0 w-24 sm:w-28 md:w-32 text-center"
-            style={{ scrollSnapAlign: "center" }}
+            className="text-center cursor-pointer"
+            onClick={() => navigate(`/brand/${brand.slug || createSlug(brand.name)}`)}
           >
-            <div 
-              className="w-full h-24 sm:h-28 md:h-32 bg-white border shadow-md flex items-center justify-center transition-transform hover:scale-90 cursor-pointer rounded-2xl"
-              onClick={() => navigate(`/brand/${brand.slug || createSlug(brand.name)}`)}
-            >
+            <div className="w-full h-20 bg-white border shadow-md flex items-center justify-center transition-transform hover:scale-90 rounded-2xl">
               <img
                 src={brand.logo_url}
                 alt={brand.name}
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+                className="w-12 h-12 object-contain"
                 loading="lazy"
               />
             </div>
@@ -190,5 +182,7 @@ export function PopularBrand() {
     </div>
   );
 }
+
+
 
 

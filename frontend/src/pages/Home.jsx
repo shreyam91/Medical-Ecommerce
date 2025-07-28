@@ -153,7 +153,7 @@ const Home = () => {
       <div className="hidden sm:relative sm:bg-gradient-to-tr sm:from-orange-50 sm:via-green-100 sm:to-blue-50 sm:overflow-hidden sm:flex sm:flex-col sm:items-center sm:rounded-2xl">
 
         {/* Images on Left & Right */}
-        <img
+        {/* <img
           src={leftImage}
           alt="Left Decoration"
           className="absolute top-10 left-4 w-32 opacity-80"
@@ -162,7 +162,7 @@ const Home = () => {
           src={rightImage}
           alt="Right Decoration"
           className="absolute top-10 right-4 w-32 opacity-80"
-        />
+        /> */}
         <SearchComponent />
       </div>
       <Type />
@@ -174,7 +174,7 @@ const Home = () => {
       {/* ----------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
             Seasonal Products
           </h1>
           <Link
@@ -185,7 +185,7 @@ const Home = () => {
           </Link>
         </div>
         <div 
-          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
           style={{
             scrollbarWidth: 'none', /* Firefox */
             msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -222,7 +222,7 @@ const Home = () => {
       {/* ---------------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
             Top Products
           </h1>
           <Link
@@ -233,7 +233,7 @@ const Home = () => {
           </Link>
         </div>
         <div 
-          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
           style={{
             scrollbarWidth: 'none', /* Firefox */
             msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -269,7 +269,7 @@ const Home = () => {
       {/* ---------------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
             People Preferred Products
           </h1>
           <Link
@@ -280,7 +280,7 @@ const Home = () => {
           </Link>
         </div>
         <div 
-          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
           style={{
             scrollbarWidth: 'none', /* Firefox */
             msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -321,7 +321,7 @@ const Home = () => {
       {/* ----------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
             Maximum Discount Products
           </h1>
           <Link
@@ -332,7 +332,7 @@ const Home = () => {
           </Link>
         </div>
         <div 
-          className="flex overflow-x-auto gap-4 scrollbar-hide"
+          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
           style={{
             scrollbarWidth: 'none', /* Firefox */
             msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -367,44 +367,51 @@ const Home = () => {
       </div>
       {/* ---------------  */}
       <PopularBrand />
+
+      {/* --------------------------------  */}
       {/* Blog Section */}
-      <div className="my-10">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-black">
-            Discover Ayurveda
-          </h2>
-          <Link
-            to="/blog"
-            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
-          >
-            {" "}
-            Read all
-          </Link>
-          {/* <h2 className="text-md font-semibold text-blue-600 cursor-pointer hover:underline">See all</h2> */}
-        </div>
+     <div className="my-10">
+  <div className="flex justify-between items-center mb-6">
+    <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black truncate">
+      Discover Ayurveda
+    </h2>
+    <Link
+      to="/blog"
+      className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
+    >
+      Read all
+    </Link>
+  </div>
 
-        {loading && <div className="text-gray-500">Loading blogs...</div>}
-        {error && <div className="text-red-500">{error}</div>}
+  {loading && <div className="text-gray-500">Loading blogs...</div>}
+  {error && <div className="text-red-500">{error}</div>}
 
-        {!loading && !error && blogs.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {blogs.map((blog) => (
-              <BlogCard
-                key={blog.id}
-                image={blog.image_url}
-                title={blog.title}
-                description={blog.short_description}
-                tags={blog.tags || []}
-                link={`/blog/${blog.id}`}
-              />
-            ))}
-          </div>
-        )}
+  {!loading && !error && blogs.length > 0 && (
+    <div className="flex space-x-4 overflow-x-auto sm:grid sm:grid-cols-4 gap-4 scrollbar-hide py-2">
+  {blogs.map((blog) => (
+    <div
+      className="w-[250px] flex-shrink-0 sm:w-full"
+      key={blog.id}
+    >
+      <BlogCard
+        image={blog.image_url}
+        title={blog.title}
+        description={blog.short_description}
+        tags={blog.tags || []}
+        link={`/blog/${blog.id}`}
+      />
+    </div>
+  ))}
+</div>
 
-        {!loading && !error && blogs.length === 0 && (
-          <div className="text-gray-400">No blogs available.</div>
-        )}
-      </div>
+  )}
+
+  {!loading && !error && blogs.length === 0 && (
+    <div className="text-gray-400">No blogs available.</div>
+  )}
+</div>
+
+        {/* ----------------------------  */}
       {/* Company banner  */}
       {getBannerByType("company") && (
         <Banners banners={[getBannerByType("company")]} />
