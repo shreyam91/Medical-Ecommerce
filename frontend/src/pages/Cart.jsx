@@ -82,7 +82,7 @@ export default function Cart() {
             </Link>
           </div>
           <div 
-            className="flex overflow-x-auto gap-4 scrollbar-hide"
+            className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
             style={{
               scrollbarWidth: 'none', /* Firefox */
               msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -242,52 +242,58 @@ export default function Cart() {
     {/* Cart Items */}
     <div className="md:col-span-2 space-y-4">
       {cartItems.map((item) => (
-        <div
-          key={item.id}
-          className="flex flex-col sm:flex-row items-center gap-4 p-4 border rounded-lg"
+  <div
+    key={item.id}
+    className="flex flex-row items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg"
+  >
+    <img
+      src={item.image}
+      alt={item.name}
+      className="w-16 h-16 sm:w-24 sm:h-24 object-cover rounded"
+    />
+    <div className="flex-grow">
+      <h3 className=" text-sm sm:text-base">{item.name}</h3>
+      <div className="text-gray-600 text-xs sm:text-sm flex items-center gap-2">
+        <span className="font-bold text-gray-900">₹{Number(item.price).toFixed(2)}</span>
+        {item.actual_price && Number(item.actual_price) > Number(item.price) && (
+          <>
+            <span className="line-through text-gray-400 text-xs">₹{Number(item.actual_price).toFixed(2)}</span>
+            <span className="text-green-600 text-xs font-semibold ml-1">
+              -{Math.round(((Number(item.actual_price) - Number(item.price)) / Number(item.actual_price)) * 100)}%
+            </span>
+          </>
+        )}
+      </div>
+      <div className="flex items-center gap-2 mt-1">
+        <button
+          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+          className="px-2 py-1 border rounded text-sm"
         >
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-24 h-24 object-cover rounded"
-          />
-          <div className="flex-grow text-center sm:text-left">
-            <h3 className="font-semibold text-sm sm:text-base">{item.name}</h3>
-            <div className="text-gray-600 text-sm flex items-center gap-2">
-              <span className="font-bold text-gray-900">₹{Number(item.price).toFixed(2)}</span>
-              {item.actual_price && Number(item.actual_price) > Number(item.price) && (
-                <>
-                  <span className="line-through text-gray-400 text-xs">₹{Number(item.actual_price).toFixed(2)}</span>
-                  <span className="text-green-600 text-xs font-semibold ml-1">
-                    -{Math.round(((Number(item.actual_price) - Number(item.price)) / Number(item.actual_price)) * 100)}%
-                  </span>
-                </>
-              )}
-            </div>
-            <div className="flex justify-center sm:justify-start items-center gap-2 mt-2">
-              <button
-                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                className="px-2 py-1 border rounded"
-              >
-                -
-              </button>
-              <span>{item.quantity}</span>
-              <button
-                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                className="px-2 py-1 border rounded"
-              >
-                +
-              </button>
-            </div>
-          </div>
-          <button
-            onClick={() => removeFromCart(item.id)}
-            className="text-red-500 hover:text-red-700 text-m "
-          >
-            Remove
-          </button>
-        </div>
-      ))}
+          -
+        </button>
+        <span>{item.quantity}</span>
+        <button
+          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          +
+        </button>
+      </div>
+    </div>
+    <button
+  onClick={() => removeFromCart(item.id)}
+  className="text-red-500 hover:text-red-700 text-sm"
+>
+  {/* Mobile: show "X" */}
+  <span className="sm:hidden text-lg font-semibold">×</span>
+
+  {/* Desktop: show "Remove" */}
+  <span className="hidden font-semibold sm:inline">Remove</span>
+</button>
+
+  </div>
+))}
+
     </div>
 
     {/* Order Summary */}
@@ -310,20 +316,16 @@ export default function Cart() {
           {/* Show total discount if any */}
           {cartItems.some(item => item.actual_price && Number(item.actual_price) > Number(item.price)) && (
             <div className="flex justify-between text-green-600">
-              <span>Total Discount</span>
-              <span>
-                -₹{(
-                  cartItems.reduce((sum, item) => sum + ((Number(item.actual_price) - Number(item.price)) * item.quantity || 0), 0)
-                ).toFixed(2)}
-                {(() => {
-                  const totalActual = cartItems.reduce((sum, item) => sum + (Number(item.actual_price) * item.quantity || 0), 0);
-                  const totalDiscount = cartItems.reduce((sum, item) => sum + ((Number(item.actual_price) - Number(item.price)) * item.quantity || 0), 0);
-                  return totalActual > 0 && totalDiscount > 0
-                    ? ` (-${Math.round((totalDiscount / totalActual) * 100)}%)`
-                    : '';
-                })()}
-              </span>
-            </div>
+  <span>Total Discount</span>
+  <span>
+    -₹{(
+      cartItems.reduce((sum, item) => 
+        sum + ((Number(item.actual_price) - Number(item.price)) * item.quantity || 0), 
+      0)
+    ).toFixed(2)}
+  </span>
+</div>
+
           )}
 
           <div className="border-t pt-2">
@@ -383,7 +385,7 @@ export default function Cart() {
 {/* ----------  */}
             <div className="mt-8 px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold">Frequently Bought from Customers</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold">Frequently Bought from Customers</h1>
             <Link
               to="/products?frequently_bought=true"
               className=" text-blue-600 px-4 py-2 rounded-lg transition-colors text-m font-medium text-center sm:text-left whitespace-nowrap"
@@ -392,7 +394,7 @@ export default function Cart() {
             </Link>
           </div>
           <div 
-            className="flex overflow-x-auto gap-4 scrollbar-hide"
+            className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
             style={{
               scrollbarWidth: 'none', /* Firefox */
               msOverflowStyle: 'none', /* Internet Explorer 10+ */
