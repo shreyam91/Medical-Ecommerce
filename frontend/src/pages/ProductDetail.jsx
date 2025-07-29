@@ -26,8 +26,9 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [prescriptionError, setPrescriptionError] = useState("");
-    const [peoplePreferredProducts, setPeoplePreferredProducts] = useState([]);
-    const [similarProducts, setSimilarProducts] = useState([]);
+  const [peoplePreferredProducts, setPeoplePreferredProducts] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [brandName, setBrandName] = useState("");
 
   
 
@@ -69,6 +70,9 @@ export default function ProductDetails() {
         return res.json();
       })
       .then((data) => {
+        console.log('Product data:', data);
+        console.log('Dietary info:', data.dietary);
+        console.log('Medicine type:', data.medicine_type);
         setProduct(data);
         setSelectedImage(
           (Array.isArray(data.images) ? data.images[0] : null) || null
@@ -90,40 +94,91 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
   });
 
 
-        // Fetch people preferred products
-    fetch("http://localhost:3001/api/product?people_preferred=true")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setPeoplePreferredProducts(data);
-        } else {
-          setPeoplePreferredProducts([]);
-          console.error("API error (people preferred):", data.error || data);
+        // Fetch brand name if brand_id exists
+        if (data.brand_id) {
+          fetch(`http://localhost:3001/api/brand/${data.brand_id}`)
+            .then((res) => res.json())
+            .then((brandData) => {
+              setBrandName(brandData.name || "");
+            })
+            .catch((err) => {
+              console.error("Failed to fetch brand:", err);
+              setBrandName("");
+            });
         }
-      })
-      .catch((err) => {
-        setPeoplePreferredProducts([]);
-        console.error("Network error (people preferred):", err);
-      });
 
-
-        // Fetch prices
-        fetch(`http://localhost:3001/api/product_price`)
+        // Fetch people preferred products
+        fetch("http://localhost:3001/api/product?people_preferred=true")
           .then((res) => res.json())
-          .then((prices) => {
-            const productPrices = prices.filter(
-              (p) => String(p.product_id) === String(data.id)
-            );
-            setPriceMap(productPrices);
-            if (productPrices.length > 0) {
-              setSelectedSize(productPrices[0].size);
+          .then((data) => {
+            if (Array.isArray(data)) {
+              setPeoplePreferredProducts(data);
             } else {
-              setSelectedSize(null);
+              setPeoplePreferredProducts([]);
+              console.error("API error (people preferred):", data.error || data);
             }
           })
-          .catch(() => {
-            setPriceMap([]);
-            setSelectedSize(null);
+          .catch((err) => {
+            setPeoplePreferredProducts([]);
+            console.error("Network error (people preferred):", err);
+          });
+
+
+        // Fetch prices for this specific product
+        fetch(`http://localhost:3001/api/product_price/product/${data.id}`)
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}`);
+            }
+            return res.json();
+          })
+          .then((productPrices) => {
+            console.log('Product prices fetched:', productPrices);
+            const pricesArray = Array.isArray(productPrices) ? productPrices : [];
+            setPriceMap(pricesArray);
+            
+            if (pricesArray.length > 0) {
+              setSelectedSize(pricesArray[0].size);
+            } else {
+              // Fallback: create a default size from main product data
+              console.log('No separate prices found, using main product data');
+              const defaultSize = data.total_quantity || 
+                                 (data.medicine_type === 'Tablet' ? '10' :
+                                  data.medicine_type === 'Capsule' ? '30' :
+                                  data.medicine_type === 'Liquid' ? '100' :
+                                  data.medicine_type === 'Gram' ? '50' : '1');
+              
+              const fallbackPrice = {
+                size: defaultSize,
+                actual_price: data.actual_price,
+                selling_price: data.selling_price,
+                discount_percent: data.discount_percent,
+                quantity: data.total_quantity
+              };
+              setPriceMap([fallbackPrice]);
+              setSelectedSize(fallbackPrice.size);
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to fetch product prices:', err);
+            console.log('Using fallback pricing from main product');
+            
+            // Fallback: use main product pricing
+            const defaultSize = data.total_quantity || 
+                               (data.medicine_type === 'Tablet' ? '10' :
+                                data.medicine_type === 'Capsule' ? '30' :
+                                data.medicine_type === 'Liquid' ? '100' :
+                                data.medicine_type === 'Gram' ? '50' : '1');
+            
+            const fallbackPrice = {
+              size: defaultSize,
+              actual_price: data.actual_price,
+              selling_price: data.selling_price,
+              discount_percent: data.discount_percent,
+              quantity: data.total_quantity
+            };
+            setPriceMap([fallbackPrice]);
+            setSelectedSize(fallbackPrice.size);
           });
         setLoading(false);
       })
@@ -144,6 +199,9 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
   // Sizes/units come from priceMap
   const sizes = priceMap.map((p) => p.size).filter(Boolean);
+  console.log('PriceMap:', priceMap);
+  console.log('Sizes array:', sizes);
+  console.log('Selected size:', selectedSize);
 
   const selectedPrice = priceMap.find((p) => p.size === selectedSize);
   const actualPrice = Number(
@@ -159,7 +217,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
   const handleCheckDelivery = () => {
     if (pincode.trim().length >= 5) {
-      setDeliveryMessage("✅ Delivered within 5-7 days.");
+      setDeliveryMessage("✅ Delivered within 3-5 days.");
     } else {
       setDeliveryMessage("❌ Enter a valid pincode.");
     }
@@ -287,7 +345,12 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
         {/* Product Info */}
         <div className="w-full md:w-1/2 space-y-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">{product.name}</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">
+            {product.name}
+            {product.strength && (
+              <span className="text-gray-600 font-normal ml-2">({product.strength})</span>
+            )}
+          </h1>
 
           {/* Key Tags */}
           {product.key &&
@@ -322,27 +385,58 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
           {/* Reference Books */}
           {renderReferenceBooks()}
 
+          {/* Debug Info */}
+          {/* <div className="mb-4 p-3 bg-gray-100 border rounded text-sm">
+            <p><strong>Debug Info:</strong></p>
+            <p>PriceMap length: {priceMap.length}</p>
+            <p>Sizes: {JSON.stringify(sizes)}</p>
+            <p>Selected size: {selectedSize}</p>
+            <p>Medicine type: {product.medicine_type}</p>
+          </div> */}
+
           {/* Size Selector */}
-          {sizes.length > 0 && (
+          {sizes.length > 0 ? (
             <div>
               <h2 className="font-medium mb-2">Select Size:</h2>
               <div className="flex gap-2">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-4 py-1 border rounded ${
-                      selectedSize === size
-                        ? "bg-blue-500 text-white"
-                        : "border-gray-400"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+                {sizes.map((size) => {
+                  // Get the medicine type suffix
+                  const getTypeSuffix = (medicineType) => {
+                    switch(medicineType?.toLowerCase()) {
+                      case 'tablet': return 'tablets';
+                      case 'capsule': return 'capsules';
+                      case 'liquid': return 'ml';
+                      case 'gram': return 'g';
+                      default: return medicineType || '';
+                    }
+                  };
+                  
+                  const typeSuffix = getTypeSuffix(product.medicine_type);
+                  const displaySize = `${size} ${typeSuffix}`;
+                  
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-4 py-1 border rounded ${
+                        selectedSize === size
+                          ? "bg-blue-500 text-white"
+                          : "border-gray-400"
+                      }`}
+                    >
+                      {displaySize}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          )}
+          )
+          : (
+            <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+              No sizes available. PriceMap: {JSON.stringify(priceMap)}
+            </div>
+          )
+          }
 
           {/* Quantity Selector */}
           <div className="flex items-center gap-3 mt-2">
@@ -431,7 +525,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
                 * 10 Capsules per products.
               </p> */}
               <p>
-                 Company
+                 Company: {brandName || product.brand_name || "N/A"}
               </p>
               <p>* For safety & hygiene reasons, this product can't be returned, we ensure 100% genuine & quality check delivery.</p>
               <p>* Country of Origin: <span className="font-bold">India</span></p>
@@ -545,7 +639,7 @@ if (prescriptionFile) {
             { key: "description", label: "description" },
             { key: "key_ingredients", label: "key ingredients" },
             { key: "dosage", label: "Dosage" },
-            { key: "dieatary", label: "dietary & lifestyle advice" },
+            { key: "dietary", label: "dietary & lifestyle advice" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -566,13 +660,10 @@ if (prescriptionFile) {
           {activeTab === "description" && (
             <p>{product.description || "No description available."}</p>
           )}
-          {activeTab === "key_benefits" && (
-            <p>{product.key_benefits || "No key benefits provided."}</p>
-          )}
           {activeTab === "dosage" && (
             <p>{product.dosage || "Usage information not available."}</p>
           )}
-          {activeTab === "safety_precaution" && (
+          {activeTab === "dietary" && (
             <p>
               {product.dietary || "No safety or precaution info."}
             </p>

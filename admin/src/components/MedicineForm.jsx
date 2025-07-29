@@ -46,10 +46,10 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
     strength: "",
     prices: [
       {
-        size: "",
+        size: "", // Empty by default, suffix will show the type
         quantity: "",
         actualPrice: "",
-        discount: "",
+        discount: "0", // Default discount to 0
         sellingPrice: "",
       },
     ],
@@ -58,6 +58,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
     frequentlyBought: false,
     topProducts: false,
     peoplePreferred: false,
+    maximumDiscount: false,
   };
 
   const [form, setForm] = useState(initial);
@@ -142,6 +143,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
           frequentlyBought: Boolean(editProduct.frequently_bought),
           topProducts: Boolean(editProduct.top_products),
           peoplePreferred: Boolean(editProduct.people_preferred),
+          maximumDiscount: Boolean(editProduct.maximum_discount),
           diseaseId: String(editProduct.disease_id || ""),
         });
       })();
@@ -160,11 +162,21 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
   const handlePriceChange = (idx, field, value) => {
     const prices = [...form.prices];
     prices[idx][field] = value;
-    const actual = parseFloat(prices[idx].actualPrice) || 0;
-    const discount = parseFloat(prices[idx].discount) || 0;
-    // Calculate discounted price
-    let discounted = actual > 0 ? actual - (actual * discount) / 100 : 0;
-    prices[idx].sellingPrice = discounted > 0 ? discounted.toFixed(2) : "";
+    
+    // Auto-calculate selling price when actual price or discount changes
+    if (field === 'actualPrice' || field === 'discount') {
+      const actual = parseFloat(prices[idx].actualPrice) || 0;
+      const discount = parseFloat(prices[idx].discount) || 0;
+      
+      if (actual > 0) {
+        const discountAmount = (actual * discount) / 100;
+        const sellingPrice = actual - discountAmount;
+        prices[idx].sellingPrice = sellingPrice > 0 ? sellingPrice.toFixed(2) : "";
+      } else {
+        prices[idx].sellingPrice = "";
+      }
+    }
+    
     setForm((prev) => ({ ...prev, prices }));
   };
 
@@ -174,10 +186,10 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
       prices: [
         ...prev.prices,
         {
-          size: "",
+          size: "", // Empty by default, suffix will show the type
           quantity: "",
           actualPrice: "",
-          discount: "",
+          discount: "0", // Default discount to 0
           sellingPrice: "",
         },
       ],
@@ -202,7 +214,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
     if (!form.dosage.trim()) e.dosage = "Required";
     if (!form.dietary.trim()) e.dietary = "Required";
     if (!form.ingredients.trim()) e.ingredients = "Required";
-    if (form.type === "tablet" && !form.strength) e.strength = "Required";
+    if (!form.strength.trim()) e.strength = "Required";
     // if (!form.referenceBook) e.referenceBook = "Required"; // Added error handling for referenceBook
     // if (!form.diseaseId) e.diseaseId = "Required";
     form.prices.forEach((p, i) => {
@@ -214,8 +226,8 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
         parseFloat(p.actualPrice) <= 0
       )
         e[`actualPrice_${i}`] = "Enter price";
-      if (p.discount === "" || isNaN(p.discount) || parseFloat(p.discount) < 0)
-        e[`discount_${i}`] = "Invalid";
+      if (p.discount === "" || isNaN(p.discount) || parseFloat(p.discount) < 0 || parseFloat(p.discount) > 100)
+        e[`discount_${i}`] = "Enter valid discount (0-100%)";
       if (!p.sellingPrice) e[`sellingPrice_${i}`] = "Required";
     });
     if (!form.selectedImages || form.selectedImages.length === 0)
@@ -246,6 +258,17 @@ setTimeout(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitting form", form);
+    
+    // Check authentication before proceeding
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = user.token || localStorage.getItem('token');
+    console.log("User authentication status:", { hasUser: !!user, hasToken: !!token });
+    
+    if (!token) {
+      toast.error("Authentication required. Please log in again.");
+      return;
+    }
+    
     const isValid = validateForm();
     console.log("Validation result:", isValid, errors);
     if (!isValid) return;
@@ -291,6 +314,7 @@ setTimeout(() => {
         frequently_bought: form.frequentlyBought,
         top_products: form.topProducts,
         people_preferred: form.peoplePreferred,
+        maximum_discount: form.maximumDiscount,
         disease_id: form.diseaseId ? parseInt(form.diseaseId, 10) : null,
       };
       console.log("Submitting to API:", editProduct ? "update" : "create", common);
@@ -305,8 +329,8 @@ setTimeout(() => {
         toast.success("Product added successfully");
       }
 
-      // Handle multiple price rows
-      if (form.prices.length > 1) {
+      // Handle price rows (save all price variations)
+      if (form.prices.length > 0) {
         try {
           const priceData = form.prices.map(price => ({
             size: price.size,
@@ -316,15 +340,17 @@ setTimeout(() => {
             selling_price: parseFloat(price.sellingPrice)
           }));
 
+          console.log("Saving price data:", priceData);
+
           if (editProduct) {
             await updateProductPrices(productId, priceData);
           } else {
             await createProductPrices(productId, priceData);
           }
-          toast.success("Product prices updated successfully");
+          toast.success("Product prices saved successfully");
         } catch (priceErr) {
-          console.error("Error updating prices:", priceErr);
-          toast.error("Product saved but failed to update prices");
+          console.error("Error saving prices:", priceErr);
+          toast.error("Product saved but failed to save prices: " + priceErr.message);
         }
       }
 
@@ -338,9 +364,10 @@ setTimeout(() => {
           
           // Get auth token
           const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const token = user.token || localStorage.getItem('token');
           const headers = {};
-          if (user.token) {
-            headers['Authorization'] = `Bearer ${user.token}`;
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
           }
           
           const res = await fetch(
@@ -379,7 +406,16 @@ setTimeout(() => {
       }
     } catch (err) {
       console.error("Error submitting product:", err);
-      toast.error(err.message || "Failed to submit product");
+      
+      // Show specific error messages
+      if (err.message.includes("No token provided") || err.message.includes("Unauthorized")) {
+        toast.error("Authentication failed. Please log in again.");
+      } else if (err.message.includes("Forbidden")) {
+        toast.error("You don't have permission to perform this action.");
+      } else {
+        toast.error(err.message || "Failed to submit product");
+      }
+      
       // Clean up orphaned images
       for (const url of uploadedUrls) {
         try {
@@ -440,7 +476,7 @@ setTimeout(() => {
                 setForm((f) => ({
                   ...f,
                   type: o.value,
-                  prices: [{ ...f.prices[0], size: "" }],
+                  // Don't modify size field, just change the type
                 }))
               }
             >
@@ -581,23 +617,34 @@ setTimeout(() => {
         )}
       </div>
 
-      {/* Strength (for tablets) */}
-      {form.type === "tablet" && (
-        <div>
-          <label className="font-medium block mb-1">Strength *</label>
-          <input
-            type="text"
-            name="strength"
-            placeholder="e.g., 500mg, 250mg"
-            className="w-full border rounded p-2"
-            value={form.strength}
-            onChange={handleChange}
-          />
-          {errors.strength && (
-            <p className="text-red-500 text-sm">{errors.strength}</p>
-          )}
-        </div>
-      )}
+      {/* Strength (for all medicine types) */}
+      <div>
+        <label className="font-medium block mb-1">
+          Strength 
+          <span className="text-gray-500 text-sm ml-1">
+            ({form.type === "tablet" ? "e.g., 500mg, 250mg" : 
+              form.type === "capsule" ? "e.g., 250mg, 500mg" :
+              form.type === "ml" ? "e.g., 100ml, 200ml" :
+              form.type === "gm" ? "e.g., 50g, 100g" : "e.g., 500mg"})
+          </span>
+        </label>
+        <input
+          type="text"
+          name="strength"
+          placeholder={
+            form.type === "tablet" ? "e.g., 500mg, 250mg" : 
+            form.type === "capsule" ? "e.g., 250mg, 500mg" :
+            form.type === "ml" ? "e.g., 100ml, 200ml" :
+            form.type === "gm" ? "e.g., 50g, 100g" : "e.g., 500mg"
+          }
+          className="w-full border rounded p-2"
+          value={form.strength}
+          onChange={handleChange}
+        />
+        {errors.strength && (
+          <p className="text-red-500 text-sm">{errors.strength}</p>
+        )}
+      </div>
 
       {/* Price Section */}
       <PriceSection

@@ -81,13 +81,8 @@ router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
     reference_books,
     key,
     key_ingredients,
-    key_benefits,
-    how_to_use,
-    safety_precaution,
     description,
-    other_info,
     strength,
-    gst,
     prescription_required,
     actual_price,
     selling_price,
@@ -96,20 +91,25 @@ router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
     seasonal_medicine,
     frequently_bought,
     top_products,
-    people_preferred
+    people_preferred,
+    dosage,
+    dietary
   } = req.body;
+  
   try {
+    // Start with basic columns that definitely exist
     const [product] = await sql`
       INSERT INTO product (
-        name, category, medicine_type, images, brand_id, reference_books, key, key_ingredients, key_benefits, how_to_use, safety_precaution, description, other_info, strength, gst, prescription_required, actual_price, selling_price, discount_percent, total_quantity, seasonal_medicine, frequently_bought, top_products, people_preferred
+        name, category, medicine_type, images, brand_id, reference_books, key, key_ingredients, description, strength, prescription_required, actual_price, selling_price, discount_percent, total_quantity, seasonal_medicine, frequently_bought, top_products, people_preferred, dosage, dietary
       )
       VALUES (
-        ${safe(name)}, ${safe(category)}, ${safe(medicine_type)}, ${safe(images)}, ${safe(brand_id)}, ${safe(reference_books)}, ${safe(key)}, ${safe(key_ingredients)}, ${safe(key_benefits)}, ${safe(how_to_use)}, ${safe(safety_precaution)}, ${safe(description)}, ${safe(other_info)}, ${safe(strength)}, ${safe(gst)}, ${safe(prescription_required)}, ${safe(actual_price)}, ${safe(selling_price)}, ${safe(discount_percent)}, ${safe(total_quantity)}, ${safe(seasonal_medicine)}, ${safe(frequently_bought)}, ${safe(top_products)}, ${safe(people_preferred)}
+        ${safe(name)}, ${safe(category)}, ${safe(medicine_type)}, ${safe(images)}, ${safe(brand_id)}, ${safe(reference_books)}, ${safe(key)}, ${safe(key_ingredients)}, ${safe(description)}, ${safe(strength)}, ${safe(prescription_required)}, ${safe(actual_price)}, ${safe(selling_price)}, ${safe(discount_percent)}, ${safe(total_quantity)}, ${safe(seasonal_medicine)}, ${safe(frequently_bought)}, ${safe(top_products)}, ${safe(people_preferred)}, ${safe(dosage)}, ${safe(dietary)}
       )
       RETURNING *`;
     res.status(201).json(product);
   } catch (err) {
     console.error('Error creating product:', err);
+    console.error('SQL Error details:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -126,13 +126,8 @@ router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
     reference_books,
     key,
     key_ingredients,
-    key_benefits,
-    how_to_use,
-    safety_precaution,
     description,
-    other_info,
     strength,
-    gst,
     prescription_required,
     actual_price,
     selling_price,
@@ -141,7 +136,9 @@ router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
     seasonal_medicine,
     frequently_bought,
     top_products,
-    people_preferred
+    people_preferred,
+    dosage,
+    dietary
   } = req.body;
   try {
     const [product] = await sql`
@@ -154,13 +151,9 @@ router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
         reference_books=${safe(reference_books)},
         key=${safe(key)},
         key_ingredients=${safe(key_ingredients)},
-        key_benefits=${safe(key_benefits)},
-        how_to_use=${safe(how_to_use)},
-        safety_precaution=${safe(safety_precaution)},
         description=${safe(description)},
-        other_info=${safe(other_info)},
         strength=${safe(strength)},
-        gst=${safe(gst)},
+
         prescription_required=${safe(prescription_required)},
         actual_price=${safe(actual_price)},
         selling_price=${safe(selling_price)},
@@ -170,6 +163,8 @@ router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
         frequently_bought=${safe(frequently_bought)},
         top_products=${safe(top_products)},
         people_preferred=${safe(people_preferred)},
+        dosage=${safe(dosage)},
+        dietary=${safe(dietary)},
         updated_at=NOW()
       WHERE id=${req.params.id} RETURNING *`;
     if (!product) return res.status(404).json({ error: 'Not found' });

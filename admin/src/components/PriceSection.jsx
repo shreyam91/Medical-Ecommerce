@@ -3,17 +3,31 @@ import React from 'react';
 const PriceSection = ({ prices, setPrices, errors, formType }) => {
   const handlePriceChange = (idx, field, value) => {
     const updated = prices.map((p, i) => i === idx ? { ...p, [field]: value } : p);
-    // Calculate selling price if actualPrice or discount changes
+    
+    // Auto-calculate selling price when actual price or discount changes
     if (field === 'actualPrice' || field === 'discount') {
       const actual = parseFloat(updated[idx].actualPrice) || 0;
       const discount = parseFloat(updated[idx].discount) || 0;
-      let discounted = actual > 0 ? actual - (actual * discount) / 100 : 0;
-      updated[idx].sellingPrice = discounted > 0 ? discounted.toFixed(2) : '';
+      
+      if (actual > 0) {
+        const discountAmount = (actual * discount) / 100;
+        const sellingPrice = actual - discountAmount;
+        updated[idx].sellingPrice = sellingPrice > 0 ? sellingPrice.toFixed(2) : "";
+      } else {
+        updated[idx].sellingPrice = "";
+      }
     }
+    
     setPrices(updated);
   };
 
-  const addPriceRow = () => setPrices(prices.concat({ size: '', quantity: '', actualPrice: '', discount: '', sellingPrice: '' }));
+  const addPriceRow = () => setPrices(prices.concat({ 
+    size: '', // Empty by default, suffix will show the type
+    quantity: '', 
+    actualPrice: '', 
+    discount: '0', // Default discount to 0
+    sellingPrice: '' 
+  }));
   const removePriceRow = idx => {
     if (prices.length === 1) return;
     setPrices(prices.filter((_, i) => i !== idx));
@@ -29,12 +43,22 @@ const PriceSection = ({ prices, setPrices, errors, formType }) => {
               <label className="text-sm">Product Size</label>
               <input
                 type="text"
-                placeholder="Eg: 100"
+                placeholder={
+                  formType === "tablet" ? "e.g., 10" : 
+                  formType === "capsule" ? "e.g., 30" :
+                  formType === "ml" ? "e.g., 100" :
+                  formType === "gm" ? "e.g., 50" : "e.g., 100"
+                }
                 value={item.size}
                 onChange={e => handlePriceChange(index, 'size', e.target.value)}
-                className="border rounded p-1 w-full pr-10"
+                className="border rounded p-1 w-full pr-16"
               />
-              <span className="absolute right-3 top-7 text-gray-600 pointer-events-none select-none">{formType}</span>
+              <span className="absolute right-3 top-7 text-gray-600 pointer-events-none select-none text-sm">
+                {formType === "tablet" ? "tablets" : 
+                 formType === "capsule" ? "capsules" :
+                 formType === "ml" ? "ml" :
+                 formType === "gm" ? "gm" : formType}
+              </span>
               {errors[`size_${index}`] && <p className="text-red-500 text-sm ">{errors[`size_${index}`]}</p>}
             </div>
             <div className="w-1/5 relative">
@@ -54,7 +78,10 @@ const PriceSection = ({ prices, setPrices, errors, formType }) => {
               <label className="text-sm">Discount (%)</label>
               <input
                 type="number"
-                placeholder="Discount %"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="0"
                 value={item.discount}
                 onChange={e => handlePriceChange(index, 'discount', e.target.value)}
                 className="border rounded p-1 w-full"

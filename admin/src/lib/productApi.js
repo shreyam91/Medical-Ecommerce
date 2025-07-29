@@ -2,8 +2,9 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
+  // Check both locations for token
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const token = user.token;
+  const token = user.token || localStorage.getItem('token');
   
   return {
     'Content-Type': 'application/json',
@@ -72,7 +73,7 @@ export const getProductBySlug = async (slug) => {
 // Get product prices
 export const getProductPrices = async (productId) => {
   try {
-    const response = await fetch(`${API_BASE}/product-price/${productId}`);
+    const response = await fetch(`${API_BASE}/product_price/product/${productId}`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch product prices: ${response.statusText}`);
@@ -150,7 +151,8 @@ export const deleteProduct = async (id) => {
 // Create product prices
 export const createProductPrices = async (productId, prices) => {
   try {
-    const response = await fetch(`${API_BASE}/product-price`, {
+    console.log('Creating product prices via API:', { productId, prices });
+    const response = await fetch(`${API_BASE}/product_price`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ productId, prices }),
@@ -161,7 +163,9 @@ export const createProductPrices = async (productId, prices) => {
       throw new Error(errorData.error || `Failed to create product prices: ${response.statusText}`);
     }
     
-    return await response.json();
+    const result = await response.json();
+    console.log('Product prices created successfully:', result);
+    return result;
   } catch (error) {
     console.error('Error creating product prices:', error);
     throw error;
@@ -171,7 +175,8 @@ export const createProductPrices = async (productId, prices) => {
 // Update product prices
 export const updateProductPrices = async (productId, prices) => {
   try {
-    const response = await fetch(`${API_BASE}/product-price/${productId}`, {
+    console.log('Updating product prices via API:', { productId, prices });
+    const response = await fetch(`${API_BASE}/product_price/${productId}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify({ prices }),
@@ -182,7 +187,9 @@ export const updateProductPrices = async (productId, prices) => {
       throw new Error(errorData.error || `Failed to update product prices: ${response.statusText}`);
     }
     
-    return await response.json();
+    const result = await response.json();
+    console.log('Product prices updated successfully:', result);
+    return result;
   } catch (error) {
     console.error('Error updating product prices:', error);
     throw error;
