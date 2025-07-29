@@ -82,13 +82,13 @@ function Ayurvedic() {
     }
   }
 
-  const getPredefinedDiseases = () => [
-    'Diabetes', 'Hypertension', 'Arthritis', 'Asthma', 'Migraine',
-    'Digestive Issues', 'Skin Problems', 'Respiratory Issues',
-    'Heart Disease', 'Kidney Problems', 'Liver Issues', 'Anxiety',
-    'Depression', 'Insomnia', 'Joint Pain', 'Back Pain', 'Cold & Flu',
-    'Fever', 'Headache', 'Stomach Problems', 'Constipation', 'Acidity'
-  ]
+  // const getPredefinedDiseases = () => [
+  //   'Diabetes', 'Hypertension', 'Arthritis', 'Asthma', 'Migraine',
+  //   'Digestive Issues', 'Skin Problems', 'Respiratory Issues',
+  //   'Heart Disease', 'Kidney Problems', 'Liver Issues', 'Anxiety',
+  //   'Depression', 'Insomnia', 'Joint Pain', 'Back Pain', 'Cold & Flu',
+  //   'Fever', 'Headache', 'Stomach Problems', 'Constipation', 'Acidity'
+  // ]
 
   const applyFilters = () => {
     let filtered = [...products]
@@ -194,10 +194,10 @@ function Ayurvedic() {
     setSearchQuery('')
   }
 
-  const breadcrumbItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Ayurvedic', path: '/ayurvedic' }
-  ]
+  // const breadcrumbItems = [
+  //   { label: 'Home', path: '/' },
+  //   { label: 'Ayurvedic', path: '/ayurvedic' }
+  // ]
 
   if (loading) {
     return (
@@ -220,11 +220,11 @@ function Ayurvedic() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <Breadcrumb items={breadcrumbItems} />
+    <div className="container mx-auto px-4 ">
+      {/* <Breadcrumb items={breadcrumbItems} /> */}
       
       <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Ayurvedic Products</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-600  mb-2">Ayurvedic Products</h1>
         <p className="text-gray-600">
           {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
         </p>
@@ -304,7 +304,7 @@ function Ayurvedic() {
 
       {/* Mobile Filter Modal */}
       {showMobileFilters && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-start pt-12">
+        <div className="fixed inset-0 z-50 bg-opacity-50 flex justify-center items-start pt-12">
           <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative">
             <button
               className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl"
@@ -327,8 +327,8 @@ function Ayurvedic() {
                 clearFilters()
                 setShowMobileFilters(false)
               }}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
+              // searchQuery={searchQuery}
+              // setSearchQuery={setSearchQuery}
             />
             <button
               onClick={() => setShowMobileFilters(false)}

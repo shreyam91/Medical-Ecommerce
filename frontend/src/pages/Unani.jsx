@@ -194,10 +194,10 @@ function Unani() {
     setSearchQuery('')
   }
 
-  const breadcrumbItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Unani', path: '/unani' }
-  ]
+  // const breadcrumbItems = [
+  //   { label: 'Home', path: '/' },
+  //   { label: 'Unani', path: '/unani' }
+  // ]
 
   if (loading) {
     return (
@@ -220,11 +220,11 @@ function Unani() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <Breadcrumb items={breadcrumbItems} />
+    <div className="container mx-auto px-4">
+      {/* <Breadcrumb items={breadcrumbItems} /> */}
       
       <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Unani Products</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-600 mb-2">Unani Products</h1>
         <p className="text-gray-600">
           {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
         </p>
@@ -304,7 +304,7 @@ function Unani() {
 
       {/* Mobile Filter Modal */}
       {showMobileFilters && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-start pt-12">
+        <div className="fixed inset-0 z-50 bg-opacity-50 flex justify-center items-start pt-12">
           <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative">
             <button
               className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl"
