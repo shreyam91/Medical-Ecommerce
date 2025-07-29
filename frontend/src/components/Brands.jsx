@@ -12,13 +12,13 @@ const Brands = () => {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch data
+  // Fetch top brands only
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch("http://localhost:3001/api/brand")
+    fetch("http://localhost:3001/api/brand/top")
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch brands");
+        if (!res.ok) throw new Error("Failed to fetch top brands");
         return res.json();
       })
       .then((data) => {

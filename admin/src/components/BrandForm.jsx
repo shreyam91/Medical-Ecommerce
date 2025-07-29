@@ -13,10 +13,12 @@ const BrandForm = () => {
   const [brandName, setBrandName] = useState("");
   const [image, setImage] = useState(null);
   const [banner, setBanner] = useState(null);
+  const [isTopBrand, setIsTopBrand] = useState(false);
   const [brandList, setBrandList] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [editBrand, setEditBrand] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showTopBrandsOnly, setShowTopBrandsOnly] = useState(false);
 
   useEffect(() => {
     getBrands()
@@ -61,6 +63,7 @@ const BrandForm = () => {
         name: brandName,
         logo_url: imageUrl || "",
         banner_url: bannerUrl || "",
+        is_top_brand: isTopBrand,
       };
 
       if (editBrand) {
@@ -151,6 +154,7 @@ const BrandForm = () => {
           ...current,
           logo_url: imageUrl,
           banner_url: bannerUrl,
+          is_top_brand: isTopBrand,
         };
 
         const updatedBrandRes = await fetch(
@@ -180,6 +184,7 @@ const BrandForm = () => {
       setBrandName("");
       setImage(null);
       setBanner(null);
+      setIsTopBrand(false);
       setEditBrand(null);
       toast.success(
         editBrand ? "Brand updated successfully!" : "Brand created successfully!"
@@ -210,6 +215,7 @@ const BrandForm = () => {
   const handleEditBrand = (brand) => {
     setEditBrand(brand);
     setBrandName(brand.name);
+    setIsTopBrand(brand.is_top_brand || false);
     setImage(null);
     setBanner(null);
   };
@@ -263,6 +269,19 @@ const BrandForm = () => {
             className="mb-4"
           />
 
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="isTopBrand"
+              checked={isTopBrand}
+              onChange={(e) => setIsTopBrand(e.target.checked)}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            />
+            <label htmlFor="isTopBrand" className="ml-2 text-sm font-medium text-gray-700">
+              Mark as Top Brand
+            </label>
+          </div>
+
           <button
             type="submit"
             className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
@@ -279,6 +298,7 @@ const BrandForm = () => {
                 setBrandName("");
                 setImage(null);
                 setBanner(null);
+                setIsTopBrand(false);
               }}
             >
               Cancel Edit
@@ -290,14 +310,28 @@ const BrandForm = () => {
         <div className="md:w-1/2 w-full border rounded p-4 bg-gray-50">
           <h2 className="text-xl font-semibold mb-4">All Brands</h2>
 
-          {/* Search Input */}
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search brands..."
-            className="w-full p-2 mb-4 border rounded"
-          />
+          {/* Search and Filter Controls */}
+          <div className="mb-4 space-y-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search brands..."
+              className="w-full p-2 border rounded"
+            />
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="showTopBrandsOnly"
+                checked={showTopBrandsOnly}
+                onChange={(e) => setShowTopBrandsOnly(e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+              />
+              <label htmlFor="showTopBrandsOnly" className="ml-2 text-sm font-medium text-gray-700">
+                Show Top Brands Only
+              </label>
+            </div>
+          </div>
 
           {brandList.length === 0 ? (
             <p className="text-gray-500">No brands added yet.</p>
@@ -305,9 +339,11 @@ const BrandForm = () => {
             <div className="max-h-[400px] overflow-y-auto pr-2">
               <ul className="space-y-4">
                 {brandList
-                  .filter((brand) =>
-                    brand.name.toLowerCase().includes(searchTerm.toLowerCase())
-                  )
+                  .filter((brand) => {
+                    const matchesSearch = brand.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesTopBrandFilter = showTopBrandsOnly ? brand.is_top_brand : true;
+                    return matchesSearch && matchesTopBrandFilter;
+                  })
                   .map((brand) => (
                     <li
                       key={brand.id}
@@ -323,6 +359,11 @@ const BrandForm = () => {
                         )}
                         <div className="flex-1">
                           <p className="font-medium">{brand.name}</p>
+                          {brand.is_top_brand && (
+                            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full mt-1">
+                              Top Brand
+                            </span>
+                          )}
                         </div>
                         <div className="flex gap-2">
                           <button

@@ -21,6 +21,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get top brands only
+router.get('/top', async (req, res) => {
+  try {
+    const topBrands = await sql`SELECT * FROM brand WHERE is_top_brand = true ORDER BY id DESC`;
+    res.json(topBrands);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get brand by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -32,13 +42,24 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Get brand by slug
+router.get('/slug/:slug', async (req, res) => {
+  try {
+    const [brand] = await sql`SELECT * FROM brand WHERE slug = ${req.params.slug}`;
+    if (!brand) return res.status(404).json({ error: 'Not found' });
+    res.json(brand);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Create brand
 router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { name, logo_url, banner_url } = req.body;
+  const { name, logo_url, banner_url, is_top_brand = false } = req.body;
   try {
     const [brand] = await sql`
-      INSERT INTO brand (name, logo_url, banner_url)
-      VALUES (${name}, ${logo_url}, ${banner_url})
+      INSERT INTO brand (name, logo_url, banner_url, is_top_brand)
+      VALUES (${name}, ${logo_url}, ${banner_url}, ${is_top_brand})
       RETURNING *`;
     res.status(201).json(brand);
   } catch (err) {
@@ -49,10 +70,10 @@ router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
 
 // Update brand
 router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { name, logo_url, banner_url } = req.body;
+  const { name, logo_url, banner_url, is_top_brand = false } = req.body;
   try {
     const [brand] = await sql`
-      UPDATE brand SET name=${name}, logo_url=${logo_url}, banner_url=${banner_url}
+      UPDATE brand SET name=${name}, logo_url=${logo_url}, banner_url=${banner_url}, is_top_brand=${is_top_brand}, updated_at=NOW()
       WHERE id=${req.params.id} RETURNING *`;
     if (!brand) return res.status(404).json({ error: 'Not found' });
     res.json(brand);

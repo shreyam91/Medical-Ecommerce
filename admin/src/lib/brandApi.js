@@ -27,6 +27,22 @@ export const getBrands = async () => {
   }
 };
 
+// Get top brands only
+export const getTopBrands = async () => {
+  try {
+    const response = await fetch(`${API_BASE}/brand/top`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch top brands: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching top brands:', error);
+    throw error;
+  }
+};
+
 // Get brand by ID
 export const getBrand = async (id) => {
   try {
