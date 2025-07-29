@@ -138,18 +138,21 @@ export default function Category() {
             ))
           : categories.map(({ id, title, name, imageUrl, image_url, link }) => (
               <Link
-                to={link}
-                key={id}
-                className="flex items-center bg-white rounded-md shadow-md p-4 hover:shadow-lg transition duration-300 hover:bg-gray-50"
-              >
-                <img
-                  src={imageUrl || image_url || "/assets/default-category.svg"}
-                  alt={title || name}
-                  className="w-16 h-16 object-cover mr-4"
-                  loading="lazy"
-                />
-                <p className="text-md font-semibold text-gray-800">{title || name}</p>
-              </Link>
+  to={link}
+  key={id}
+  className="group flex items-center p-[2px] rounded-md transition-all duration-300 bg-gradient-to-br from-gray-200 to-white hover:from-green-400 hover:to-orange-500"
+>
+  <div className="flex items-center bg-white rounded-md shadow-md p-2 w-full group-hover:shadow-lg transition duration-300">
+    <img
+      src={imageUrl || image_url || "/assets/default-category.svg"}
+      alt={title || name}
+      className="w-16 h-16 object-cover mr-4"
+      loading="lazy"
+    />
+    <p className="text-md font-semibold text-gray-800">{title || name}</p>
+  </div>
+</Link>
+
             ))}
       </div>
     </div>

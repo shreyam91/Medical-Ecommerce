@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 function RequestProduct() {
   const location = useLocation();
@@ -7,7 +7,7 @@ function RequestProduct() {
 
 //   const suggestions = ['Mango Juice', 'Fruit Basket', 'Organic Honey'];
 
-  const whatsappMessage = `Hello, I'm interested in a product that isn't listed: "${productQuery}". Could you please add it or let me know when it's available?`;
+  const whatsappMessage = `Hello, I'm interested in a product that isn't listed:"${productQuery}" Could you please add it or let me know when it's available?`;
   const whatsappLink = `https://wa.me/1234567890?text=${encodeURIComponent(whatsappMessage)}`; // Replace with your number
 
   return (
