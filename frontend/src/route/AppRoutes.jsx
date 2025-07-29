@@ -33,10 +33,23 @@ import CategoriesPage from '../pages/CategoriesPage';
 import DiseasePage from '../pages/DiseasePage';
 import BrandsPage from '../pages/BrandsPage';
 import Products from '../pages/Products';
+import { useState } from 'react';
 
 const AppRoutes = () => {
+  // const [screen, setScreen] = useState('login');
+  // const [userId, setUserId] = useState(null);
+
+  // const handleLogin = (next, id) => {
+  //   setUserId(id);
+  //   setScreen(next);
+  // };
   return (
     <Routes>
+      {/* -------------  */}
+       {screen === 'login' && <Login onLogin={handleLogin} />}
+      {screen === 'user-profile' && <UserProfile userId={userId} onComplete={() => setScreen('home')} />}
+      {screen === 'home' && <h1 className="text-center mt-20 text-2xl">🏠 Welcome Home!</h1>}
+      {/* -----------------------  */}
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Products />} />

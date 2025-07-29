@@ -276,4 +276,86 @@ router.delete('/:id', auth, requireAdmin, async (req, res) => {
   }
 });
 
+// Address CRUD endpoints
+
+// Get all addresses for a customer
+router.get('/:customerId/addresses', auth, async (req, res) => {
+  try {
+    const addresses = await sql`SELECT * FROM address WHERE customer_id = ${req.params.customerId} ORDER BY is_default DESC, id DESC`;
+    res.json(addresses);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get a single address by id
+router.get('/:customerId/addresses/:addressId', auth, async (req, res) => {
+  try {
+    const [address] = await sql`SELECT * FROM address WHERE id = ${req.params.addressId} AND customer_id = ${req.params.customerId}`;
+    if (!address) return res.status(404).json({ error: 'Not found' });
+    res.json(address);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add a new address for a customer
+router.post('/:customerId/addresses', auth, async (req, res) => {
+  const { address_line1, address_line2, city, state, pincode, country, is_default } = req.body;
+  try {
+    // If is_default is true, unset previous default
+    if (is_default) {
+      await sql`UPDATE address SET is_default = FALSE WHERE customer_id = ${req.params.customerId}`;
+    }
+    const [address] = await sql`
+      INSERT INTO address (customer_id, address_line1, address_line2, city, state, pincode, country, is_default)
+      VALUES (${req.params.customerId}, ${address_line1}, ${address_line2}, ${city}, ${state}, ${pincode}, ${country || 'India'}, ${!!is_default})
+      RETURNING *`;
+    res.status(201).json(address);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update an address
+router.put('/:customerId/addresses/:addressId', auth, async (req, res) => {
+  const { address_line1, address_line2, city, state, pincode, country, is_default } = req.body;
+  try {
+    // If is_default is true, unset previous default
+    if (is_default) {
+      await sql`UPDATE address SET is_default = FALSE WHERE customer_id = ${req.params.customerId}`;
+    }
+    const [address] = await sql`
+      UPDATE address SET address_line1=${address_line1}, address_line2=${address_line2}, city=${city}, state=${state}, pincode=${pincode}, country=${country || 'India'}, is_default=${!!is_default}, updated_at=NOW()
+      WHERE id=${req.params.addressId} AND customer_id=${req.params.customerId} RETURNING *`;
+    if (!address) return res.status(404).json({ error: 'Not found' });
+    res.json(address);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete an address
+router.delete('/:customerId/addresses/:addressId', auth, async (req, res) => {
+  try {
+    const [deleted] = await sql`DELETE FROM address WHERE id=${req.params.addressId} AND customer_id=${req.params.customerId} RETURNING *`;
+    if (!deleted) return res.status(404).json({ error: 'Not found' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Set an address as default
+router.post('/:customerId/addresses/:addressId/set-default', auth, async (req, res) => {
+  try {
+    await sql`UPDATE address SET is_default = FALSE WHERE customer_id = ${req.params.customerId}`;
+    const [address] = await sql`UPDATE address SET is_default = TRUE WHERE id = ${req.params.addressId} AND customer_id = ${req.params.customerId} RETURNING *`;
+    if (!address) return res.status(404).json({ error: 'Not found' });
+    res.json(address);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
