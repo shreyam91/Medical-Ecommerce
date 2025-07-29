@@ -34,11 +34,13 @@ const ProductCard = ({ product }) => {
   return (
     <>
       <Toaster position="top-right" />
-      
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative bg-white rounded-lg shadow-md overflow-hidden w-full max-w-[90vw] sm:max-w-[300px] md:max-w-[340px] lg:max-w-[360px] xl:max-w-[400px] group transition-transform duration-300 hover:scale-[1.02] mx-auto ">
+        <div className="relative bg-white rounded-lg shadow-md overflow-hidden 
+          w-[calc(50vw-24px)] sm:w-48 md:w-56 lg:w-[200px]
+          h-[250px] sm:h-[300px] md:h-[320px]
+          mx-auto flex flex-col cursor-pointer"
+        >
 
-          
           {/* Discount Badge */}
           {hasDiscount && (
             <div className="absolute top-2 left-2 bg-orange-400 text-black text-xs font-semibold px-2 py-1 rounded z-10">
@@ -47,38 +49,38 @@ const ProductCard = ({ product }) => {
           )}
 
           {/* Product Image */}
-          <div className="flex justify-center items-center h-40 sm:h-44 md:h-48 lg:h-52 xl:h-56 overflow-hidden">
+          <div className="flex justify-center items-center h-[120px] sm:h-[140px] md:h-[160px] overflow-hidden">
             <img
               src={image}
               alt={name}
               loading="lazy"
-              className="h-full w-auto object-contain transform transition-transform duration-300 group-hover:scale-105"
+              className="h-full w-auto object-contain"
             />
           </div>
 
           {/* Product Info */}
-          <div className="p-3 sm:p-4">
-            <h3 className="text-sm sm:text-base font-medium text-gray-800 line-clamp-2">{name}</h3>
+          <div className="flex flex-col justify-between flex-grow p-2 sm:p-3">
+            <h3 className="text-xs sm:text-sm md:text-base text-gray-800 line-clamp-2">
+              {name}
+            </h3>
 
-            {/* Price Info */}
-            <div className="mt-2 mb-4 flex flex-col">
+            <div className="mt-1 mb-2">
               {sellingPriceNum > 0 ? (
-                <span className="text-md sm:text-lg font-bold text-green-700">
+                <span className="text-sm sm:text-base font-bold text-green-700">
                   ₹{sellingPriceNum.toFixed(2)}
                 </span>
               ) : (
-                <span className="text-md sm:text-lg font-bold text-gray-500">N/A</span>
+                <span className="text-sm sm:text-base font-bold text-gray-500">N/A</span>
               )}
               {hasDiscount && actualPriceNum > 0 && (
-                <span className="text-sm text-gray-400">
-                  MRP: <span className="line-through">₹{actualPriceNum.toFixed(2)}</span>
+                <span className="ml-2 text-xs text-gray-400 line-through">
+                  ₹{actualPriceNum.toFixed(2)}
                 </span>
               )}
             </div>
 
-            {/* Add to Cart Button */}
             <button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-1.5 sm:py-2 px-2 sm:px-4 rounded transition duration-200"
+              className="w-full bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-semibold py-1.5 sm:py-2 px-2 sm:px-4 rounded transition duration-200"
               onClick={handleAddToCart}
             >
               Add to Cart
@@ -117,16 +119,16 @@ export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPri
 
   return (
     <div 
-      className="w-[calc(50vw-24px)] sm:w-48 md:w-56 lg:w-64 p-3 sm:p-4 bg-white rounded-lg shadow-md flex-shrink-0 cursor-pointer border-2 flex flex-col h-[250px] sm:h-[300px] md:h-[320px]"
+      className="w-[calc(50vw-24px)] sm:w-48 md:w-56 lg:w-50 p-3 sm:p-4 bg-white rounded-lg shadow-md flex-shrink-0 cursor-pointer border-2 flex flex-col h-[250px] sm:h-[300px] md:h-[320px]"
       onClick={handleCardClick}
     >
-      <img src={image} alt={name} className="h-32 sm:h-36 md:h-40 w-full object-cover rounded-md mb-3 sm:mb-4" />
+      <img src={image} alt={name} className="h-30 sm:h-32 md:h-40 w-auto object-cover rounded-md mb-3 sm:mb-4" />
       
       <h2 className="text-xs sm:text-sm md:text-base line-clamp-2">{name}</h2>
       
       <div className="flex items-center gap-1 sm:gap-2 my-2">
+        <span className="text-green-600 font-bold text-sm sm:text-base">₹{sellingPrice}</span>
         <span className="text-gray-500 line-through text-xs sm:text-sm">₹{actualPrice}</span>
-        <span className="text-red-600 font-bold text-sm sm:text-base">₹{sellingPrice}</span>
       </div>
 
       <div className="mt-auto">

@@ -219,7 +219,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
   return (
     <>
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className=" max-w-6xl mx-auto">
       <Toaster position="top-right" />
       {/* Responsive Images Section */}
       <div className="flex flex-col md:flex-row gap-6">
@@ -416,7 +416,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
               {hasDiscount && (
                 <>
                   <span className="line-through text-gray-500 text-sm">
-                    MRP: ₹{actualPrice.toFixed(2)}
+                     ₹{actualPrice.toFixed(2)}
                   </span>
                   <span className="text-red-700 text-sm">
                     Save: {discount}%
@@ -441,14 +441,25 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
           </div>
 
               
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
-      {icons.map((item, index) => (
-        <div key={index} className="flex flex-col items-center w-24">
-          <img src={item.img} alt={item.title} className="w-12 h-12 mb-2" />
-          <h3 className="text-sm font-medium text-gray-800">{item.title}</h3>
-        </div>
-      ))}
+    <div className="flex overflow-x-auto sm:grid sm:grid-cols-4 gap-2 text-center">
+  {icons.map((item, index) => (
+    <div
+      key={index}
+      className="flex-shrink-0 flex flex-col items-center w-16 sm:w-24"
+    >
+      <img
+        src={item.img}
+        alt={item.title}
+        className="w-10 h-10 sm:w-12 sm:h-12 mb-1 sm:mb-2"
+      />
+      <h3 className="text-xs sm:text-sm text-gray-800">
+        {item.title}
+      </h3>
     </div>
+  ))}
+</div>
+
+
  
 
 
@@ -533,8 +544,8 @@ if (prescriptionFile) {
           {[
             { key: "description", label: "description" },
             { key: "key_ingredients", label: "key ingredients" },
-            { key: "how_to_use", label: "Dosage" },
-            { key: "safety_precaution", label: "dietary & lifestyle advice" },
+            { key: "dosage", label: "Dosage" },
+            { key: "dieatary", label: "dietary & lifestyle advice" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -558,12 +569,12 @@ if (prescriptionFile) {
           {activeTab === "key_benefits" && (
             <p>{product.key_benefits || "No key benefits provided."}</p>
           )}
-          {activeTab === "how_to_use" && (
-            <p>{product.how_to_use || "Usage information not available."}</p>
+          {activeTab === "dosage" && (
+            <p>{product.dosage || "Usage information not available."}</p>
           )}
           {activeTab === "safety_precaution" && (
             <p>
-              {product.safety_precaution || "No safety or precaution info."}
+              {product.dietary || "No safety or precaution info."}
             </p>
           )}
           {activeTab === "key_ingredients" && (
@@ -576,7 +587,7 @@ if (prescriptionFile) {
           {[
             { label: "Description", content: product.description },
             { label: "Key Ingredients", content: product.key_ingredients },
-            { label: "Dosage", content: product.how_to_use },
+            { label: "Dosage", content: product.dosage },
             {
               label: "Dietary & Lifestyle Advice",
               content: product.dietary,
@@ -593,7 +604,7 @@ if (prescriptionFile) {
 
     {/* ----------  */}
            {similarProducts.length > 0 && (
-  <div className="mt-10 px-4 sm:px-6">
+  <div className="mt-10 sm:px-6">
     <div className="flex justify-between items-center mb-4 gap-2">
       <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">Similar Products</h1>
       <Link
@@ -637,7 +648,7 @@ if (prescriptionFile) {
         {/* ---------------  */}
 
         {/* ----------  */}
-            <div className="mt-8 px-4 sm:px-6">
+            <div className="mt-8 sm:px-6">
         <div className="flex justify-between items-center mb-4 gap-2">
           <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-black">People Preferred Products</h1>
           <Link
