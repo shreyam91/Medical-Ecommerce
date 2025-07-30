@@ -2,44 +2,109 @@ import React, { useState } from 'react';
 
 const faqs = [
   {
+    question: 'What is HerbalMG?',
+    answer:
+      'HerbalMG is an online platform that sells Ayurvedic and herbal products from trusted companies. We aim to make quality herbal medicines easily accessible to everyone.',
+  },
+  {
+    question: 'Do you manufacture the products?',
+    answer:
+      'No. We only list and sell products manufactured by certified and reputed Ayurvedic and herbal brands.',
+  },
+  {
+    question: 'Are the products original and sealed?',
+    answer:
+      'Yes, all products sold on HerbalMG are original, directly sourced from brands, and company-sealed.',
+  },
+  {
+    question: 'How can I place an order?',
+    answer:
+      'Simply browse the product, add it to your cart, and proceed to checkout. Fill in your shipping details and complete the payment.',
+  },
+  {
     question: 'What payment methods do you accept?',
     answer:
-      'We accept all major credit cards, UPI, and other popular payment gateways. Cash on Delivery (COD) is currently available only for customers in Jaipur.',
+      'We accept UPI, credit/debit cards, net banking, and wallets.',
   },
   {
-    question: 'How long does shipping take?',
+    question: 'Do you offer Cash on Delivery (COD)?',
     answer:
-      'Shipping typically takes 5–7 business days, depending on your location. You will receive tracking information once your order is dispatched.',
+      'Currently, we do not offer COD across India. However, Cash on Delivery is available for selected areas within Jaipur city. We are working to expand COD service to more locations in the future.',
   },
   {
-    question: 'Can I return a product if I am not satisfied?',
+    question: 'How long does delivery take?',
     answer:
-      'Yes, you can request a refund or exchange within 30 days of purchase. Please visit our Return Policy page for detailed information and instructions.',
+      'Delivery usually takes 3–7 working days depending on your location and courier availability.',
   },
   {
-    question: 'Do you offer international shipping?',
+    question: 'How will I know if my order is confirmed?',
     answer:
-      'Currently, we ship only within the country. We are working on expanding our shipping options to include international deliveries in the near future.',
+      'You will receive an order confirmation via email or SMS after successful payment.',
   },
   {
-    question: 'Are the medicines sold on your website genuine and safe?',
+    question: 'Can I track my order?',
     answer:
-      'Absolutely. We source all our medicines directly from licensed manufacturers and authorized distributors to ensure quality, safety, and authenticity.',
+      'Yes. Once your order is shipped, you will receive a tracking link via SMS or email.',
   },
   {
-    question: 'Do I need a prescription to order medicines?',
+    question: 'What should I do if I receive a damaged product?',
     answer:
-      'For prescription medicines, a valid prescription from a registered medical practitioner is required at the time of order. Over-the-counter products can be purchased without a prescription.',
+      'Please contact us within 24 hours of delivery with photos/videos. If verified, we will process a refund or replacement.',
   },
   {
-    question: 'How is my personal and medical information protected?',
+    question: 'What if I receive the wrong product?',
     answer:
-      'We take your privacy seriously and use advanced encryption and security measures to protect your personal and medical information. For more details, please refer to our Privacy Policy.',
+      'If you receive a product different from what you ordered, contact us within 24 hours and we’ll assist you with a refund or exchange.',
   },
   {
-    question: 'Can I consult a pharmacist or medical expert through your site?',
+    question: 'Do you accept returns?',
     answer:
-      'Currently, we do not provide direct medical consultations. We recommend consulting your healthcare provider for personalized medical advice.',
+      'We do not accept returns unless the product is damaged, defective, or wrong. We follow a strict return policy due to product sensitivity.',
+  },
+  {
+    question: 'Is refund possible?',
+    answer:
+      `Refund is applicable only if the product is:
+	•	Damaged on arrival
+	•	Wrong product received
+	•	Has a clear manufacturing defect`,
+  },
+  {
+    question: 'How do I request a refund?',
+    answer:
+      'Email or WhatsApp us with your order ID and photos. If approved, refund will be processed within 7 working days.',
+  },
+  {
+    question: 'What if the product has a manufacturer defect?',
+    answer:
+      'In case of a manufacturing defect (e.g. leakage, broken seal), report to us within 24 hours of delivery. We will verify and process a refund.',
+  },
+  {
+    question: 'Can I cancel my order after placing it?',
+    answer:
+      'Orders once placed cannot be cancelled by the customer unless the product is unavailable or undelivered.',
+  },
+  {
+    question: 'Is doctor’s prescription required?',
+    answer:
+      'Most herbal products do not need a prescription. For classical or strong formulations, consult an Ayurvedic expert.',
+  },
+  {
+    question: 'Are your products safe to use?',
+    answer:
+      'We sell only approved and licensed products. However, we recommend checking the label and consulting a healthcare provider if unsure.',
+  },
+  {
+    question: 'How do I contact HerbalMG customer care?',
+    answer:
+      `You can reach us at: 
+📧 [Your Email]
+📞 [Your WhatsApp or Phone Number]`,
+  },
+  {
+    question: 'Is my personal data safe on your website?',
+    answer:
+      'Yes. We follow strict data protection policies. Your personal details are never shared with third parties without your consent.',
   },
 ];
 
@@ -51,7 +116,7 @@ const FAQ = () => {
   };
 
   return (
-    <div className="min-h-screen px-4 py-10 sm:px-8 lg:px-24 max-w-4xl mx-auto">
+    <div className="min-h-screen max-w-4xl mx-auto">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-3xl sm:text-4xl font-bold text-green-600">Frequently Asked Questions</h1>

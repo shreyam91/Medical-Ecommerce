@@ -95,13 +95,33 @@ const About = () => {
     <div className="min-h-screen">
       {/* Top Section */}
       <div className=" text-black text-center">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-700">Welcome to HerbalMG</h1>
-        <p className="text-base sm:text-lg md:text-xl mt-2 text-orange-500">Your trusted source for natural wellness</p>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-700">ABOUT US</h1>
+        <p className="text-base sm:text-lg md:text-xl mt-2 text-orange-500">Welcome to HerbalMG, India’s trusted platform for Ayurvedic and herbal medicines from top companies.</p>
       </div>
 
+      <div className="gap-8 px-6 max-w-6xl  mt-2 mx-auto">
+        
+          <p className="text-gray-800 leading-relaxed mt-2 ">
+            At HerbalMG, we don’t make our own products — we bring together a wide range of authentic medicines from reputed Ayurvedic and herbal brands, all in one place. Our goal is simple: to make quality herbal medicines easily available to every person, no matter where they are.
+          </p>
+
+          <p className="text-gray-800 leading-relaxed mt-2 ">
+            We carefully list only trusted company products, ensuring quality, originality, and customer confidence. Whether you’re searching for daily wellness, traditional remedies, or specialized herbal solutions, you’ll find them all here — verified, accessible, and affordable.
+          </p>
+
+          <p className="text-gray-800 leading-relaxed mt-2">
+            Our mission is to connect people with genuine Ayurvedic care and make herbal health simple and reliable for all.
+          </p>
+
+          <p className="text-gray-500 leading-relaxed mt-2 font-semibold">
+            We don’t create products — we deliver trust.
+          </p>
+
+
+        </div>
+
       {/* Two Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-6 max-w-6xl  mt-2 mx-auto">
-        {/* Left Column */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-6 max-w-6xl  mt-2 mx-auto">
         <div>
           <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-green-600 mb-2 ">
             ABOUT US
@@ -132,7 +152,6 @@ const About = () => {
         </div>
         
 
-        {/* Right Column */}
         <div>
           <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-green-600 mb-2">
             Our MISSION
@@ -164,7 +183,7 @@ const About = () => {
             life.
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
