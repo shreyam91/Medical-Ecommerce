@@ -6,7 +6,6 @@ import ProductDetail from '../pages/ProductDetail'
 import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
 import Login from '../pages/Login/Login'
-import Register from '../pages/Register/Register'
 import OrderSuccess from '../pages/OrderSuccess'
 import OrderHistory from '../pages/OrderHistory'
 import About from '../pages/About';
@@ -57,7 +56,6 @@ const AppRoutes = () => {
 
       <Route path="/cart" element={<Cart />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/order-success" element={<OrderSuccess />} />
       <Route path="/order-history" element={<OrderHistory />} />
