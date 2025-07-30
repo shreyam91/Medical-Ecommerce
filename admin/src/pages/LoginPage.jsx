@@ -23,7 +23,7 @@ export default function LoginPage({ onLogin }) {
       }
       const data = await res.json();
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify({ ...data.user, token: data.token }));
       if (onLogin) onLogin();
       navigate('/dashboard');
     } catch (err) {

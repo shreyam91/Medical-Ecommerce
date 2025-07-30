@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 const Sidebar = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const links = [
-    { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'limited_admin'] },
+    { label: 'Dashboard', path: '/dashboard', roles: ['admin'] },
     { label: 'Inventory', path: '/inventory', roles: ['admin','limited_admin'] },
     { label: 'Management', path: '/management', roles: ['admin', 'limited_admin'] },
     { label: 'Product Management', path: '/product-management', roles: ['admin', 'limited_admin'] },
