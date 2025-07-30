@@ -16,6 +16,8 @@ const PORT = 3001;
 app.use(express.json());
 
 app.use(cors());
+const authRoutes = require('./routes/authUser');
+app.use('/api/auth', authRoutes);
 app.use('/api', uploadRoutes);
 // app.use('/api', locationRoutes);
 app.use('/api/blog', require('./routes/blog'));

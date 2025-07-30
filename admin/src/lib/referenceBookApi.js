@@ -14,7 +14,7 @@ const getAuthHeaders = () => {
 // Get all reference books
 export const getReferenceBooks = async () => {
   try {
-    const response = await fetch(`${API_BASE}/reference-book`);
+    const response = await fetch(`${API_BASE}/reference_book`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch reference books: ${response.statusText}`);
