@@ -3,15 +3,24 @@ import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
 // GST rates for different categories
-const GST_RATES = {
-  'Life Saving Drugs': 0.05, // 5%
-  'General Medicine': 0.12,  // 12%
-  'Medical Equipment': 0.18, // 18%
-  'Ayurvedic': 0.12,        // 12% for Ayurvedic
-  'Homeopathic': 0.12       // 12% for Homeopathic
-};
+// const GST_RATES = {
+//   'Life Saving Drugs': 0.05, // 5%
+//   'General Medicine': 0.12,  // 12%
+//   'Medical Equipment': 0.18, // 18%
+//   'Ayurvedic': 0.12,        // 12% for Ayurvedic
+//   'Homeopathic': 0.12       // 12% for Homeopathic
+// };
 
-const SHIPPING_COST = 49;
+function getShippingCost(total) {
+  if (total < 499) {
+    return 79;
+  } else if (total >= 499 && total <= 999) {
+    return 49;
+  } else {
+    return 0;
+  }
+}
+
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -49,7 +58,7 @@ export default function CheckoutPage() {
 
   const handlePincodeChange = async (e) => {
     const pincode = e.target.value;
-    setForm(prev => ({ ...prev, zip: pincode }));
+    setForm(prev => ({ ...prev, pincode }));
 
     if (pincode.length === 6) {
       try {
@@ -100,12 +109,14 @@ export default function CheckoutPage() {
     return subtotal - subtotal * appliedPromo.discount;
   };
 
-  const getFinalTotal = () => {
-    const subtotal = getDiscountedSubtotal();
-    // const gst = getGSTAmount();
-    // return subtotal + gst + SHIPPING_COST;
-    return subtotal + SHIPPING_COST;
-  };
+  const subtotal = getDiscountedSubtotal();
+const shippingCost = getShippingCost(subtotal);
+const getFinalTotal = () => {
+  return subtotal + shippingCost;
+};
+
+  // return subtotal + shippingCost; // + gst if needed
+
 
   const isFormValid =
     form.name &&
@@ -223,7 +234,7 @@ export default function CheckoutPage() {
                 type="text"
                 placeholder="Area"
                 value={form.area}
-                onChange={handlePincodeChange}
+                onChange={handleInput}
                 className="w-full border p-2 rounded"
                 required
               />
@@ -249,7 +260,7 @@ export default function CheckoutPage() {
                 onChange={handlePincodeChange}
                 className="w-full border p-2 rounded"
                 required
-                maxLength={6}
+                // maxLength={6}
               />
               {pincodeData && (
                 <p className="text-sm text-green-600 mt-1">
@@ -332,9 +343,10 @@ export default function CheckoutPage() {
               </div> */}
 
               <div className="flex justify-between text-gray-600">
-                <span>Shipping Cost:</span>
-                <span>₹{SHIPPING_COST.toFixed(2)}</span>
-              </div>
+  <span>Shipping Cost:</span>
+  <span>₹{shippingCost.toFixed(2)}</span>
+</div>
+
 
               <div className="flex justify-between text-base sm:text-lg font-bold pt-2 border-t">
                 <span>Total</span>
