@@ -66,35 +66,79 @@ const BrandProducts = () => {
   const fetchBrandInfo = async () => {
     try {
       const brandId = extractIdFromSlug(brandSlug);
+      console.log('Fetching brand info for:', { brandSlug, brandId });
       
       if (brandId) {
         // Try to fetch by ID first
+        console.log('Fetching brand by ID:', brandId);
         const response = await fetch(`http://localhost:3001/api/brand/${brandId}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('Brand data fetched by ID:', data);
           setBrand(data);
           return;
+        } else {
+          console.log('Failed to fetch brand by ID, status:', response.status);
         }
       }
       
       // Try to fetch by slug
+      console.log('Fetching brand by slug:', brandSlug);
       const slugResponse = await fetch(`http://localhost:3001/api/brand/slug/${brandSlug}`);
       if (slugResponse.ok) {
         const data = await slugResponse.json();
+        console.log('Brand data fetched by slug:', data);
         setBrand(data);
       } else {
-        // Create a mock brand object from slug
-        setBrand({
-          name: slugToText(brandSlug),
-          slug: brandSlug
-        });
+        console.log('Failed to fetch brand by slug, status:', slugResponse.status);
+        
+        // Fallback: fetch all brands and find matching one
+        try {
+          console.log('Trying fallback: fetching all brands');
+          const allBrandsResponse = await fetch('http://localhost:3001/api/brand');
+          if (allBrandsResponse.ok) {
+            const allBrands = await allBrandsResponse.json();
+            console.log('All brands fetched:', allBrands.length);
+            
+            // Try to find brand by name match
+            const brandName = slugToText(brandSlug);
+            const matchingBrand = allBrands.find(b => 
+              b.name.toLowerCase() === brandName.toLowerCase() ||
+              b.name.toLowerCase().includes(brandName.toLowerCase())
+            );
+            
+            if (matchingBrand) {
+              console.log('Found matching brand:', matchingBrand);
+              setBrand(matchingBrand);
+            } else {
+              console.log('No matching brand found, using mock');
+              setBrand({
+                name: brandName,
+                slug: brandSlug
+              });
+            }
+          } else {
+            throw new Error('Failed to fetch all brands');
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback failed:', fallbackErr);
+          // Create a mock brand object from slug
+          const mockBrand = {
+            name: slugToText(brandSlug),
+            slug: brandSlug
+          };
+          console.log('Using mock brand:', mockBrand);
+          setBrand(mockBrand);
+        }
       }
     } catch (err) {
       console.error('Error fetching brand info:', err);
-      setBrand({
+      const fallbackBrand = {
         name: slugToText(brandSlug),
         slug: brandSlug
-      });
+      };
+      console.log('Using fallback brand:', fallbackBrand);
+      setBrand(fallbackBrand);
     }
   };
 
@@ -154,20 +198,33 @@ const BrandProducts = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto">
+      {/* Debug brand data */}
+      {console.log('Current brand state:', brand)}
+      {console.log('Banner URL:', brand?.banner_url)}
+      
       {brand?.banner_url && (
-  <div className="mb-6">
-    <img
-      src={brand.banner_url}
-      alt={`${brand.name} banner`}
-      className="w-full h-48 sm:h-64 md:h-72 object-cover rounded-md shadow"
-    />
-  </div>
-)}
+        <div className="mb-4">
+          <img
+            src={brand.banner_url}
+            alt={`${brand.name} banner`}
+            className="w-full h-34 sm:h-48 md:h-48 object-cover rounded-md shadow"
+            onLoad={() => console.log('Banner image loaded successfully')}
+            onError={(e) => console.error('Banner image failed to load:', e.target.src)}
+          />
+        </div>
+      )}
+      
+      {/* Show banner URL for debugging */}
+      {brand && !brand.banner_url && (
+        <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+          Debug: No banner_url found for brand "{brand.name}". Brand data: {JSON.stringify(brand)}
+        </div>
+      )}
       {/* <Breadcrumb items={breadcrumbItems} /> */}
       
       <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-800 mb-2">
           {getBrandTitle()} Products
         </h1>
         <p className="text-gray-600">
@@ -194,19 +251,20 @@ const BrandProducts = () => {
 
       {/* Products Grid */}
       {sortedProducts.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-          {sortedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-500 text-lg mb-4">No products found for {getBrandTitle()}</div>
-          <p className="text-gray-400 mb-6">
-            This brand doesn't have any products available at the moment.
-          </p>
-        </div>
-      )}
+  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-6">
+    {sortedProducts.map((product) => (
+      <ProductCard key={product.id} product={product} />
+    ))}
+  </div>
+) : (
+  <div className="text-center py-12">
+    <div className="text-gray-500 text-lg mb-4">No products found for {getBrandTitle()}</div>
+    <p className="text-gray-400 mb-6">
+      This brand doesn't have any products available at the moment.
+    </p>
+  </div>
+)}
+
     </div>
   );
 };

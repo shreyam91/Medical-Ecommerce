@@ -42,11 +42,31 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Get brand by slug
+// Get brand by slug (convert slug to name for lookup)
 router.get('/slug/:slug', async (req, res) => {
   try {
-    const [brand] = await sql`SELECT * FROM brand WHERE slug = ${req.params.slug}`;
-    if (!brand) return res.status(404).json({ error: 'Not found' });
+    const slug = req.params.slug;
+    // Convert slug to name by replacing hyphens with spaces and capitalizing
+    const brandName = slug.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+    
+    console.log('Looking for brand by slug:', slug, 'converted to name:', brandName);
+    
+    // Try exact match first
+    let [brand] = await sql`SELECT * FROM brand WHERE LOWER(name) = LOWER(${brandName})`;
+    
+    // If not found, try partial match
+    if (!brand) {
+      [brand] = await sql`SELECT * FROM brand WHERE LOWER(name) LIKE LOWER(${'%' + brandName + '%'})`;
+    }
+    
+    if (!brand) {
+      console.log('Brand not found for slug:', slug);
+      return res.status(404).json({ error: 'Brand not found' });
+    }
+    
+    console.log('Found brand:', brand);
     res.json(brand);
   } catch (err) {
     res.status(500).json({ error: err.message });
