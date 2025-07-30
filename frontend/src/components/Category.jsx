@@ -140,7 +140,7 @@ export default function Category() {
               <Link
   to={link}
   key={id}
-  className="group flex items-center p-[2px] rounded-md transition-all duration-300 bg-gradient-to-br from-gray-200 to-white hover:from-green-400 hover:to-orange-500"
+  className="group flex items-center p-[2px] rounded-md "
 >
   <div className="flex items-center bg-white rounded-md shadow-md p-2 w-full group-hover:shadow-lg transition duration-300">
     <img

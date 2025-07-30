@@ -231,11 +231,11 @@ function CategoryPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <Breadcrumb items={breadcrumbItems} />
+    <div className="container mx-auto">
+      {/* <Breadcrumb items={breadcrumbItems} /> */}
       
       <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-700 mb-2">
           {getCategoryTitle()}
         </h1>
         <p className="text-gray-600">
