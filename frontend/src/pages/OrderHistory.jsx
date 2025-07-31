@@ -1,66 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { getCustomerOrders, updateOrderStatus } from '../services/orderService';
 
 // Sample order data
-const initialOrders = [
-  {
-    id: 'ORD-20250721-ABC123',
-    date: '2025-07-26',
-    status: 'Delivered',
-    total: '₹89.99',
-   items: [
-  { name: 'T-shirt', price: '₹40.00' },
-  { name: 'Sneakers', price: '₹49.99' },
-]
-,
-  },
-  {
-    id: 'ORD-20250715-XYZ789',
-    date: '2025-07-15',
-    status: 'Shipped',
-    total: '₹49.50',
-   items: [
-  { name: 'T-shirt', price: '₹40.00' },
-  { name: 'Sneakers', price: '₹49.99' },
-]
+// const initialOrders = [
+//   {
+//     id: 'ORD-20250721-ABC123',
+//     date: '2025-07-26',
+//     status: 'Delivered',
+//     total: '₹89.99',
+//    items: [
+//   { name: 'T-shirt', price: '₹40.00' },
+//   { name: 'Sneakers', price: '₹49.99' },
+// ]
+// ,
+//   },
+//   {
+//     id: 'ORD-20250715-XYZ789',
+//     date: '2025-07-15',
+//     status: 'Shipped',
+//     total: '₹49.50',
+//    items: [
+//   { name: 'T-shirt', price: '₹40.00' },
+//   { name: 'Sneakers', price: '₹49.99' },
+// ]
 
-  },
-  {
-    id: 'ORD-20250710-QWE456',
-    date: '2025-07-10',
-    status: 'Processing',
-    total: '₹120.00',
-    items: [
-  { name: 'T-shirt', price: '₹40.00' },
-  { name: 'Sneakers', price: '₹49.99' },
-]
+//   },
+//   {
+//     id: 'ORD-20250710-QWE456',
+//     date: '2025-07-10',
+//     status: 'Processing',
+//     total: '₹120.00',
+//     items: [
+//   { name: 'T-shirt', price: '₹40.00' },
+//   { name: 'Sneakers', price: '₹49.99' },
+// ]
 
-  },
-  {
-    id: 'ORD-20250710-QWE467',
-    date: '2025-07-10',
-    status: 'Returned',
-    total: '₹120.00',
-    items: [
-  { name: 'T-shirt', price: '₹40.00' },
-  { name: 'Sneakers', price: '₹49.99' },
-]
+//   },
+//   {
+//     id: 'ORD-20250710-QWE467',
+//     date: '2025-07-10',
+//     status: 'Returned',
+//     total: '₹120.00',
+//     items: [
+//   { name: 'T-shirt', price: '₹40.00' },
+//   { name: 'Sneakers', price: '₹49.99' },
+// ]
 
-  },
-  {
-    id: 'ORD-20250710-QWE434',
-    date: '2025-07-10',
-    status: 'Cancelled',
-    total: '₹120.00',
-   items: [
-  { name: 'T-shirt', price: '₹40.00' },
-  { name: 'Sneakers', price: '₹49.99' },
-]
+//   },
+//   {
+//     id: 'ORD-20250710-QWE434',
+//     date: '2025-07-10',
+//     status: 'Cancelled',
+//     total: '₹120.00',
+//    items: [
+//   { name: 'T-shirt', price: '₹40.00' },
+//   { name: 'Sneakers', price: '₹49.99' },
+// ]
 
-  },
-];
+//   },
+// ];
 
-const statuses = ['All', 'Delivered', 'Shipped', 'Processing', 'Replacement', 'Cancelled'];
+const statuses = ['All', 'Delivered', 'Shipped', 'Ordered', 'Replacement', 'Cancelled'];
 
 const isReturnEligible = (deliveryDateStr) => {
   const deliveryDate = new Date(deliveryDateStr);
@@ -72,7 +73,8 @@ const isReturnEligible = (deliveryDateStr) => {
 };
 
 const OrderHistory = () => {
-  const [orders, setOrders] = useState(initialOrders);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('All');
 
@@ -83,6 +85,43 @@ const OrderHistory = () => {
   const [replacementIssues, setReplacementIssues] = useState([]);
   const [replacementReason, setReplacementReason] = useState('');
   const [replacementImage, setReplacementImage] = useState(null);
+
+  // Load orders on component mount
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      // For now, we'll use a demo customer ID. In a real app, this would come from auth context
+      const customerId = localStorage.getItem('customerId') || '1';
+      const fetchedOrders = await getCustomerOrders(customerId);
+      
+      // Transform backend orders to match frontend format
+      const transformedOrders = fetchedOrders.map(order => ({
+        id: order.id,
+        date: new Date(order.order_date).toISOString().split('T')[0],
+        status: order.status,
+        total: `₹${order.total_amount}`,
+        items: order.items?.length > 0 
+          ? order.items.map(item => ({
+              name: item.product_name || 'Product',
+              price: `₹${item.price}`
+            }))
+          : [{ name: 'Order items', price: `₹${order.total_amount}` }]
+      }));
+      
+      setOrders(transformedOrders);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      // Fallback to dummy data if API fails
+      setOrders(initialOrders);
+      toast.error('Failed to load orders. Showing sample data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredOrders =
     statusFilter === 'All'
@@ -108,7 +147,7 @@ const OrderHistory = () => {
     setModalAction(null);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (modalAction === 'replacement') {
       if (replacementIssues.length === 0 || !replacementReason.trim() || !replacementImage) {
         toast.error('Please fill in all fields and upload an image.');
@@ -116,22 +155,41 @@ const OrderHistory = () => {
       }
     }
 
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === modalOrder.id
-          ? { ...order, status: modalAction === 'cancel' ? 'Cancelled' : 'Replacement' }
-          : order
-      )
-    );
+    try {
+      const newStatus = modalAction === 'cancel' ? 'Cancelled' : 'Replacement';
+      await updateOrderStatus(modalOrder.id, newStatus);
+      
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === modalOrder.id
+            ? { ...order, status: newStatus }
+            : order
+        )
+      );
 
-    toast.success(
-      `${modalAction === 'cancel' ? 'Cancel' : 'Replacement'} request submitted.`
-    );
+      toast.success(
+        `${modalAction === 'cancel' ? 'Cancel' : 'Replacement'} request submitted.`
+      );
+    } catch (error) {
+      console.error('Error updating order:', error);
+      toast.error('Failed to update order. Please try again.');
+    }
 
     setModalOpen(false);
     setModalOrder(null);
     setModalAction(null);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-4 sm:p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your orders...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 sm:p-6">
@@ -194,7 +252,7 @@ const OrderHistory = () => {
               </td>
               <td className="py-3 px-4">{order.total}</td>
               <td className="py-3 px-4 flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-                {order.status === 'Processing' && (
+                {order.status === 'Ordered' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
