@@ -24,10 +24,21 @@ function safe(val) {
 // Get all products, optionally filter by brandId, category, and special flags
 router.get('/', async (req, res) => {
   try {
-    const { brandId, category, seasonal_medicine, frequently_bought, top_products, people_preferred } = req.query;
+    const { brandId, category, seasonal_medicine, frequently_bought, top_products, people_preferred, search } = req.query;
     
     // Build the query using sql template literals for proper SQL injection protection
     let query = sql`SELECT * FROM product WHERE 1=1`;
+    
+    if (search) {
+      const searchTerm = `%${search.toLowerCase()}%`;
+      query = sql`${query} AND (
+        LOWER(name) LIKE ${searchTerm} OR 
+        LOWER(key) LIKE ${searchTerm} OR 
+        LOWER(key_ingredients) LIKE ${searchTerm} OR 
+        LOWER(description) LIKE ${searchTerm} OR
+        LOWER(strength) LIKE ${searchTerm}
+      )`;
+    }
     
     if (brandId) {
       query = sql`${query} AND brand_id = ${brandId}`;

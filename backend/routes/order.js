@@ -207,7 +207,7 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// 📦 Get All Orders
+// 📦 Get All Orders (Admin only)
 router.get('/', auth, requireAdmin, async (req, res) => {
   try {
     const orders = await sql`
@@ -224,6 +224,36 @@ router.get('/', auth, requireAdmin, async (req, res) => {
   }
 });
 
+// 📦 Get Customer Orders (Customer can access their own orders)
+router.get('/customer/:customerId', async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    const orders = await sql`
+      SELECT o.*, c.name AS customer_name
+      FROM "order" o
+      LEFT JOIN customer c ON o.customer_id = c.id
+      WHERE o.customer_id = ${customerId}
+      ORDER BY o.order_date DESC
+    `;
+
+    // Get order items for each order
+    for (let order of orders) {
+      const items = await sql`
+        SELECT oi.*, p.name as product_name
+        FROM order_item oi
+        LEFT JOIN product p ON oi.product_id = p.id
+        WHERE oi.order_id = ${order.id}
+      `;
+      order.items = items;
+    }
+
+    res.json(orders);
+  } catch (err) {
+    console.error('Customer orders API error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 📦 Get Order by ID
 router.get('/:id', auth, requireAdmin, async (req, res) => {
   try {
@@ -235,20 +265,88 @@ router.get('/:id', auth, requireAdmin, async (req, res) => {
   }
 });
 
-// 🆕 Create Order
-router.post('/', auth, requireAdmin, async (req, res) => {
-  const { customer_id, status, total_amount, payment_id, address, notes } = req.body;
+// Function to generate formatted order ID for display
+function generateOrderId(orderId, orderDate) {
+  const date = new Date(orderDate);
+  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+  // Use first 8 characters of UUID for uniqueness
+  const uuidShort = orderId.replace(/-/g, '').substring(0, 8).toUpperCase();
+  return `ORD-${dateStr}-${uuidShort}`;
+}
+
+// 🆕 Create Order (Public endpoint for checkout)
+router.post('/', async (req, res) => {
+  const { customer_id, status = 'Ordered', total_amount, address, notes, items } = req.body;
   try {
-    const order_uuid = uuidv4();
+    // Generate UUID for the order
+    const orderId = uuidv4();
+    
     const [order] = await sql`
-      INSERT INTO "order" (id, customer_id, status, total_amount, payment_id, address, notes)
-      VALUES (${order_uuid}, ${customer_id}, ${status}, ${total_amount}, ${payment_id}, ${address}, ${notes})
+      INSERT INTO "order" (id, customer_id, status, total_amount, address, notes)
+      VALUES (${orderId}, ${customer_id}, ${status}, ${total_amount}, ${address}, ${notes})
       RETURNING *`;
 
-    await appendOrderToSheet(order);
+    // Insert order items if provided
+    if (items && items.length > 0) {
+      for (const item of items) {
+        await sql`
+          INSERT INTO order_item (order_id, product_id, quantity, price)
+          VALUES (${order.id}, ${item.product_id}, ${item.quantity}, ${item.price})
+        `;
+      }
+    }
 
-    res.status(201).json(order);
+    // Get the complete order with items and product names for response
+    const orderWithItems = await sql`
+      SELECT o.*, c.name AS customer_name
+      FROM "order" o
+      LEFT JOIN customer c ON o.customer_id = c.id
+      WHERE o.id = ${order.id}
+    `;
+
+    if (items && items.length > 0) {
+      const orderItems = await sql`
+        SELECT oi.*, p.name as product_name
+        FROM order_item oi
+        LEFT JOIN product p ON oi.product_id = p.id
+        WHERE oi.order_id = ${order.id}
+      `;
+      orderWithItems[0].items = orderItems;
+    }
+
+    // Generate formatted order ID for display
+    const formattedOrderId = generateOrderId(order.id, order.order_date);
+    const finalOrder = orderWithItems[0] || order;
+    finalOrder.formatted_order_id = formattedOrderId;
+
+    // await appendOrderToSheet(order); // Temporarily disabled
+
+    res.status(201).json(finalOrder);
   } catch (err) {
+    console.error('Create order error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 📊 Update Order Status (Public endpoint for status updates)
+router.patch('/:id/status', async (req, res) => {
+  const { status } = req.body;
+  try {
+    const [order] = await sql`
+      UPDATE "order" 
+      SET status=${status}, updated_at=NOW()
+      WHERE id=${req.params.id} RETURNING *`;
+
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    const rowIndex = await findOrderRowIndex(order.id);
+    if (rowIndex > 0) {
+      await updateOrderInSheet(order, rowIndex);
+    }
+
+    res.json(order);
+  } catch (err) {
+    console.error('Update order status error:', err);
     res.status(500).json({ error: err.message });
   }
 });

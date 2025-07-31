@@ -216,6 +216,41 @@ router.get('/:id', auth, requireAdmin, async (req, res) => {
   }
 });
 
+// Get customer by email (Public endpoint for checkout)
+router.get('/email/:email', async (req, res) => {
+  try {
+    const [customer] = await sql`SELECT * FROM customer WHERE email = ${req.params.email}`;
+    if (!customer) return res.status(404).json({ error: 'Customer not found' });
+    res.json(customer);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create customer (Public endpoint for checkout)
+router.post('/public', async (req, res) => {
+  const { name, email, mobile, address, active = true } = req.body;
+  try {
+    const [customer] = await sql`
+      INSERT INTO customer (name, email, mobile, address, active)
+      VALUES (${name}, ${email}, ${mobile}, ${address}, ${active})
+      RETURNING *`;
+    const date = (customer.created_at || new Date()).toISOString().slice(0,10).replace(/-/g,'');
+    const namePart = (customer.name || '').toUpperCase().replace(/[^A-Z]/g, '').padEnd(3, 'X').slice(0,3);
+    const idPart = String(customer.id).padStart(2, '0');
+    const customId = `CUST-${date}-${namePart}${idPart}`;
+    await sql`UPDATE customer SET customer_id = ${customId} WHERE id = ${customer.id}`;
+    customer.customer_id = customId;
+
+    // await appendCustomerToSheet(customer); // Temporarily disabled
+
+    res.status(201).json(customer);
+  } catch (err) {
+    console.error('Customer creation error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/', auth, requireAdmin, async (req, res) => {
   const { name, email, mobile, address, active } = req.body;
   try {
