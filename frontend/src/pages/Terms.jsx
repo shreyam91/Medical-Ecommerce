@@ -70,7 +70,7 @@ const Terms = () => {
         </section>
         
         <section>
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">6. PRIVACY POLICY</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">7. PRIVACY POLICY</h2>
           <li>
             We value your privacy. All customer data is kept confidential and is not shared with third parties without consent.
           </li>
@@ -78,7 +78,7 @@ const Terms = () => {
         </section>
         
         <section>
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">6. MODIFICATIONS</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">8. MODIFICATIONS</h2>
           <li>
             HerbalMG reserves the right to update or change these Terms & Conditions at any time. Continued use of the website after changes implies acceptance of the updated terms.
           </li>

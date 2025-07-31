@@ -36,7 +36,7 @@ Our service is rooted in authenticity, accessibility, and care.
             <a href="#" target="_blank" aria-label="Facebook">
               <FaFacebookF className="text-[#1877F2] hover:text-black transition" />
             </a>
-            <a href="#" target="_blank" aria-label="Instagram">
+            <a href="https://www.instagram.com/herbal.mg?igsh=OHd6a29zZGswbzZ3" target="_blank" aria-label="Instagram">
               <FaInstagram className="text-[#E4405F] hover:text-black transition" />
             </a>
             <a href="#" target="_blank" aria-label="YouTube">
