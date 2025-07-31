@@ -30,7 +30,10 @@ app.use('/api/inventory', require('./routes/inventory')); // Add this line
 app.use('/api/banner', require('./routes/banner'));
 app.use('/api/book', require('./routes/book'));
 app.use('/api/brand', require('./routes/brand'));
-app.use('/api/order', require('./routes/order'));
+// Temporarily use mock routes for testing
+app.use('/api', require('./routes/mock-orders'));
+
+// app.use('/api/orders', require('./routes/order'));
 app.use('/api/login', require('./routes/login'));
 app.use('/api/reference_book', require('./routes/reference_book'));
 app.use('/api/disease', require('./routes/disease'));
@@ -38,6 +41,8 @@ app.use('/api/main_category', require('./routes/main_category'));
 app.use('/api/sub_category', require('./routes/sub_category'));
 app.use('/api/customer', require('./routes/customer'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/product-request', require('./routes/product_request'));
+app.use('/api/search', require('./routes/search'));
 
 // Endpoint to fetch pincodes by city or pincode using a free public API
 app.use('/api', locationRoutes);

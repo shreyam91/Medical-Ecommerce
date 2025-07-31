@@ -4,12 +4,17 @@ import { getBrands } from '../lib/brandApi';
 import { getMainCategories } from '../lib/categoryApi';
 import { getDiseases } from '../lib/diseaseApi';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 
 const ProductList = ({ onEdit, onView }) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [brandSearch, setBrandSearch] = useState('');
+const [categorySearch, setCategorySearch] = useState('');
+
   
   // Filter options
   const [brands, setBrands] = useState([]);
@@ -226,42 +231,52 @@ const ProductList = ({ onEdit, onView }) => {
           </div>
 
           {/* Brand Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Brand
-            </label>
-            <select
-              value={filters.brandId}
-              onChange={(e) => handleFilterChange('brandId', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Brands</option>
-              {brands.map(brand => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+  <Select
+    options={brands.map(brand => ({
+      value: brand.id,
+      label: brand.name
+    }))}
+    value={filters.brandId ? {
+      value: filters.brandId,
+      label: brands.find(b => b.id === parseInt(filters.brandId))?.name
+    } : null}
+    onChange={(selectedOption) =>
+      handleFilterChange('brandId', selectedOption ? selectedOption.value.toString() : '')
+    }
+    isClearable
+    placeholder="Select brand..."
+    className="react-select-container"
+    classNamePrefix="react-select"
+  />
+</div>
+
+
 
           {/* Category Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category
-            </label>
-            <select
-              value={filters.categoryId}
-              onChange={(e) => handleFilterChange('categoryId', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Categories</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
+         <div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+  <Select
+    options={categories.map(category => ({
+      value: category.id,
+      label: category.name
+    }))}
+    value={filters.categoryId ? {
+      value: filters.categoryId,
+      label: categories.find(c => c.id === parseInt(filters.categoryId))?.name
+    } : null}
+    onChange={(selectedOption) =>
+      handleFilterChange('categoryId', selectedOption ? selectedOption.value.toString() : '')
+    }
+    isClearable
+    placeholder="Select category..."
+    className="react-select-container"
+    classNamePrefix="react-select"
+  />
+</div>
+
+
 
           {/* Medicine Type Filter */}
           <div>
@@ -405,7 +420,8 @@ const ProductList = ({ onEdit, onView }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.brand_name || 'N/A'}
+                    {brands.find(b => b.id === product.brand_id)?.name || 'N/A'}
+
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.medicine_type}

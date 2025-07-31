@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { getProducts, updateProduct } from '../lib/productApi';
 import { getBrands } from '../lib/brandApi';
+import Select from 'react-select';
+
 
 
 
@@ -37,6 +39,8 @@ const InventoryPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
+  const [categoryFilter, setCategoryFilter] = useState("All");
+
 
   useEffect(() => {
     // Fetch products and brands in parallel
@@ -103,10 +107,12 @@ const InventoryPage = () => {
   };
 
   const filteredProducts = products.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
-    const matchesBrand = brandFilter === "All" || item.brand === brandFilter;
-    return matchesSearch && matchesBrand;
-  });
+  const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+  const matchesBrand = brandFilter === "All" || item.brand === brandFilter;
+  const matchesCategory = categoryFilter === "All" || item.category === categoryFilter;
+  return matchesSearch && matchesBrand && matchesCategory;
+});
+
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     const { key, direction } = sortConfig;
@@ -141,24 +147,46 @@ const InventoryPage = () => {
           }}
         />
 
-        <div className="flex items-center gap-2">
-          <label className="text-sm">Brand:</label>
-          <select
-            className="border rounded px-2 py-1"
-            value={brandFilter}
-            onChange={(e) => {
-              setBrandFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="All">All</option>
-            {brands.map((brand) => (
-              <option key={brand.id} value={brand.name}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
-        </div>
+       <div className="flex flex-wrap items-center gap-4">
+  <div className="flex items-center gap-2">
+  <label className="text-sm">Brand:</label>
+  <div className="min-w-[200px]">
+    <Select
+      options={[
+        { value: "All", label: "All" },
+        ...brands.map((b) => ({ value: b.name, label: b.name })),
+      ]}
+      value={{ value: brandFilter, label: brandFilter }}
+      onChange={(selected) => {
+        setBrandFilter(selected?.value || "All");
+        setCurrentPage(1);
+      }}
+      isSearchable
+      className="react-select-container"
+      classNamePrefix="react-select"
+    />
+  </div>
+</div>
+
+
+  <div className="flex items-center gap-2">
+    <label className="text-sm">Category:</label>
+    <select
+      className="border rounded px-2 py-1"
+      value={categoryFilter}
+      onChange={(e) => {
+        setCategoryFilter(e.target.value);
+        setCurrentPage(1);
+      }}
+    >
+      <option value="All">All</option>
+      <option value="Unani">Unani</option>
+      <option value="Ayurvedic">Ayurvedic</option>
+      <option value="Homeopathic">Homeopathic</option>
+    </select>
+  </div>
+</div>
+
 
         <div className="flex items-center gap-2">
           <label className="text-sm">Items per page:</label>
