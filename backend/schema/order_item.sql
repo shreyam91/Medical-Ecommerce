@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS order_item (
     id SERIAL PRIMARY KEY,
-    order_id INTEGER REFERENCES "order"(id) ON DELETE CASCADE,
+    order_id UUID REFERENCES "order"(id) ON DELETE CASCADE,
     product_id INTEGER REFERENCES product(id) ON DELETE SET NULL,
     quantity INTEGER NOT NULL,
     price NUMERIC(10,2) NOT NULL,

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS payment (
     id SERIAL PRIMARY KEY,
-    order_id INTEGER REFERENCES "order"(id) ON DELETE CASCADE,
+    order_id UUID REFERENCES "order"(id) ON DELETE CASCADE,
     amount NUMERIC(10,2) NOT NULL,
     status VARCHAR(50) DEFAULT 'Paid',
     method VARCHAR(50),

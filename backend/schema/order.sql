@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "order" (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id INTEGER REFERENCES customer(id) ON DELETE SET NULL,
     order_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     status VARCHAR(50) DEFAULT 'Ordered',
