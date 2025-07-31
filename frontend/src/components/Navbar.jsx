@@ -15,9 +15,15 @@ import { NavigationMenuDemo } from "./ui/NavigationMenuDemo";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FaLocationDot } from "react-icons/fa6";
+import toast from 'react-hot-toast';
 import { FaHome } from "react-icons/fa";
+import searchAnalytics from "../utils/searchAnalytics";
+import NavbarSearch from "./NavbarSearch";
+import NavbarSearchMobile from "./NavbarSearchMobile";
 
 export default function NavbarMain() {
+
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cartItems } = useCart();
   const navigate = useNavigate();
@@ -36,53 +42,109 @@ export default function NavbarMain() {
   const [selectedPincode, setSelectedPincode] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchError, setSearchError] = useState("");
-  const [medicineSearch, setMedicineSearch] = useState("");
   const [isPincodeDropdownOpen, setIsPincodeDropdownOpen] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+
+
+
+
 
   const detectUserLocation = async () => {
     console.log("Manually triggering location detection...");
+    setLocationLoading(true);
+    setSearchError("");
 
+    // Check if geolocation is supported
     if (!("geolocation" in navigator)) {
       setSearchError("Geolocation is not supported by your browser");
+      setLocationLoading(false);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log("Geolocation coords:", latitude, longitude);
+    // Check if we're on HTTPS or localhost (required for geolocation on mobile)
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      setSearchError("Location access requires HTTPS connection");
+      setLocationLoading(false);
+      return;
+    }
 
-        try {
-          const res = await fetch("http://localhost:3001/api/detect-location", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lat: latitude, lon: longitude }),
-          });
+    // Show user-friendly message for mobile users
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      console.log("Mobile device detected, requesting location permission...");
+      toast.loading("Please allow location access when prompted", { duration: 3000 });
+    }
 
-          console.log("Detect location response status:", res.status);
-          if (!res.ok) throw new Error("Detect location failed");
+    // Options for getCurrentPosition - important for mobile devices
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000, // 10 seconds timeout
+      maximumAge: 300000 // 5 minutes cache
+    };
 
-          const data = await res.json();
+    try {
+      // Use Promise wrapper for better error handling
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
 
-          if (data.pincode) {
-            localStorage.setItem("userPincode", data.pincode);
-            setSelectedPincode(data.pincode);
-            setSearchQuery(data.pincode);
-            fetchPincodes(data.pincode);
-            setSearchError("");
-          } else {
-            setSearchError("No pincode returned from location detection");
-          }
-        } catch (err) {
-          console.error("Error during detect-location fetch:", err);
-          setSearchError("Failed to detect location");
+      const { latitude, longitude } = position.coords;
+      console.log("Geolocation coords:", latitude, longitude);
+      setSearchError("Getting location details...");
+
+      try {
+        const res = await fetch("http://localhost:3001/api/detect-location", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat: latitude, lon: longitude }),
+        });
+
+        console.log("Detect location response status:", res.status);
+        if (!res.ok) throw new Error("Detect location failed");
+
+        const data = await res.json();
+
+        if (data.pincode) {
+          localStorage.setItem("userPincode", data.pincode);
+          setSelectedPincode(data.pincode);
+          setSearchQuery(data.pincode);
+          fetchPincodes(data.pincode);
+          setSearchError("");
+          console.log("Location detected successfully:", data.pincode);
+          toast.success(`Location detected: ${data.pincode}`);
+        } else {
+          setSearchError("Could not determine pincode from location");
+          toast.error("Could not determine pincode from location");
         }
-      },
-      (error) => {
-        console.warn("Geolocation error callback fired:", error);
-        setSearchError("Location permission denied or unavailable");
+      } catch (err) {
+        console.error("Error during detect-location fetch:", err);
+        setSearchError("Failed to get location details");
+        toast.error("Failed to get location details");
       }
-    );
+    } catch (error) {
+      console.warn("Geolocation error:", error);
+      
+      // Provide specific error messages based on error code
+      let errorMessage;
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = "Location access denied. Please enable location permissions in your browser settings.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = "Location information unavailable. Please try again.";
+          break;
+        case error.TIMEOUT:
+          errorMessage = "Location request timed out. Please try again.";
+          break;
+        default:
+          errorMessage = "Failed to get location. Please try again.";
+          break;
+      }
+      setSearchError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLocationLoading(false);
+    }
   };
 
   const cartItemCount = cartItems.reduce(
@@ -97,18 +159,19 @@ export default function NavbarMain() {
     // { name: "Contact", link: "#contact" },
   ];
 
-  // Click outside to close profile dropdown
+  // Click outside to close dropdowns
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsProfileDropdownOpen(false);
       }
+
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load cached or detected pincode
+  // Load cached or detected pincode and popular searches
   useEffect(() => {
     const cachedPincode = localStorage.getItem("userPincode");
     console.log("Requesting user location...");
@@ -120,6 +183,7 @@ export default function NavbarMain() {
     } else {
       detectUserLocation(); // <-- Use the reusable function here
     }
+
   }, []);
 
   // Helper function to fetch pincodes and update state
@@ -223,6 +287,8 @@ export default function NavbarMain() {
     (loc, idx, arr) => arr.findIndex((l) => l.Pincode === loc.Pincode) === idx
   );
 
+
+
   return (
     <div className="relative w-full">
       <Navbar>
@@ -234,14 +300,21 @@ export default function NavbarMain() {
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {/* Use Current Location button with icon */}
                   <button
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                    className={`flex items-center gap-1 text-sm whitespace-nowrap ${
+                      locationLoading 
+                        ? 'text-gray-400 cursor-not-allowed' 
+                        : 'text-blue-600 hover:text-blue-800'
+                    }`}
                     onClick={() => {
-                      localStorage.removeItem("userPincode");
-                      detectUserLocation(); // manually trigger geolocation
+                      if (!locationLoading) {
+                        localStorage.removeItem("userPincode");
+                        detectUserLocation(); // manually trigger geolocation
+                      }
                     }}
+                    disabled={locationLoading}
                   >
-                    <FaLocationDot className="w-4 h-4" />
-                    <span> Location</span>
+                    <FaLocationDot className={`w-4 h-4 ${locationLoading ? 'animate-pulse' : ''}`} />
+                    <span>{locationLoading ? 'Getting...' : 'Location'}</span>
                   </button>
 
                   {/* Pincode Input and Dropdown */}
@@ -295,13 +368,9 @@ export default function NavbarMain() {
                   </div>
                 </div>
 
-                <input
-    type="text"
-    value={medicineSearch}
-    onChange={(e) => setMedicineSearch(e.target.value)}
-    placeholder="Search medicine and health products..."
-    className="border rounded px-4 py-2 ml-2 text-sm w-full dark:bg-neutral-800 dark:text-white"
-  />
+                <div className="ml-2 w-full">
+                  <NavbarSearch placeholder="Search medicine, brands, diseases, categories..." />
+                </div>
 
               </div>
             </div>
@@ -319,6 +388,8 @@ export default function NavbarMain() {
                   <span>{cartItemCount}</span>
                 </div>
               </NavbarButton>
+
+
 
               {user.isLoggedIn ? (
                 <div className="relative" ref={dropdownRef}>
@@ -407,14 +478,21 @@ export default function NavbarMain() {
                   {/* Location Detection + Pincode */}
                   <div className="flex items-center gap-2">
                     <button
-                      className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                      className={`flex items-center gap-1 text-xs whitespace-nowrap ${
+                        locationLoading 
+                          ? 'text-gray-400 cursor-not-allowed' 
+                          : 'text-blue-600 hover:text-blue-800'
+                      }`}
                       onClick={() => {
-                        localStorage.removeItem("userPincode");
-                        detectUserLocation();
+                        if (!locationLoading) {
+                          localStorage.removeItem("userPincode");
+                          detectUserLocation();
+                        }
                       }}
+                      disabled={locationLoading}
                     >
-                      <FaLocationDot className="w-3 h-3" />
-                      <span>Location</span>
+                      <FaLocationDot className={`w-3 h-3 ${locationLoading ? 'animate-pulse' : ''}`} />
+                      <span>{locationLoading ? 'Getting...' : 'Location'}</span>
                     </button>
 
                     <div
@@ -537,13 +615,7 @@ export default function NavbarMain() {
 
                 {/* Second Row: Search + Cart */}
                 <div className="flex items-center gap-2 w-full">
-                  <input
-                    type="text"
-                    value={medicineSearch}
-                    onChange={(e) => setMedicineSearch(e.target.value)}
-                    placeholder="Search medicines..."
-                    className="border rounded px-2 py-1 text-xs flex-1 dark:bg-neutral-800 dark:text-white"
-                  />
+                  <NavbarSearchMobile placeholder="Search medicines, brands..." />
 
                   <Link to="/cart" className="flex items-center">
                     <div className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded text-xs">
