@@ -292,7 +292,7 @@ export default function NavbarMain() {
   return (
     <div className="relative w-full">
       <Navbar>
-        <NavBody className="hidden md:flex flex-col items-stretch gap-2">
+        <NavBody className="hidden md:flex flex-col items-stretch gap-2 ">
           <div className="flex w-full items-center justify-between">
             <NavbarLogo />
             <div className="flex flex-1 items-center gap-4 w-full max-w-[1400px]">
@@ -368,9 +368,9 @@ export default function NavbarMain() {
                   </div>
                 </div>
 
-                <div className="ml-2 w-full">
+                {/* <div className="ml-2 w-full">
                   <NavbarSearch placeholder="Search medicine, brands, diseases, categories..." />
-                </div>
+                </div> */}
 
               </div>
             </div>
@@ -464,12 +464,12 @@ export default function NavbarMain() {
             </div>
           </div>
 
-          <div className="w-full flex justify-center">
+          {/* <div className="w-full flex justify-center">
             <NavigationMenuDemo />
-          </div>
+          </div> */}
         </NavBody>
 
-        <div className="block md:hidden">
+        <div className="block md:hidden bg-[#ff6f00]">
           <MobileNav>
             <MobileNavHeader>
               <div className="flex flex-col w-full gap-2 p-2">
@@ -480,8 +480,8 @@ export default function NavbarMain() {
                     <button
                       className={`flex items-center gap-1 text-xs whitespace-nowrap ${
                         locationLoading 
-                          ? 'text-gray-400 cursor-not-allowed' 
-                          : 'text-blue-600 hover:text-blue-800'
+                          ? 'text-gray-800 cursor-not-allowed' 
+                          : 'text-black hover:text-white'
                       }`}
                       onClick={() => {
                         if (!locationLoading) {
@@ -511,7 +511,7 @@ export default function NavbarMain() {
                         onBlur={handleInputBlur}
                         onClick={(e) => e.stopPropagation()}
                         placeholder="Pincode"
-                        className="border rounded px-2 py-1 text-xs w-full dark:bg-neutral-800 dark:text-white"
+                        className="border rounded px-2 py-1 text-xs w-full dark:bg-neutral-800 dark:text-white text-black"
                       />
 
                       {isPincodeDropdownOpen && uniqueLocations.length > 0 && (
@@ -551,7 +551,7 @@ export default function NavbarMain() {
                             e.stopPropagation();
                             setIsProfileDropdownOpen((prev) => !prev);
                           }}
-                          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+                          className="flex items-center gap-1 text-xs text-black hover:text-blue-800"
                         >
                           {user.name}
                           <svg
