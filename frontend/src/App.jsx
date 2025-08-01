@@ -45,7 +45,7 @@ function App() {
         <div className="min-h-screen">
           <Navbar />
            <GlobalLoader />
-          <main className="container mx-auto px-4 py-4">
+          <main className="container mx-auto px-2 py-2">
             <AppRoutes/>
           </main>
           <Footer />
