@@ -150,7 +150,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="hidden sm:relative sm:bg-gradient-to-tr sm:from-orange-50 sm:via-green-100 sm:to-blue-50 sm:overflow-hidden sm:flex sm:flex-col sm:items-center sm:rounded-2xl">
+      <div className="hidden sm:relative sm:bg-gradient-to-tr sm:from-orange-50 sm:via-green-100 sm:to-blue-50 sm:flex sm:flex-col sm:items-center sm:rounded-2xl">
 
         {/* Images on Left & Right */}
         {/* <img
@@ -183,6 +183,59 @@ const Home = () => {
           >
             View All
           </Link>
+
+          
+        </div>
+        <div 
+          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+          `}</style>
+          {seasonalProducts.map((product) => (
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              {/* <div className="min-w-[200px]"> */}
+              <ProductCardScrollable
+                id={product.id}
+                image={
+                  Array.isArray(product.images) && product.images.length > 0
+                    ? product.images[0]
+                    : undefined
+                }
+                name={product.name}
+                actualPrice={product.actual_price}
+                sellingPrice={product.selling_price}
+              />
+              {/* </div> */}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* -------------  */}
+       <div className="mt-2">
+        <div className="flex justify-between items-center mb-6">
+          {/* <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
+            Seasonal Products
+          </h1> */}
+          <Link
+            to="/products?seasonal_medicine=true"
+            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
+          >
+            {/* View All */}
+          </Link>
+
+          
         </div>
         <div 
           className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
@@ -222,7 +275,7 @@ const Home = () => {
       {/* ---------------  */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-[#2f2f2f]">
             Top Products
           </h1>
           <Link

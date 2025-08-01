@@ -430,7 +430,7 @@ export default function BannerTop ({ banners }) {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-6">
+    <div className="w-full max-w-7xl mx-auto py-6">
       <div
         className={`grid gap-4 ${
           itemsPerPage === 1 ? 'grid-cols-1' : 'grid-cols-3'
