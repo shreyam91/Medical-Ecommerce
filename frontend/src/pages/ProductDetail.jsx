@@ -293,7 +293,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
               className="w-full h-[300px] object-contain rounded"
             />
           </div>
-          <div className="flex overflow-x-auto gap-4">
+          {/* <div className="flex overflow-x-auto gap-4">
             {(Array.isArray(product.images) ? product.images : []).map(
               (img, i) => (
                 <img
@@ -309,7 +309,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
                 />
               )
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* Desktop view: thumbnails left, main image right */}
@@ -382,8 +382,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
               </div>
             )}
 
-          {/* Reference Books */}
-          {renderReferenceBooks()}
+         
 
           {/* Debug Info */}
           {/* <div className="mb-4 p-3 bg-gray-100 border rounded text-sm">
@@ -504,7 +503,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
 
           {/* Pricing */}
-          <div className="space-y-1 mt-2">
+          <div className="space-y-1">
             <div className="flex items-center gap-3 text-lg font-semibold text-green-600">
               ₹{sellingPrice.toFixed(2)}
               {hasDiscount && (
@@ -518,68 +517,9 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
                 </>
               )}
             </div>
-            <div className="text-sm text-gray-600">Inclusive of all taxes</div>
-            {/* Product Notes */}
-            <div className="text-xs text-gray-600 mt-4 space-y-1">
-              {/* <p>
-                * 10 Capsules per products.
-              </p> */}
-              <p>
-                 Company: {brandName || product.brand_name || "N/A"}
-              </p>
-              <p>* For safety & hygiene reasons, this product can't be returned, we ensure 100% genuine & quality check delivery.</p>
-              <p>* Country of Origin: <span className="font-bold">India</span></p>
-              <p>* To be taken under Medical Supervision. </p>
-              <p>* Delivery charges may be applied on checkout.</p>
-            </div>
-          </div>
+            <div className="text-sm text-gray-500">Inclusive of all taxes</div>
 
-              
-    <div className="flex overflow-x-auto sm:grid sm:grid-cols-4 gap-2 text-center">
-  {icons.map((item, index) => (
-    <div
-      key={index}
-      className="flex-shrink-0 flex flex-col items-center w-16 sm:w-24"
-    >
-      <img
-        src={item.img}
-        alt={item.title}
-        className="w-10 h-10 sm:w-12 sm:h-12 mb-1 sm:mb-2"
-      />
-      <h3 className="text-xs sm:text-sm text-gray-800">
-        {item.title}
-      </h3>
-    </div>
-  ))}
-</div>
-
-
- 
-
-
-
-          {/* Delivery Check */}
-          <div className="flex gap-2 mt-4">
-            <input
-              type="text"
-              value={pincode}
-              onChange={(e) => setPincode(e.target.value)}
-              placeholder="Enter pincode"
-              className="border px-3 py-2 rounded w-full"
-            />
-            <button
-              onClick={handleCheckDelivery}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              Check
-            </button>
-          </div>
-          {deliveryMessage && (
-            <div className="text-sm mt-1 text-gray-700">{deliveryMessage}</div>
-          )}
-
-          {/* Add to Cart Button */}
-          <button
+             <button
             className="bg-green-600 text-white w-full mt-4 py-2 rounded disabled:opacity-60 cursor-pointer"
             disabled={
               (product.prescription_required && !prescriptionFile) ||
@@ -628,8 +568,113 @@ if (prescriptionFile) {
           >
             Add to Cart
           </button>
+            {/* Product Notes */}
+            <div className="text-xs text-gray-400 mt-2 space-y-1">
+              {/* <p>
+                * 10 Capsules per products.
+              </p> */}
+              <p>
+                 Company: {brandName || product.brand_name || "N/A"}
+              </p>
+              <p>* For safety & hygiene reasons, this product can't be returned, we ensure 100% genuine & quality check delivery.</p>
+              <p>* Country of Origin: <span className="font-bold">India</span></p>
+              <p>* To be taken under Medical Supervision. </p>
+              <p>* Delivery charges may be applied on checkout.</p>
+            </div>
+          </div>
+
+              
+    {/* <div className="flex overflow-x-auto sm:grid sm:grid-cols-4 gap-2 text-center">
+  {icons.map((item, index) => (
+    <div
+      key={index}
+      className="flex-shrink-0 flex flex-col items-center w-16 sm:w-24"
+    >
+      <img
+        src={item.img}
+        alt={item.title}
+        className="w-10 h-10 sm:w-12 sm:h-12 mb-1 sm:mb-2"
+      />
+      <h3 className="text-xs sm:text-sm text-gray-800">
+        {item.title}
+      </h3>
+    </div>
+  ))}
+</div> */}
+
+
+ 
+
+
+
+          {/* Delivery Check */}
+          {/* <div className="flex gap-2 mt-4">
+            <input
+              type="text"
+              value={pincode}
+              onChange={(e) => setPincode(e.target.value)}
+              placeholder="Enter pincode"
+              className="border px-3 py-2 rounded w-full"
+            />
+            <button
+              onClick={handleCheckDelivery}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Check
+            </button>
+          </div>
+          {deliveryMessage && (
+            <div className="text-sm mt-1 text-gray-700">{deliveryMessage}</div>
+          )} */}
+
+          {/* Add to Cart Button */}
+          {/* <button
+            className="bg-green-600 text-white w-full mt-4 py-2 rounded disabled:opacity-60 cursor-pointer"
+            disabled={
+              (product.prescription_required && !prescriptionFile) ||
+              !selectedSize
+            }
+            onClick={() => {
+              if (product.prescription_required && !prescriptionFile) {
+                setPrescriptionError("Please upload prescription to proceed.");
+                return;
+              }
+              addToCart({
+  id: product.id,
+  name: product.name,
+  size: selectedSize,
+  price: sellingPrice,
+  quantity,
+  image: selectedImage,
+});
+
+// Store prescription file in sessionStorage
+if (prescriptionFile) {
+  sessionStorage.setItem(
+    `prescription_${product.id}`,
+    JSON.stringify({
+      name: prescriptionFile.name,
+      type: prescriptionFile.type,
+    })
+  );
+
+  // Optionally store the actual File object using a workaround:
+  window.__prescriptions__ = window.__prescriptions__ || {};
+  window.__prescriptions__[product.id] = prescriptionFile;
+}
+
+              toast.success("Product added to cart");
+            }}
+          >
+            Add to Cart
+          </button> */}
+
+          <div> banner </div>
         </div>
       </div>
+
+       {/* Reference Books */}
+          {renderReferenceBooks()}
 
       {/* Tabs Section */}
       <div className="mt-5 border-t pt-4">
@@ -674,7 +719,7 @@ if (prescriptionFile) {
         </div>
 
         {/* Mobile Accordion Tabs */}
-        <div className="block md:hidden mt-4 space-y-6 text-gray-800 leading-relaxed whitespace-pre-line">
+        <div className="block md:hidden space-y-1 text-gray-800">
           {[
             { label: "Description", content: product.description },
             { label: "Key Ingredients", content: product.key_ingredients },
@@ -684,9 +729,9 @@ if (prescriptionFile) {
               content: product.dietary,
             },
           ].map((section) => (
-            <div key={section.label} className="border-b pb-4">
-              <h2 className="text-lg font-semibold mb-1">{section.label}</h2>
-              <p>{section.content || "Not available."}</p>
+            <div key={section.label} className="">
+              <h2 className="text-sm font-semibold text-gray-800">{section.label}</h2>
+              <p className="text-gray-500 text-sm"> {section.content || "Not available."}</p>
             </div>
           ))}
         </div>

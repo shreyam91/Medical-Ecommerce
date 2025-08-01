@@ -35,9 +35,9 @@ const ProductCard = ({ product }) => {
     <>
       <Toaster position="top-right" />
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative bg-white rounded-lg shadow-md overflow-hidden 
-          w-[calc(50vw-24px)] sm:w-48 md:w-56 lg:w-[200px]
-          h-[250px] sm:h-[300px] md:h-[320px]
+        <div className="relative overflow-hidden 
+          w-[calc(33.333vw-16px)] sm:w-48 md:w-56 lg:w-[200px]
+          h-[200px] sm:h-[300px] md:h-[320px]
           mx-auto flex flex-col cursor-pointer"
         >
 
@@ -59,25 +59,26 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Product Info */}
-          <div className="flex flex-col justify-between flex-grow p-2 sm:p-3">
+          <div className="flex flex-col justify-between flex-grow sm:p-3">
             <h3 className="text-xs sm:text-sm md:text-base text-gray-800 line-clamp-2">
               {name}
             </h3>
 
-            <div className="mt-1 mb-2">
-              {sellingPriceNum > 0 ? (
-                <span className="text-sm sm:text-base font-bold text-green-700">
-                  ₹{sellingPriceNum.toFixed(2)}
-                </span>
-              ) : (
-                <span className="text-sm sm:text-base font-bold text-gray-500">N/A</span>
-              )}
-              {hasDiscount && actualPriceNum > 0 && (
-                <span className="ml-2 text-xs text-gray-400 line-through">
-                  ₹{actualPriceNum.toFixed(2)}
-                </span>
-              )}
-            </div>
+            <div className="mt-1 mb-2 flex flex-col">
+  {sellingPriceNum > 0 ? (
+    <span className="text-sm sm:text-base font-bold text-green-700">
+      ₹{sellingPriceNum.toFixed(2)}
+    </span>
+  ) : (
+    <span className="text-sm sm:text-base font-bold text-gray-500">N/A</span>
+  )}
+  {hasDiscount && actualPriceNum > 0 && (
+    <span className="text-xs text-gray-400 line-through">
+      ₹{actualPriceNum.toFixed(2)}
+    </span>
+  )}
+</div>
+
 
             <button
               className="w-full bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-semibold py-1.5 sm:py-2 px-2 sm:px-4 rounded transition duration-200"
@@ -119,10 +120,10 @@ export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPri
 
   return (
     <div 
-      className="w-[calc(50vw-24px)] sm:w-48 md:w-56 lg:w-50 p-3 sm:p-4 bg-white rounded-lg shadow-md flex-shrink-0 cursor-pointer border-2 flex flex-col h-[250px] sm:h-[300px] md:h-[320px]"
+      className="w-[calc(33.333vw-16px)] sm:w-48 md:w-56 lg:w-50  flex-shrink-0 cursor-pointer flex flex-col h-[200px] sm:h-[300px] md:h-[320px]"
       onClick={handleCardClick}
     >
-      <img src={image} alt={name} className="h-30 sm:h-32 md:h-40 w-auto object-cover rounded-md mb-3 sm:mb-4" />
+      <img src={image} alt={name} className="h-24 sm:h-32 md:h-40 w-auto object-cover rounded-md mb-3 sm:mb-4" />
       
       <h2 className="text-xs sm:text-sm md:text-base line-clamp-2">{name}</h2>
       
@@ -133,7 +134,7 @@ export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPri
 
       <div className="mt-auto">
         <button
-          className="bg-green-600 text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded hover:bg-green-700 transition duration-200 w-full"
+          className="bg-[#ff8f00] text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded hover:bg-green-700 transition duration-200 w-full"
           onClick={handleAddToCart}
         >
           {'Add to Cart'}
