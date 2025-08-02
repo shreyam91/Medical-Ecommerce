@@ -275,10 +275,10 @@ export default function SearchComponent() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center w-full min-h-[120px] py-12"
+      className="flex flex-col items-center justify-center w-full min-h-[120px] py-4"
       ref={dropdownRef}
     >
-      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 text-gray-700 drop-shadow-sm">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center mb-4 text-gray-700 drop-shadow-sm font-serif font-semibold">
         Search your medicine here
       </h1>
       <div className={`relative w-full max-w-xl transition-all duration-300 ease-in-out z-50`}>  
@@ -448,7 +448,7 @@ export default function SearchComponent() {
       </div>
 
       {/* Quick Search Categories */}
-      {!isFocused && (
+      {/* {!isFocused && (
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <div className="text-sm text-gray-500 mb-2 w-full text-center">Popular categories:</div>
           {['Ayurvedic', 'Homeopathic', 'Diabetes', 'Blood Pressure', 'Pain Relief', 'Vitamins'].map(category => (
@@ -464,7 +464,7 @@ export default function SearchComponent() {
             </button>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

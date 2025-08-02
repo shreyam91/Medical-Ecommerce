@@ -14,13 +14,13 @@ export default function Category() {
     { id: 1, title: "Diabetes", imageUrl: "/assets/diabetes.svg", slug: "diabetes" },
     { id: 2, title: "Skin Care", imageUrl: "/assets/skin.svg", slug: "skin-care" },
     { id: 3, title: "Hair Care", imageUrl: "/assets/hair.svg", slug: "hair-care" },
-    { id: 4, title: "Joint, Bone & Muscle Care", imageUrl: "/assets/joint.svg", slug: "joint-care" },
+    { id: 4, title: "Muscle Care", imageUrl: "/assets/joint.svg", slug: "joint-care" },
     { id: 5, title: "Kidney Care", imageUrl: "/assets/Kidney.svg", slug: "kidney-care" },
     { id: 6, title: "Liver Care", imageUrl: "/assets/liver.svg", slug: "liver-care" },
     { id: 7, title: "Heart Care", imageUrl: "/assets/heart.svg", slug: "heart-care" },
     { id: 8, title: "Men Wellness", imageUrl: "/assets/men.svg", slug: "men-care" },
     { id: 9, title: "Women Wellness", imageUrl: "/assets/women.svg", slug: "women-care" },
-    { id: 10, title: "Digestive Care", imageUrl: "/assets/digestive.svg", slug: "digestive-care" },
+    { id: 10, title: "Digestive Care", imageUrl: "/assets/digestive.svg", slug: "digestive-care" }
   ];
 
   useEffect(() => {
@@ -89,19 +89,19 @@ export default function Category() {
 
   return (
     <div className=" max-w-7xl mx-auto">
-      <h1 className="text-xl sm:text-3xl font-semibold mb-6 text-black">
+      <h1 className="text-xl sm:text-3xl font-arial  mb-6 text-black">
         Shop by Health Concern
       </h1>
 
       {/* Mobile Grid - multiple rows, no scroll, no background */}
-<div className="sm:hidden grid grid-cols-3 gap-4 px-2">
+<div className="sm:hidden grid grid-cols-5 gap-2 px-2">
   {loading
     ? Array.from({ length: 8 }).map((_, idx) => (
         <div
           key={idx}
           className="animate-pulse flex flex-col items-center"
         >
-          <div className="w-16 h-16 bg-gray-300 rounded-full mb-2" />
+          <div className="w-12 h-12 bg-gray-300 rounded-full mb-2" />
           <div className="h-4 w-20 bg-gray-300 rounded" />
         </div>
       ))
@@ -132,8 +132,8 @@ export default function Category() {
                 key={idx}
                 className="animate-pulse bg-gray-200 rounded-md shadow-md h-20 flex items-center px-4"
               >
-                <div className="w-12 h-12 bg-gray-300 rounded-full mr-4" />
-                <div className="h-4 w-20 bg-gray-300 rounded" />
+                {/* <div className="w-12 h-12 bg-gray-300 rounded-full mr-4" /> */}
+                {/* <div className="h-4 w-20 bg-gray-300 rounded" /> */}
               </div>
             ))
           : categories.map(({ id, title, name, imageUrl, image_url, link }) => (
