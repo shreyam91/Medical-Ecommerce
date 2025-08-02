@@ -39,9 +39,9 @@ Our service is rooted in authenticity, accessibility, and care.
             <a href="https://www.instagram.com/herbal.mg?igsh=OHd6a29zZGswbzZ3" target="_blank" aria-label="Instagram">
               <FaInstagram className="text-[#E4405F] hover:text-black transition" />
             </a>
-            <a href="#" target="_blank" aria-label="YouTube">
+            {/* <a href="#" target="_blank" aria-label="YouTube">
               <FaYoutube className="text-[#FF0000] hover:text-black transition" />
-            </a>
+            </a> */}
             <a href="#" target="_blank" aria-label="X (Twitter)">
               <FaXTwitter className="text-black hover:text-[#1DA1F2] transition" />
             </a>
