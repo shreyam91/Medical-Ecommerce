@@ -78,7 +78,7 @@ function CardItem({
         src={imageUrl}
         alt={title}
         className={`object-contain ${
-          isMobile ? "w-10 h-10 mb-1" : "w-12 h-12 mr-4"
+          isMobile ? "w-8 h-8 mb-1" : "w-12 h-12 mr-4"
         }`}
         loading="lazy"
       />
