@@ -3,6 +3,7 @@ const router = express.Router();
 const sql = require('../config/supabase');
 const cloudinary = require('../config/cloudinary');
 const auth = require('./auth');
+const { generateSlug, isNumericId } = require('../utils/slugUtils');
 
 function requireAdminOrLimitedAdmin(req, res, next) {
   if (!req.user || !['admin', 'limited_admin'].includes(req.user.role)) {
@@ -31,42 +32,21 @@ router.get('/top', async (req, res) => {
   }
 });
 
-// Get brand by ID
-router.get('/:id', async (req, res) => {
+// Get brand by ID or slug
+router.get('/:identifier', async (req, res) => {
   try {
-    const [brand] = await sql`SELECT * FROM brand WHERE id = ${req.params.id}`;
-    if (!brand) return res.status(404).json({ error: 'Not found' });
-    res.json(brand);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get brand by slug (convert slug to name for lookup)
-router.get('/slug/:slug', async (req, res) => {
-  try {
-    const slug = req.params.slug;
-    // Convert slug to name by replacing hyphens with spaces and capitalizing
-    const brandName = slug.split('-').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
+    const identifier = req.params.identifier;
+    let brand;
     
-    console.log('Looking for brand by slug:', slug, 'converted to name:', brandName);
-    
-    // Try exact match first
-    let [brand] = await sql`SELECT * FROM brand WHERE LOWER(name) = LOWER(${brandName})`;
-    
-    // If not found, try partial match
-    if (!brand) {
-      [brand] = await sql`SELECT * FROM brand WHERE LOWER(name) LIKE LOWER(${'%' + brandName + '%'})`;
+    if (isNumericId(identifier)) {
+      // It's an ID
+      [brand] = await sql`SELECT * FROM brand WHERE id = ${identifier}`;
+    } else {
+      // It's a slug
+      [brand] = await sql`SELECT * FROM brand WHERE slug = ${identifier}`;
     }
     
-    if (!brand) {
-      console.log('Brand not found for slug:', slug);
-      return res.status(404).json({ error: 'Brand not found' });
-    }
-    
-    console.log('Found brand:', brand);
+    if (!brand) return res.status(404).json({ error: 'Brand not found' });
     res.json(brand);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -75,30 +55,49 @@ router.get('/slug/:slug', async (req, res) => {
 
 // Create brand
 router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { name, logo_url, banner_url, is_top_brand = false } = req.body;
+  const { name, slug, logo_url, banner_url, is_top_brand = false } = req.body;
   try {
+    const finalSlug = slug || generateSlug(name);
     const [brand] = await sql`
-      INSERT INTO brand (name, logo_url, banner_url, is_top_brand)
-      VALUES (${name}, ${logo_url}, ${banner_url}, ${is_top_brand})
+      INSERT INTO brand (name, slug, logo_url, banner_url, is_top_brand)
+      VALUES (${name}, ${finalSlug}, ${logo_url}, ${banner_url}, ${is_top_brand})
       RETURNING *`;
     res.status(201).json(brand);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    if (err.message.includes('duplicate key value violates unique constraint') && err.message.includes('slug')) {
+      res.status(400).json({ error: 'A brand with this slug already exists. Please choose a different name or provide a custom slug.' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 
-// Update brand
-router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  const { name, logo_url, banner_url, is_top_brand = false } = req.body;
+// Update brand by ID or slug
+router.put('/:identifier', auth, requireAdminOrLimitedAdmin, async (req, res) => {
+  const { name, slug, logo_url, banner_url, is_top_brand = false } = req.body;
   try {
+    const identifier = req.params.identifier;
+    const finalSlug = slug || generateSlug(name);
+    let whereClause;
+    
+    if (isNumericId(identifier)) {
+      whereClause = sql`id = ${identifier}`;
+    } else {
+      whereClause = sql`slug = ${identifier}`;
+    }
+    
     const [brand] = await sql`
-      UPDATE brand SET name=${name}, logo_url=${logo_url}, banner_url=${banner_url}, is_top_brand=${is_top_brand}, updated_at=NOW()
-      WHERE id=${req.params.id} RETURNING *`;
-    if (!brand) return res.status(404).json({ error: 'Not found' });
+      UPDATE brand SET name=${name}, slug=${finalSlug}, logo_url=${logo_url}, banner_url=${banner_url}, is_top_brand=${is_top_brand}, updated_at=NOW()
+      WHERE ${whereClause} RETURNING *`;
+    if (!brand) return res.status(404).json({ error: 'Brand not found' });
     res.json(brand);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    if (err.message.includes('duplicate key value violates unique constraint') && err.message.includes('slug')) {
+      res.status(400).json({ error: 'A brand with this slug already exists. Please choose a different slug.' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 
@@ -111,14 +110,23 @@ function extractCloudinaryPublicId(url) {
   return matches ? matches[1] : null;
 }
 
-// Delete brand
-router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
-  console.log('DELETE /api/brand/:id called with id:', req.params.id);
+// Delete brand by ID or slug
+router.delete('/:identifier', auth, requireAdminOrLimitedAdmin, async (req, res) => {
+  console.log('DELETE /api/brand/:identifier called with identifier:', req.params.identifier);
   try {
+    const identifier = req.params.identifier;
+    let brand;
+    
     // Get brand first to access logo_url and banner_url
-    const [brand] = await sql`SELECT * FROM brand WHERE id=${req.params.id}`;
+    if (isNumericId(identifier)) {
+      [brand] = await sql`SELECT * FROM brand WHERE id=${identifier}`;
+    } else {
+      [brand] = await sql`SELECT * FROM brand WHERE slug=${identifier}`;
+    }
+    
     console.log('Fetched brand:', brand);
-    if (!brand) return res.status(404).json({ error: 'Not found' });
+    if (!brand) return res.status(404).json({ error: 'Brand not found' });
+    
     // Delete logo image from Cloudinary if present
     if (brand.logo_url) {
       const publicId = extractCloudinaryPublicId(brand.logo_url);
@@ -143,8 +151,16 @@ router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
         }
       }
     }
-    // Delete brand from DB
-    const [deleted] = await sql`DELETE FROM brand WHERE id=${req.params.id} RETURNING *`;
+    
+    // Delete brand from DB using the same identifier logic
+    let whereClause;
+    if (isNumericId(identifier)) {
+      whereClause = sql`id = ${identifier}`;
+    } else {
+      whereClause = sql`slug = ${identifier}`;
+    }
+    
+    const [deleted] = await sql`DELETE FROM brand WHERE ${whereClause} RETURNING *`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
