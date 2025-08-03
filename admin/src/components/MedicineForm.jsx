@@ -32,6 +32,7 @@ const MedicineForm = ({ editProduct, setEditProduct, category, onDelete, onSucce
     type: "tablet",
     category: category || "Ayurvedic",
     name: "",
+    slug: "",
     brand_id: "",
     mainCategoryId: "",
     subCategoryId: "",
