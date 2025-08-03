@@ -72,6 +72,17 @@ export const createDiseaseSlug = (diseaseName, diseaseId = null) => {
 };
 
 /**
+ * Create product slug with prefix
+ * @param {string} productName - Product name
+ * @param {number} productId - Product ID (optional)
+ * @returns {string} - Product slug
+ */
+export const createProductSlug = (productName, productId = null) => {
+  const baseSlug = createSlug(productName);
+  return productId ? `${baseSlug}-${productId}` : baseSlug;
+};
+
+/**
  * Extract ID from slug (if it exists)
  * @param {string} slug - The slug containing ID
  * @returns {number|null} - Extracted ID or null
@@ -108,6 +119,7 @@ export const generateUrls = {
   brand: (brandName, brandSlug) => `/brand/${brandSlug || createSlug(brandName)}`,
   category: (categoryName, categorySlug) => `/category/${categorySlug || createSlug(categoryName)}`,
   disease: (diseaseName, diseaseSlug) => `/disease/${diseaseSlug || createSlug(diseaseName)}`,
+  product: (productName, productSlug) => `/product/${productSlug || createSlug(productName)}`,
   subCategory: (parentCategory, subCategory, subCategorySlug) => 
     `/category/${createSlug(parentCategory)}/${subCategorySlug || createSlug(subCategory)}`,
 };
@@ -127,7 +139,7 @@ export const isValidSlug = (slug) => {
 
 /**
  * Create breadcrumb data from slug
- * @param {string} type - Entity type (brand, category, disease)
+ * @param {string} type - Entity type (brand, category, disease, product)
  * @param {string} slug - The slug
  * @param {string} name - Display name
  * @returns {Array} - Breadcrumb items
@@ -154,6 +166,12 @@ export const createBreadcrumb = (type, slug, name) => {
       breadcrumbs.push(
         { label: 'Health Concerns', path: '/health-concerns' },
         { label: name, path: `/disease/${slug}` }
+      );
+      break;
+    case 'product':
+      breadcrumbs.push(
+        { label: 'Products', path: '/products' },
+        { label: name, path: `/product/${slug}` }
       );
       break;
     default:
@@ -201,6 +219,7 @@ export default {
   createBrandSlug,
   createCategorySlug,
   createDiseaseSlug,
+  createProductSlug,
   extractIdFromSlug,
   removeIdFromSlug,
   generateUrls,
