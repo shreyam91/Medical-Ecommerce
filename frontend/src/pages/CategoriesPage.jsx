@@ -52,10 +52,10 @@ function CategoriesPage() {
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const breadcrumbItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Categories', path: '/categories' }
-  ];
+  // const breadcrumbItems = [
+  //   { label: 'Home', path: '/' },
+  //   { label: 'Categories', path: '/categories' }
+  // ];
 
   if (loading) {
     return (
@@ -69,7 +69,7 @@ function CategoriesPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <Breadcrumb items={breadcrumbItems} />
+      {/* <Breadcrumb items={breadcrumbItems} /> */}
       
       <div className="mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
@@ -93,7 +93,7 @@ function CategoriesPage() {
 
       {/* Categories Grid */}
       {filteredCategories.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filteredCategories.map((category) => (
             <Link
               key={category.id}
