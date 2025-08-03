@@ -488,7 +488,7 @@ const getFinalTotal = () => {
             <div className="mt-4 text-sm">
               {form.city.toLowerCase() === 'jaipur' ? (
                 <p className="text-green-600">
-                  Note: For Jaipur location only COD available
+                  Note: For Jaipur location COD available
                 </p>
               ) : (
                 <p className="text-red-600">
