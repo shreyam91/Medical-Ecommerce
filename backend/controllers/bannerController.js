@@ -1,34 +1,19 @@
-const express = require('express');
-const router = express.Router();
 const sql = require('../config/supabase');
 const cloudinary = require('../config/cloudinary');
-const auth = require('./auth');
-
-function extractCloudinaryPublicId(url) {
-  if (!url) return null;
-  const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
-  return matches ? matches[1] : null;
-}
-
-function requireAdminOrLimitedAdmin(req, res, next) {
-  if (!req.user || !['admin', 'limited_admin'].includes(req.user.role)) {
-    return res.status(403).json({ error: 'Forbidden: insufficient permissions' });
-  }
-  next();
-}
+const extractCloudinaryPublicId = require('../utils/extractCloudinaryPublicId');
 
 // Get all banners
-router.get('/', async (req, res) => {
+exports.getAllBanners = async (req, res) => {
   try {
     const banners = await sql`SELECT * FROM banner ORDER BY id DESC`;
     res.json(banners);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
 // Get banner by ID
-router.get('/:id', async (req, res) => {
+exports.getBannerById = async (req, res) => {
   try {
     const [banner] = await sql`SELECT * FROM banner WHERE id = ${req.params.id}`;
     if (!banner) return res.status(404).json({ error: 'Not found' });
@@ -36,10 +21,10 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
 // Create banner
-router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
+exports.createBanner = async (req, res) => {
   const { image_url, type, title, link, product_id } = req.body;
   const status = req.body.status || 'active';
   try {
@@ -52,10 +37,10 @@ router.post('/', auth, requireAdminOrLimitedAdmin, async (req, res) => {
     console.error('Error creating banner:', err);
     res.status(500).json({ error: err.message });
   }
-});
+};
 
 // Update banner
-router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
+exports.updateBanner = async (req, res) => {
   const { image_url, type, title, link, product_id } = req.body;
   const status = req.body.status || 'active';
   try {
@@ -67,19 +52,16 @@ router.put('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-// Delete banner
-router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
+// Delete banner (and remove Cloudinary image if exists)
+exports.deleteBanner = async (req, res) => {
   try {
-    // Get banner first to access image_url
     const [banner] = await sql`SELECT * FROM banner WHERE id=${req.params.id}`;
-    console.log('Fetched banner:', banner);
     if (!banner) return res.status(404).json({ error: 'Not found' });
-    // Delete image from Cloudinary if present
+
     if (banner.image_url) {
       const publicId = extractCloudinaryPublicId(banner.image_url);
-      console.log('Deleting banner image:', banner.image_url, 'Extracted publicId:', publicId);
       if (publicId) {
         try {
           await cloudinary.uploader.destroy(publicId);
@@ -88,14 +70,10 @@ router.delete('/:id', auth, requireAdminOrLimitedAdmin, async (req, res) => {
         }
       }
     }
-    // Delete banner from DB
-    const [deleted] = await sql`DELETE FROM banner WHERE id=${req.params.id} RETURNING *`;
+
+    await sql`DELETE FROM banner WHERE id=${req.params.id}`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
-
-// TODO: Add role-based access control middleware. Allow 'admin' and 'limited_admin' to add/edit banners.
-
-module.exports = router; 
+};

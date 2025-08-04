@@ -1,7 +1,31 @@
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const axios = require('axios');
 
-// Get pincodes by city or pincode
-export async function getPincodeByQuery(req, res) {
+async function detectLocation(req, res) {
+  const { lat, lon } = req.body;
+  if (!lat || !lon) {
+    return res.status(400).json({ message: 'Latitude and longitude required' });
+  }
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+    const response = await axios.get(url, {
+      headers: { 'User-Agent': 'YourAppName/1.0' }
+    });
+
+    const data = response.data;
+    const pincode = data.address && (data.address.postcode || data.address.zipcode);
+
+    if (pincode) {
+      return res.json({ pincode });
+    } else {
+      return res.status(404).json({ message: 'Pincode not found for location' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to reverse geocode location' });
+  }
+}
+
+async function searchPincodes(req, res) {
   const query = req.params.query;
   let url;
   if (/^\d+$/.test(query)) {
@@ -9,9 +33,11 @@ export async function getPincodeByQuery(req, res) {
   } else {
     url = `https://api.postalpincode.in/postoffice/${encodeURIComponent(query)}`;
   }
+
   try {
-    const response = await fetch(url);
-    const data = await response.json();
+    const response = await axios.get(url);
+    const data = response.data;
+
     if (Array.isArray(data) && data[0].Status === "Success") {
       const pincodes = data[0].PostOffice.map(po => ({
         Pincode: po.Pincode,
@@ -28,24 +54,7 @@ export async function getPincodeByQuery(req, res) {
   }
 }
 
-// Detect user location via IP and return pincode
-export async function detectUserLocation(req, res) {
-  try {
-    const ipRes = await fetch('https://ipapi.co/json/');
-    const ipData = await ipRes.json();
-    const userCity = ipData.city;
-    if (!userCity) {
-      return res.status(404).json({ message: 'Could not detect city from IP' });
-    }
-
-    const response = await fetch(`https://api.postalpincode.in/postoffice/${encodeURIComponent(userCity)}`);
-    const data = await response.json();
-    if (Array.isArray(data) && data[0].Status === "Success" && data[0].PostOffice.length > 0) {
-      res.json({ pincode: data[0].PostOffice[0].Pincode });
-    } else {
-      res.status(404).json({ message: 'Pincode not found for your location' });
-    }
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to detect location' });
-  }
-}
+module.exports = {
+  detectLocation,
+  searchPincodes,
+};

@@ -8,6 +8,7 @@ import Type from "../components/Type";
 import BlogCard from "../components/BlogCard";
 import { Link } from "react-router-dom";
 import ProductCard, { ProductCardScrollable } from "../components/ProductCard";
+import ProductSection from "../components/ProductSection";
 import { StyleHome } from "../components/Style";
 import SearchComponent from "../components/SearchComponent";
 
@@ -172,55 +173,14 @@ const Home = () => {
       {/* banner for ad  */}
       {getBannerByType("ad") && <Banners banners={[getBannerByType("ad")]} />}
       {/* ----------  */}
-      <div className="mt-2">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
-            Seasonal Products
-          </h1>
-          <Link
-            to="/products?seasonal_medicine=true"
-            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
-          >
-            View All
-          </Link>
-
-          
-        </div>
-        <div 
-          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
-          style={{
-            scrollbarWidth: 'none', /* Firefox */
-            msOverflowStyle: 'none', /* Internet Explorer 10+ */
-          }}
-        >
-          <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none; /* Safari and Chrome */
-            }
-          `}</style>
-          {seasonalProducts.map((product) => (
-            <Link
-              key={product.id}
-              to={`/product/${product.id}`}
-              style={{ textDecoration: "none" }}
-            >
-              {/* <div className="min-w-[200px]"> */}
-              <ProductCardScrollable
-                id={product.id}
-                image={
-                  Array.isArray(product.images) && product.images.length > 0
-                    ? product.images[0]
-                    : undefined
-                }
-                name={product.name}
-                actualPrice={product.actual_price}
-                sellingPrice={product.selling_price}
-              />
-              {/* </div> */}
-            </Link>
-          ))}
-        </div>
-      </div>
+      <ProductSection
+        title="Seasonal Products"
+        products={seasonalProducts}
+        viewAllLink="/products?seasonal_medicine=true"
+        emptyStateIcon="🌿"
+        emptyStateTitle="No Seasonal Products Available"
+        emptyStateMessage="We're currently updating our seasonal collection. Check back soon for new arrivals!"
+      />
 
       {/* -------------  */}
        <div className="mt-2">
