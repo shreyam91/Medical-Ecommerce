@@ -257,11 +257,14 @@ const BrandProducts = () => {
     ))}
   </div>
 ) : (
-  <div className="text-center py-12">
-    <div className="text-gray-500 text-lg mb-4">No products found for {getBrandTitle()}</div>
-    <p className="text-gray-400 mb-6">
-      This brand doesn't have any products available at the moment.
-    </p>
+  <div className="flex items-center justify-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+    <div className="text-center">
+      <div className="text-5xl mb-4">🏷️</div>
+      <h3 className="text-xl font-medium text-gray-600 mb-2">No Products Found for {getBrandTitle()}</h3>
+      <p className="text-gray-500 text-sm max-w-md">
+        This brand doesn't have any products available at the moment. We're working on expanding our inventory. Check back soon!
+      </p>
+    </div>
   </div>
 )}
 

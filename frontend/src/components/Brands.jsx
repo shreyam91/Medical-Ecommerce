@@ -129,7 +129,13 @@ const Brands = () => {
             </div>
           ))
         ) : (
-          <div className="text-gray-400 text-center">No brands available</div>
+          <div className="flex items-center justify-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 w-full">
+            <div className="text-center">
+              <div className="text-4xl mb-4">🏷️</div>
+              <h3 className="text-lg font-medium text-gray-600 mb-2">No Brands Available</h3>
+              <p className="text-gray-500 text-sm max-w-md">We're working on partnering with trusted brands. Check back soon for quality products from renowned manufacturers!</p>
+            </div>
+          </div>
         )}
       </div>
     </div>

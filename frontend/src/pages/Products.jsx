@@ -674,17 +674,20 @@ const Products = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-500 text-lg mb-4">No products found</div>
-              <p className="text-gray-400 mb-6">
-                Try adjusting your filters or search criteria
-              </p>
-              <button
-                onClick={clearFilters}
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
-              >
-                Clear Filters
-              </button>
+            <div className="flex items-center justify-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+              <div className="text-center">
+                <div className="text-5xl mb-4">🔍</div>
+                <h3 className="text-xl font-medium text-gray-600 mb-2">No Products Found</h3>
+                <p className="text-gray-500 text-sm max-w-md mb-4">
+                  We couldn't find any products matching your criteria. Try adjusting your filters or search terms to discover more options.
+                </p>
+                <button
+                  onClick={clearFilters}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
+                >
+                  Clear All Filters
+                </button>
+              </div>
             </div>
           )}
         </div>

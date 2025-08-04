@@ -182,202 +182,38 @@ const Home = () => {
         emptyStateMessage="We're currently updating our seasonal collection. Check back soon for new arrivals!"
       />
 
-      {/* -------------  */}
-       <div className="mt-2">
-        <div className="flex justify-between items-center mb-6">
-          {/* <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
-            Seasonal Products
-          </h1> */}
-          <Link
-            to="/products?seasonal_medicine=true"
-            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
-          >
-            {/* View All */}
-          </Link>
-
-          
-        </div>
-        <div 
-          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
-          style={{
-            scrollbarWidth: 'none', /* Firefox */
-            msOverflowStyle: 'none', /* Internet Explorer 10+ */
-          }}
-        >
-          <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none; /* Safari and Chrome */
-            }
-          `}</style>
-          {seasonalProducts.map((product) => (
-            <Link
-              key={product.id}
-              to={`/product/${product.id}`}
-              style={{ textDecoration: "none" }}
-            >
-              {/* <div className="min-w-[200px]"> */}
-              <ProductCardScrollable
-                id={product.id}
-                image={
-                  Array.isArray(product.images) && product.images.length > 0
-                    ? product.images[0]
-                    : undefined
-                }
-                name={product.name}
-                actualPrice={product.actual_price}
-                sellingPrice={product.selling_price}
-              />
-              {/* </div> */}
-            </Link>
-          ))}
-        </div>
-      </div>
       {/* ---------------  */}
-      <div className="mt-2">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-[#2f2f2f]">
-            Top Products
-          </h1>
-          <Link
-            to="/products?top_products=true"
-            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
-          >
-            View All
-          </Link>
-        </div>
-        <div 
-          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
-          style={{
-            scrollbarWidth: 'none', /* Firefox */
-            msOverflowStyle: 'none', /* Internet Explorer 10+ */
-          }}
-        >
-          <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none; /* Safari and Chrome */
-            }
-          `}</style>
-          {topProducts.map((product) => (
-            <Link
-              key={product.id}
-              to={`/product/${product.id}`}
-              style={{ textDecoration: "none" }}
-            >
-              <ProductCardScrollable
-                key={product.id}
-                id={product.id}
-                image={
-                  Array.isArray(product.images) && product.images.length > 0
-                    ? product.images[0]
-                    : undefined
-                }
-                name={product.name}
-                actualPrice={product.actual_price}
-                sellingPrice={product.selling_price}
-              />
-            </Link>
-          ))}
-        </div>
-      </div>
+      <ProductSection
+        title="Top Products"
+        products={topProducts}
+        viewAllLink="/products?top_products=true"
+        emptyStateIcon="⭐"
+        emptyStateTitle="No Top Products Available"
+        emptyStateMessage="We're currently curating our best products. Stay tuned for amazing deals!"
+      />
       {/* ---------------  */}
-      <div className="mt-2">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
-            People Preferred Products
-          </h1>
-          <Link
-            to="/products?people_preferred=true"
-            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
-          >
-            View All
-          </Link>
-        </div>
-        <div 
-          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
-          style={{
-            scrollbarWidth: 'none', /* Firefox */
-            msOverflowStyle: 'none', /* Internet Explorer 10+ */
-          }}
-        >
-          <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none; /* Safari and Chrome */
-            }
-          `}</style>
-          {peoplePreferredProducts.map((product) => (
-            <Link
-              key={product.id}
-              to={`/product/${product.id}`}
-              style={{ textDecoration: "none" }}
-            >
-              <ProductCardScrollable
-                key={product.id}
-                id={product.id}
-                image={
-                  Array.isArray(product.images) && product.images.length > 0
-                    ? product.images[0]
-                    : undefined
-                }
-                name={product.name}
-                actualPrice={product.actual_price}
-                sellingPrice={product.selling_price}
-              />
-            </Link>
-          ))}
-        </div>
-      </div>
+      <ProductSection
+        title="People Preferred Products"
+        products={peoplePreferredProducts}
+        viewAllLink="/products?people_preferred=true"
+        emptyStateIcon="👥"
+        emptyStateTitle="No People Preferred Products Available"
+        emptyStateMessage="We're gathering customer favorites. Check back soon for popular choices!"
+      />
       {/* info banner  */}
       {getBannerByType("info") && (
         <Banners banners={[getBannerByType("info")]} />
       )}{" "}
       <Brands />
       {/* ----------  */}
-      <div className="mt-2">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-black">
-            Maximum Discount Products
-          </h1>
-          <Link
-            to="/products?discount_percent=20"
-            className="text-md font-semibold text-blue-600 cursor-pointer hover:underline"
-          >
-            View All
-          </Link>
-        </div>
-        <div 
-          className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
-          style={{
-            scrollbarWidth: 'none', /* Firefox */
-            msOverflowStyle: 'none', /* Internet Explorer 10+ */
-          }}
-        >
-          <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none; /* Safari and Chrome */
-            }
-          `}</style>
-          {maxDiscountProducts.map((product) => (
-            <Link
-              key={product.id}
-              to={`/product/${product.id}`}
-              style={{ textDecoration: "none" }}
-            >
-              <ProductCardScrollable
-                key={product.id}
-                id={product.id}
-                image={
-                  Array.isArray(product.images) && product.images.length > 0
-                    ? product.images[0]
-                    : undefined
-                }
-                name={product.name}
-                actualPrice={product.actual_price}
-                sellingPrice={product.selling_price}
-              />
-            </Link>
-          ))}
-        </div>
-      </div>
+      <ProductSection
+        title="Maximum Discount Products"
+        products={maxDiscountProducts}
+        viewAllLink="/products?discount_percent=20"
+        emptyStateIcon="💰"
+        emptyStateTitle="No Discount Products Available"
+        emptyStateMessage="We're preparing amazing discounts for you. Check back soon for great deals!"
+      />
       {/* ---------------  */}
       <PopularBrand />
 
@@ -420,7 +256,13 @@ const Home = () => {
   )}
 
   {!loading && !error && blogs.length === 0 && (
-    <div className="text-gray-400">No blogs available.</div>
+    <div className="flex items-center justify-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+      <div className="text-center">
+        <div className="text-4xl mb-4">📚</div>
+        <h3 className="text-lg font-medium text-gray-600 mb-2">No Blogs Available</h3>
+        <p className="text-gray-500 text-sm max-w-md">We're working on creating informative content about Ayurveda and health. Stay tuned for insightful articles!</p>
+      </div>
+    </div>
   )}
 </div>
 

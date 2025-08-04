@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { ProductCardScrollable } from "../components/ProductCard";
+import ProductSection from "../components/ProductSection";
 
 
 export default function Cart() {
@@ -71,40 +72,14 @@ export default function Cart() {
         </Link>
 
         {/* ----------  */}
-            <div className="mt-2">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold">Frequently Bought from Customers</h1>
-            <Link
-              to="/products?frequently_bought=true"
-              className=" text-blue-700 px-4 py-2 rounded-lg transition-colors text-m font-medium text-center sm:text-left whitespace-nowrap"
-            >
-              View All
-            </Link>
-          </div>
-          <div 
-            className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
-            style={{
-              scrollbarWidth: 'none', /* Firefox */
-              msOverflowStyle: 'none', /* Internet Explorer 10+ */
-            }}
-          >
-            <style jsx>{`
-              div::-webkit-scrollbar {
-                display: none; /* Safari and Chrome */
-              }
-            `}</style>
-            {frequentlyBoughtProducts.map((product) => (
-              <ProductCardScrollable
-                key={product.id}
-                id={product.id}
-                image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
-                name={product.name}
-                actualPrice={product.actual_price}
-                sellingPrice={product.selling_price}
-              />
-            ))}
-          </div>
-        </div>
+        <ProductSection
+          title="Frequently Bought from Customers"
+          products={frequentlyBoughtProducts}
+          viewAllLink="/products?frequently_bought=true"
+          emptyStateIcon="🛒"
+          emptyStateTitle="No Frequently Bought Products"
+          emptyStateMessage="We're analyzing customer preferences. Check back soon for popular recommendations!"
+        />
         {/* ---------------  */}
       </div>
     );
@@ -383,39 +358,15 @@ export default function Cart() {
 </div>
 
 {/* ----------  */}
-            <div className="mt-8 px-4 sm:px-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-            <h1 className="text-xl sm:text-2xl font-semibold">Frequently Bought from Customers</h1>
-            <Link
-              to="/products?frequently_bought=true"
-              className=" text-blue-600 px-4 py-2 rounded-lg transition-colors text-m font-medium text-center sm:text-left whitespace-nowrap"
-            >
-              View All
-            </Link>
-          </div>
-          <div 
-            className="flex overflow-x-auto gap-3 sm:gap-4 scrollbar-hide px-1"
-            style={{
-              scrollbarWidth: 'none', /* Firefox */
-              msOverflowStyle: 'none', /* Internet Explorer 10+ */
-            }}
-          >
-            <style jsx>{`
-              div::-webkit-scrollbar {
-                display: none; /* Safari and Chrome */
-              }
-            `}</style>
-            {frequentlyBoughtProducts.map((product) => (
-              <ProductCardScrollable
-                key={product.id}
-                id={product.id}
-                image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : undefined}
-                name={product.name}
-                actualPrice={product.actual_price}
-                sellingPrice={product.selling_price}
-              />
-            ))}
-          </div>
+        <div className="mt-8 px-4 sm:px-6">
+          <ProductSection
+            title="Frequently Bought from Customers"
+            products={frequentlyBoughtProducts}
+            viewAllLink="/products?frequently_bought=true"
+            emptyStateIcon="🛒"
+            emptyStateTitle="No Frequently Bought Products"
+            emptyStateMessage="We're analyzing customer preferences. Check back soon for popular recommendations!"
+          />
         </div>
         {/* ---------------  */}
 

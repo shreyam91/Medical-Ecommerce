@@ -116,18 +116,27 @@ function BrandsPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-500 text-lg mb-4">
-            {searchQuery ? `No brands found for "${searchQuery}"` : 'No brands available'}
+        <div className="flex items-center justify-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+          <div className="text-center">
+            <div className="text-5xl mb-4">🏷️</div>
+            <h3 className="text-xl font-medium text-gray-600 mb-2">
+              {searchQuery ? `No brands found for "${searchQuery}"` : 'No Brands Available'}
+            </h3>
+            <p className="text-gray-500 text-sm max-w-md mb-4">
+              {searchQuery 
+                ? 'Try adjusting your search terms or browse all available brands.' 
+                : 'We\'re working on adding trusted brands to our platform. Check back soon for quality products from renowned manufacturers!'
+              }
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
-            >
-              Clear Search
-            </button>
-          )}
         </div>
       )}
     </div>
