@@ -289,12 +289,12 @@ setTimeout(() => {
         category: form.category,
         medicine_type:
           form.type === "ml"
-            ? "Liquid"
+            ? "syrup"
             : form.type === "gm"
-            ? "Gram"
+            ? "powder"
             : form.type === "capsule"
-            ? "Capsule"
-            : "Tablet",
+            ? "capsule"
+            : "tablet",
         brand_id: parseInt(form.brand_id, 10),
         main_category_id: form.mainCategoryId ? parseInt(form.mainCategoryId, 10) : null,
         sub_category_id: form.subCategoryId ? parseInt(form.subCategoryId, 10) : null,
