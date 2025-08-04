@@ -1,12 +1,11 @@
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('./cloudinary');
+// ImageKit storage configuration
+// Note: ImageKit doesn't use multer storage engines like Cloudinary
+// Instead, we handle uploads directly in the routes using imagekit.upload()
+// This file is kept for compatibility but is no longer used
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'uploads', // Optional folder name
-    allowed_formats: ['jpg', 'png', 'jpeg'],
-  },
-});
+const multer = require('multer');
+
+// Use memory storage for ImageKit uploads
+const storage = multer.memoryStorage();
 
 module.exports = storage;

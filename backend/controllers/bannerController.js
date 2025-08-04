@@ -1,6 +1,6 @@
 const sql = require('../config/supabase');
-const cloudinary = require('../config/cloudinary');
-const extractCloudinaryPublicId = require('../utils/extractCloudinaryPublicId');
+const imagekit = require('../config/imagekit');
+const extractImageKitFileId = require('../utils/extractImageKitFileId');
 
 // Get all banners
 exports.getAllBanners = async (req, res) => {
@@ -54,19 +54,27 @@ exports.updateBanner = async (req, res) => {
   }
 };
 
-// Delete banner (and remove Cloudinary image if exists)
+// Delete banner (and remove ImageKit image if exists)
 exports.deleteBanner = async (req, res) => {
   try {
     const [banner] = await sql`SELECT * FROM banner WHERE id=${req.params.id}`;
     if (!banner) return res.status(404).json({ error: 'Not found' });
 
     if (banner.image_url) {
-      const publicId = extractCloudinaryPublicId(banner.image_url);
-      if (publicId) {
+      const filePath = extractImageKitFileId(banner.image_url);
+      if (filePath) {
         try {
-          await cloudinary.uploader.destroy(publicId);
-        } catch (cloudErr) {
-          console.error('Cloudinary delete error:', cloudErr);
+          // List files to find the file by path
+          const files = await imagekit.listFiles({
+            path: '/' + filePath.split('/').slice(0, -1).join('/'),
+            searchQuery: `name="${filePath.split('/').pop().split('.')[0]}"`,
+          });
+
+          if (files.length > 0) {
+            await imagekit.deleteFile(files[0].fileId);
+          }
+        } catch (imagekitErr) {
+          console.error('ImageKit delete error:', imagekitErr);
         }
       }
     }

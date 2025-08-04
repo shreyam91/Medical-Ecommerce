@@ -1,13 +1,7 @@
 const sql = require('../config/supabase');
-const cloudinary = require('../config/cloudinary');
+const imagekit = require('../config/imagekit');
 const { generateSlug, isNumericId } = require('../utils/slugUtils');
-
-// Helper
-function extractCloudinaryPublicId(url) {
-  if (!url) return null;
-  const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
-  return matches ? matches[1] : null;
-}
+const extractImageKitFileId = require('../utils/extractImageKitFileId');
 
 // Get all brands
 exports.getAll = async (req, res) => {
@@ -98,15 +92,24 @@ exports.remove = async (req, res) => {
 
     if (!brand) return res.status(404).json({ error: 'Brand not found' });
 
-    const publicIds = [brand.logo_url, brand.banner_url]
-      .map(extractCloudinaryPublicId)
-      .filter(Boolean);
+    const imageUrls = [brand.logo_url, brand.banner_url].filter(Boolean);
 
-    for (const id of publicIds) {
-      try {
-        await cloudinary.uploader.destroy(id);
-      } catch (cloudErr) {
-        console.error('Cloudinary delete error:', cloudErr);
+    for (const url of imageUrls) {
+      const filePath = extractImageKitFileId(url);
+      if (filePath) {
+        try {
+          // List files to find the file by path
+          const files = await imagekit.listFiles({
+            path: '/' + filePath.split('/').slice(0, -1).join('/'),
+            searchQuery: `name="${filePath.split('/').pop().split('.')[0]}"`,
+          });
+
+          if (files.length > 0) {
+            await imagekit.deleteFile(files[0].fileId);
+          }
+        } catch (imagekitErr) {
+          console.error('ImageKit delete error:', imagekitErr);
+        }
       }
     }
 

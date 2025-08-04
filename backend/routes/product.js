@@ -1,7 +1,7 @@
 // const express = require('express');
 // const router = express.Router();
 // const sql = require('../config/supabase');
-// const cloudinary = require('../config/cloudinary');
+// const imagekit = require('../config/imagekit');
 // const auth = require('./auth');
 
 // function requireAdminOrLimitedAdmin(req, res, next) {
@@ -11,11 +11,7 @@
 //   next();
 // }
 
-// function extractCloudinaryPublicId(url) {
-//   if (!url) return null;
-//   const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
-//   return matches ? matches[1] : null;
-// }
+// const extractImageKitFileId = require('../utils/extractImageKitFileId');
 
 // function safe(val) {
 //   return typeof val === 'undefined' ? null : val;
@@ -340,7 +336,7 @@
 //     console.log('Fetched product:', product);
 //     if (!product) return res.status(404).json({ error: 'Product not found' });
     
-//     // Delete images from Cloudinary if present
+//     // Delete images from ImageKit if present
 //     if (product.images) {
 //       let imageUrls = product.images;
 //       if (typeof imageUrls === 'string') {
@@ -353,13 +349,19 @@
 //       }
 //       if (!Array.isArray(imageUrls)) imageUrls = [imageUrls];
 //       for (const url of imageUrls) {
-//         const publicId = extractCloudinaryPublicId(url);
-//         console.log('Deleting product image:', url, 'Extracted publicId:', publicId);
-//         if (publicId) {
+//         const filePath = extractImageKitFileId(url);
+//         console.log('Deleting product image:', url, 'Extracted filePath:', filePath);
+//         if (filePath) {
 //           try {
-//             await cloudinary.uploader.destroy(publicId);
-//           } catch (cloudErr) {
-//             console.error('Cloudinary delete error:', cloudErr);
+//             const files = await imagekit.listFiles({
+//               path: '/' + filePath.split('/').slice(0, -1).join('/'),
+//               searchQuery: `name="${filePath.split('/').pop().split('.')[0]}"`,
+//             });
+//             if (files.length > 0) {
+//               await imagekit.deleteFile(files[0].fileId);
+//             }
+//           } catch (imagekitErr) {
+//             console.error('ImageKit delete error:', imagekitErr);
 //           }
 //         }
 //       }

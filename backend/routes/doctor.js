@@ -1,14 +1,10 @@
 // const express = require('express');
 // const router = express.Router();
 // const sql = require('../config/supabase');
-// const cloudinary = require('../config/cloudinary');
+// const imagekit = require('../config/imagekit');
 // const auth = require('./auth');
 
-// function extractCloudinaryPublicId(url) {
-//   if (!url) return null;
-//   const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
-//   return matches ? matches[1] : null;
-// }
+// const extractImageKitFileId = require('../utils/extractImageKitFileId');
 
 // function requireAdminOrLimitedAdmin(req, res, next) {
 //   if (!req.user || !['admin', 'limited_admin'].includes(req.user.role)) {
@@ -134,12 +130,18 @@
 // //     if (!doctor) return res.status(404).json({ error: 'Not found' });
 
 // //     if (doctor.image_url) {
-// //       const publicId = extractCloudinaryPublicId(doctor.image_url);
-// //       if (publicId) {
+// //       const filePath = extractImageKitFileId(doctor.image_url);
+// //       if (filePath) {
 // //         try {
-// //           await cloudinary.uploader.destroy(publicId);
-// //         } catch (cloudErr) {
-// //           console.error('Cloudinary delete error:', cloudErr);
+// //           const files = await imagekit.listFiles({
+// //             path: '/' + filePath.split('/').slice(0, -1).join('/'),
+// //             searchQuery: `name="${filePath.split('/').pop().split('.')[0]}"`,
+// //           });
+// //           if (files.length > 0) {
+// //             await imagekit.deleteFile(files[0].fileId);
+// //           }
+// //         } catch (imagekitErr) {
+// //           console.error('ImageKit delete error:', imagekitErr);
 // //         }
 // //       }
 // //     }
@@ -323,12 +325,18 @@
 //     if (!doctor) return res.status(404).json({ error: 'Not found' });
 
 //     if (doctor.image_url) {
-//       const publicId = extractCloudinaryPublicId(doctor.image_url);
-//       if (publicId) {
+//       const filePath = extractImageKitFileId(doctor.image_url);
+//       if (filePath) {
 //         try {
-//           await cloudinary.uploader.destroy(publicId);
-//         } catch (cloudErr) {
-//           console.error('Cloudinary delete error:', cloudErr);
+//           const files = await imagekit.listFiles({
+//             path: '/' + filePath.split('/').slice(0, -1).join('/'),
+//             searchQuery: `name="${filePath.split('/').pop().split('.')[0]}"`,
+//           });
+//           if (files.length > 0) {
+//             await imagekit.deleteFile(files[0].fileId);
+//           }
+//         } catch (imagekitErr) {
+//           console.error('ImageKit delete error:', imagekitErr);
 //         }
 //       }
 //     }

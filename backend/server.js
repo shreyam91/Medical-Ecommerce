@@ -4,8 +4,8 @@ const fs = require('fs');
 const uploadRoutes = require('./routes/upload');
 const supabase = require('./config/supabase');
 const sql = require('./config/supabase').default || require('./config/supabase');
-require('dotenv').config(); // This loads .env variables into process.env
-// Location routes are now handled through app.js
+require('dotenv').config(); 
+const imagekit = require("./config/imagekit");
 
 const PORT = 3001;
 

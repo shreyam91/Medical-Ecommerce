@@ -1,14 +1,9 @@
 const sql = require('../config/supabase');
-const cloudinary = require('../config/cloudinary');
+const imagekit = require('../config/imagekit');
+const extractImageKitFileId = require('../utils/extractImageKitFileId');
 
 function safe(val) {
   return typeof val === 'undefined' ? null : val;
-}
-
-function extractCloudinaryPublicId(url) {
-  if (!url) return null;
-  const matches = url.match(/\/upload\/(?:v[0-9]+\/)?(.+)\.[a-zA-Z]+$/);
-  return matches ? matches[1] : null;
 }
 
 exports.getAllProducts = async (req, res) => {
@@ -180,7 +175,7 @@ exports.deleteProduct = async (req, res) => {
     const [product] = await sql`SELECT * FROM product WHERE ${where}`;
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
-    // Delete images from Cloudinary
+    // Delete images from ImageKit
     let imageUrls = product.images || [];
     if (typeof imageUrls === 'string') {
       try {
@@ -190,12 +185,20 @@ exports.deleteProduct = async (req, res) => {
       }
     }
     for (const url of imageUrls) {
-      const publicId = extractCloudinaryPublicId(url);
-      if (publicId) {
+      const filePath = extractImageKitFileId(url);
+      if (filePath) {
         try {
-          await cloudinary.uploader.destroy(publicId);
-        } catch (cloudErr) {
-          console.error('Cloudinary error:', cloudErr);
+          // List files to find the file by path
+          const files = await imagekit.listFiles({
+            path: '/' + filePath.split('/').slice(0, -1).join('/'),
+            searchQuery: `name="${filePath.split('/').pop().split('.')[0]}"`,
+          });
+
+          if (files.length > 0) {
+            await imagekit.deleteFile(files[0].fileId);
+          }
+        } catch (imagekitErr) {
+          console.error('ImageKit error:', imagekitErr);
         }
       }
     }
