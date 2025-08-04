@@ -288,8 +288,9 @@ function RequestProduct() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 text-center font-sans">
       <h2 className="text-3xl font-semibold text-green-700 mb-4">Didn't Find What You’re Looking For?</h2>
-      <p className="text-lg text-orange-600 mb-6">
-        We’re always expanding our collection — and your feedback drives what comes next! If something’s missing, let us know and we’ll try to get it for you as soon as possible. You're just one WhatsApp message away from helping us improve your shopping experience.
+      <p className="text-lg text-black mb-6">
+        We’re always adding new products — and your feedback helps guide what comes next! Let us know what you’re missing, and we’ll do our best to get it for you.
+You're just one WhatsApp message away from shaping your shopping experience.
          {/* <span className="font-bold text-black">"{productQuery}"</span>  */}
       </p>
 
@@ -311,7 +312,7 @@ function RequestProduct() {
         rel="noopener noreferrer"
         className="inline-block bg-green-500 hover:bg-green-600 text-white text-lg px-6 py-3 rounded-md shadow-md transition"
       >
-        📩 Request on WhatsApp
+       Reach Out on WhatsApp
       </a>
     </div>
   );

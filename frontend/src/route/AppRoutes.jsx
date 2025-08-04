@@ -8,11 +8,11 @@ import Checkout from '../pages/Checkout'
 import Login from '../pages/Login/Login'
 import OrderSuccess from '../pages/OrderSuccess'
 import OrderHistory from '../pages/OrderHistory'
-import About from '../pages/About';
-import Terms from '../pages/Terms';
-import PrivacyPolicy from '../pages/PrivacyPolicy';
-import RefundPolicy from '../pages/RefundPolicy';
-import FAQ from '../pages/FAQ';
+import About from '../pages/footerData/About';
+import Terms from '../pages/footerData/Terms';
+import PrivacyPolicy from '../pages/footerData/PrivacyPolicy';
+import RefundPolicy from '../pages/footerData/RefundPolicy';
+import FAQ from '../pages/footerData/FAQ';
 import Testimonials from '../pages/Testimonials';
 import Blog from '../pages/Blog';
 import BlogPost from '../pages/BlogPost';
