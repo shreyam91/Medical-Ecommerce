@@ -93,7 +93,7 @@ const BrandForm = () => {
         const formData = new FormData();
         formData.append("image", compressedFile);
 
-        const res = await fetch("http://localhost:3001/api/upload", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload?type=brand`, {
           method: "POST",
           body: formData,
         });
@@ -123,7 +123,7 @@ const BrandForm = () => {
         const formData = new FormData();
         formData.append("image", compressedBanner);
 
-        const res = await fetch("http://localhost:3001/api/upload", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload?type=brand`, {
           method: "POST",
           body: formData,
         });

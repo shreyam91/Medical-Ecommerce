@@ -2,7 +2,7 @@ import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'rea
 import toast from 'react-hot-toast';
 import imageCompression from 'browser-image-compression';
 
-const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUpload, previewUrls }, ref) => {
+const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUpload, previewUrls, folderType = 'general' }, ref) => {
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -59,9 +59,10 @@ const ImageUploader = forwardRef(({ onUploadComplete, onFilesSelected, deferUplo
 
         const formData = new FormData();
         formData.append('image', compressedFile);
+        formData.append('type', folderType);
 
-        // Upload to backend
-        const res = await fetch('http://localhost:3001/api/upload', {
+        // Upload to backend with folder type
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload?type=${folderType}`, {
           method: 'POST',
           body: formData,
         });

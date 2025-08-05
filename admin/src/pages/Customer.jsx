@@ -7,6 +7,7 @@ import {
 } from "../lib/customerApi";
 
 import CreateCustomerForm from "../components/CustomerForm";
+import AddressManager from "../components/AddressManager";
 
 export default function CustomerDetails() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -23,6 +24,7 @@ export default function CustomerDetails() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const [modal, setModal] = useState({ type: null, customer: null });
+  const [showAddressManager, setShowAddressManager] = useState(null);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -158,7 +160,8 @@ String(c.customer_id).toLowerCase().includes(s)      ||
                 <th className="px-2 py-1 border">Customer ID</th>
                 <th className="px-2 py-1 border">Mobile</th>
                 <th className="px-2 py-1 border">Email</th>
-                <th className="px-2 py-1 border">Address</th>
+                <th className="px-2 py-1 border">Address 1</th>
+                <th className="px-2 py-1 border">Address 2</th>
                 <th className="px-2 py-1 border">Created At</th>
                 <th className="px-2 py-1 border">Actions</th>
               </tr>
@@ -166,7 +169,7 @@ String(c.customer_id).toLowerCase().includes(s)      ||
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center p-4 text-gray-500">
+                  <td colSpan="9" className="text-center p-4 text-gray-500">
                     No customers found.
                   </td>
                 </tr>
@@ -180,6 +183,7 @@ String(c.customer_id).toLowerCase().includes(s)      ||
                       setModal({ type: "deactivate", customer: c })
                     }
                     onDelete={() => setModal({ type: "delete", customer: c })}
+                    onManageAddresses={() => setShowAddressManager(c.id)}
                   />
                 ))
               )}
@@ -240,41 +244,92 @@ String(c.customer_id).toLowerCase().includes(s)      ||
               customer?
             </ConfirmModal>
           )}
+
+          {showAddressManager && (
+            <AddressManager
+              customerId={showAddressManager}
+              onClose={() => setShowAddressManager(null)}
+            />
+          )}
         </>
       )}
     </div>
   );
 }
 
-function CustomerRow({ serial, customer, onDeactivate, onDelete }) {
-  const [expanded, setExpanded] = useState(false);
-  const limit = 50;
+function CustomerRow({ serial, customer, onDeactivate, onDelete, onManageAddresses }) {
+  const [expandedAddress1, setExpandedAddress1] = useState(false);
+  const [expandedAddress2, setExpandedAddress2] = useState(false);
+  const limit = 40;
+  
+  // Get addresses from the customer object
+  const addresses = customer.addresses || [];
+  const address1 = addresses[0]?.formatted || "";
+  const address2 = addresses[1]?.formatted || "";
+
+  const AddressCell = ({ address, expanded, setExpanded, isEmpty = false }) => {
+    if (isEmpty || !address) {
+      return (
+        <td className="p-2 border text-gray-400 italic text-center">
+          {isEmpty ? "—" : "No address"}
+        </td>
+      );
+    }
+
+    return (
+      <td className="p-2 border">
+        <div className="flex items-center justify-between">
+          <span className="flex-1">
+            {address.length > limit && !expanded
+              ? `${address.slice(0, limit)}…`
+              : address}
+          </span>
+          {address.length > limit && (
+            <button
+              className="text-blue-600 underline text-xs ml-2 flex-shrink-0"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? "Less" : "More"}
+            </button>
+          )}
+        </div>
+      </td>
+    );
+  };
 
   return (
     <tr className="hover:bg-gray-50">
       <td className="p-2 border text-center">{serial}</td>
       <td className="p-2 border">{customer.name}</td>
-      <td className="p-2 border">{customer.customer_id}</td>
+      <td className="p-2 border">{customer.customer_id || "N/A"}</td>
       <td className="p-2 border">{customer.mobile}</td>
       <td className="p-2 border">{customer.email}</td>
-      <td className="p-2 border">
-        {customer.address.length > limit && !expanded
-          ? `${customer.address.slice(0, limit)}… `
-          : customer.address}{" "}
-        {customer.address.length > limit && (
-          <button
-            className="text-blue-600 underline"
-            onClick={() => setExpanded((e) => !e)}
-          >
-            {expanded ? "Show less" : "Show more"}
-          </button>
-        )}
-      </td>
+      
+      <AddressCell 
+        address={address1} 
+        expanded={expandedAddress1} 
+        setExpanded={setExpandedAddress1} 
+        isEmpty={!address1}
+      />
+      
+      <AddressCell 
+        address={address2} 
+        expanded={expandedAddress2} 
+        setExpanded={setExpandedAddress2}
+        isEmpty={!address2}
+      />
+      
       <td className="p-2 border">
         {new Date(customer.created_at).toLocaleDateString()}
       </td>
 
       <td className="p-2 border space-x-2 text-sm">
+        <button 
+          className="text-blue-600 hover:underline mr-2" 
+          onClick={onManageAddresses}
+        >
+          Addresses
+        </button>
         <button className="text-red-600 hover:underline" onClick={onDelete}>
           Delete
         </button>

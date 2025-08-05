@@ -372,7 +372,7 @@ setTimeout(() => {
           }
           
           const res = await fetch(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload`,
+            `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload?type=product`,
             {
               method: "POST",
               headers,
@@ -490,6 +490,7 @@ setTimeout(() => {
       {/* Image Uploader */}
       <ImageUploader
         ref={imageRef}
+        folderType="product"
         onFilesSelected={(files) => {
           setForm((f) => {
             const existing = f.selectedImages || [];

@@ -170,7 +170,7 @@ function DoctorForm() {
     formDataImg.append("image", compressedFile);
 
     try {
-      const res = await fetch("http://localhost:3001/api/upload", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload?type=doctor`, {
         method: "POST",
         body: formDataImg,
       });

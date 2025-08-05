@@ -366,7 +366,7 @@
 import React, { useState, useEffect } from "react";
 import { getProducts } from '../lib/productApi';
 import { getBrands } from '../lib/brandApi';
-import { getMainCategories } from '../lib/categoryApi';
+import { getMainCategories } from '../lib/mainCategoryApi';
 import { getDiseases } from '../lib/diseaseApi';
 import { getCustomers } from '../lib/customerApi';
 import { getOrders } from '../lib/orderApi';
@@ -395,8 +395,8 @@ import { Bar, Pie, Doughnut, Line, PolarArea } from "react-chartjs-2";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import ChartCard from '../components/ChartCard';
-import { exportToExcel } from '../lib/exportToExcel';
+// import ChartCard from '../components/ChartCard';
+// import { exportToExcel } from '../lib/exportToExcel';
 import { chartTypes, colorMap, statusLabels } from '../constants';
 
 ChartJS.register(
@@ -425,6 +425,20 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [recentProducts, setRecentProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [endDate, setEndDate] = useState(new Date());
+  const [chartType, setChartType] = useState({
+    orders: 'bar',
+    revenue: 'bar',
+    customers: 'bar',
+    active: 'bar',
+    avg: 'bar',
+    status: 'pie',
+    ordersTrend: 'line',
+    revenueTrend: 'line',
+  });
 
   useEffect(() => {
     fetchDashboardData();
@@ -434,11 +448,13 @@ const Dashboard = () => {
     setLoading(true);
     
     try {
-      const [products, brands, categories, diseases] = await Promise.all([
+      const [products, brands, categories, diseases, ordersData, customersData] = await Promise.all([
         getProducts().catch(() => []),
         getBrands().catch(() => []),
         getMainCategories().catch(() => []),
-        getDiseases().catch(() => [])
+        getDiseases().catch(() => []),
+        getOrders().catch(() => []),
+        getCustomers().catch(() => [])
       ]);
 
       // Calculate product statistics
@@ -457,6 +473,9 @@ const Dashboard = () => {
         frequentlyBought,
         peoplePreferred
       });
+
+      setOrders(ordersData);
+      setCustomers(customersData);
 
       // Get recent products (last 5)
       const recent = products
@@ -528,6 +547,27 @@ const Dashboard = () => {
     }
   ];
 
+  // Filter by date range
+  const start = startDate;
+  const end = endDate;
+  const filteredOrders = orders.filter(o => {
+    const d = new Date(o.order_date || o.date || o.createdAt || o.created_at);
+    return d >= start && d <= end;
+  });
+  const filteredCustomers = customers.filter(c => {
+    const d = new Date(c.createdAt || c.created_at);
+    return d >= start && d <= end;
+  });
+
+  // Metrics
+  const totalOrders = filteredOrders.length;
+  const totalRevenue = filteredOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+  const newCustomerCount = filteredCustomers.length;
+  // Active customers: those who placed at least one order in range
+  const activeCustomerIds = new Set(filteredOrders.map(o => o.customer_id));
+  const activeCustomers = customers.filter(c => activeCustomerIds.has(c.id));
+  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
   const dayMap = {};
   const revMap = {};
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
@@ -536,7 +576,7 @@ const Dashboard = () => {
     revMap[key] = 0;
   }
   filteredOrders.forEach(o => {
-    const d = parseDate(o).toISOString().slice(0, 10);
+    const d = new Date(o.order_date || o.date || o.createdAt || o.created_at).toISOString().slice(0, 10);
     if (dayMap[d] !== undefined) {
       dayMap[d]++;
       revMap[d] += Number(o.total_amount || 0);
@@ -682,103 +722,88 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Export Buttons */}
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => exportToExcel(filteredOrders, 'Orders')}
-          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
-        >
-          Export Orders to Excel
-        </button>
-        <button
-          onClick={() => exportToExcel(filteredCustomers, 'Customers')}
-          className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
-        >
-          Export Customers to Excel
-        </button>
+
+
+      {/* Main Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {statCards.map((card, index) => (
+          <div key={index} className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className={`${card.color} rounded-md p-3`}>
+                <card.icon className="h-6 w-6 text-white" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">{card.name}</p>
+                <p className="text-2xl font-semibold text-gray-900">{card.value}</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Metrics Grid */}
+      {/* Product Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {productStats.map((stat, index) => (
+          <div key={index} className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className={`${stat.color} rounded-md p-3`}>
+                <stat.icon className="h-6 w-6 text-white" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">{stat.name}</p>
+                <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Order Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <ChartCard
-          title="Total Orders"
-          chart={chartComponent(chartType.orders, ordersChart)}
-          value={totalOrders}
-          colorClass="text-blue-600"
-          chartTypeKey="orders"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
-        <ChartCard
-          title="Total Revenue"
-          chart={chartComponent(chartType.revenue, revenueChart)}
-          value={`₹${totalRevenue.toLocaleString()}`}
-          colorClass="text-green-600"
-          chartTypeKey="revenue"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
-        <ChartCard
-          title="New Customers"
-          chart={chartComponent(chartType.customers, customersChart)}
-          value={newCustomerCount}
-          colorClass="text-yellow-600"
-          chartTypeKey="customers"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
-        <ChartCard
-          title="Active Customers"
-          chart={chartComponent(chartType.active, activeChart)}
-          value={activeCustomers.length}
-          colorClass="text-purple-600"
-          chartTypeKey="active"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
-        <ChartCard
-          title="Avg Order Value"
-          chart={chartComponent(chartType.avg, avgChart)}
-          value={`₹${avgOrderValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-          colorClass="text-orange-600"
-          chartTypeKey="avg"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
-        <ChartCard
-          title="Order Status Breakdown"
-          chart={chartComponent(chartType.status, statusChart)}
-          value={statusLabels.map((s, i) =>
-            statusCounts[i] > 0 ? `${s}: ${statusCounts[i]}` : null
-          ).filter(Boolean).join(' | ')}
-          colorClass="text-pink-600"
-          chartTypeKey="status"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
+        <div className="bg-white rounded shadow p-6 flex flex-col items-center">
+          <h2 className="text-lg font-semibold mb-2">Total Orders</h2>
+          <div className="w-full h-48 flex items-center justify-center">
+            {chartComponent(chartType.orders, ordersChart)}
+          </div>
+          <div className="mt-4 text-2xl font-bold text-blue-600">{totalOrders}</div>
+        </div>
+        
+        <div className="bg-white rounded shadow p-6 flex flex-col items-center">
+          <h2 className="text-lg font-semibold mb-2">Total Revenue</h2>
+          <div className="w-full h-48 flex items-center justify-center">
+            {chartComponent(chartType.revenue, revenueChart)}
+          </div>
+          <div className="mt-4 text-2xl font-bold text-green-600">₹{totalRevenue.toLocaleString()}</div>
+        </div>
+        
+        <div className="bg-white rounded shadow p-6 flex flex-col items-center">
+          <h2 className="text-lg font-semibold mb-2">New Customers</h2>
+          <div className="w-full h-48 flex items-center justify-center">
+            {chartComponent(chartType.customers, customersChart)}
+          </div>
+          <div className="mt-4 text-2xl font-bold text-yellow-600">{newCustomerCount}</div>
+        </div>
       </div>
 
-      {/* Trends */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <ChartCard
-          title="Orders per Day"
-          chart={chartComponent(chartType.ordersTrend, ordersTrendChart)}
-          value=""
-          colorClass=""
-          chartTypeKey="ordersTrend"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
-        <ChartCard
-          title="Revenue per Day"
-          chart={chartComponent(chartType.revenueTrend, revenueTrendChart)}
-          value=""
-          colorClass=""
-          chartTypeKey="revenueTrend"
-          chartType={chartType}
-          setChartType={setChartType}
-        />
-      </div>
+      {/* Recent Products */}
+      {recentProducts.length > 0 && (
+        <div className="mt-8 bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">Recent Products</h3>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentProducts.map((product) => (
+                <div key={product.id} className="border rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900">{product.name}</h4>
+                  <p className="text-sm text-gray-600">{product.category}</p>
+                  <p className="text-sm text-green-600">₹{product.selling_price}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

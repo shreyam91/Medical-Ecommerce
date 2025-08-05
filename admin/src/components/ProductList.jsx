@@ -64,15 +64,39 @@ const [categorySearch, setCategorySearch] = useState('');
 
   const fetchFilterOptions = async () => {
     try {
-      const [brandsData, categoriesData, diseasesData] = await Promise.all([
-        getBrands(),
-        getMainCategories(),
-        getDiseases()
-      ]);
+      console.log('Fetching filter options...');
       
-      setBrands(brandsData);
-      setCategories(categoriesData);
-      setDiseases(diseasesData);
+      // Fetch each option separately to identify which one is failing
+      try {
+        const brandsData = await getBrands();
+        console.log('Brands fetched:', brandsData);
+        setBrands(brandsData || []);
+      } catch (err) {
+        console.error('Error fetching brands:', err);
+        setBrands([]);
+        toast.error('Failed to load brands');
+      }
+      
+      try {
+        const categoriesData = await getMainCategories();
+        console.log('Categories fetched:', categoriesData);
+        setCategories(categoriesData || []);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+        setCategories([]);
+        toast.error('Failed to load categories');
+      }
+      
+      try {
+        const diseasesData = await getDiseases();
+        console.log('Diseases fetched:', diseasesData);
+        setDiseases(diseasesData || []);
+      } catch (err) {
+        console.error('Error fetching diseases:', err);
+        setDiseases([]);
+        toast.error('Failed to load diseases');
+      }
+      
     } catch (err) {
       console.error('Error fetching filter options:', err);
     }
@@ -88,7 +112,9 @@ const [categorySearch, setCategorySearch] = useState('');
         product.name?.toLowerCase().includes(searchTerm) ||
         product.description?.toLowerCase().includes(searchTerm) ||
         product.key?.toLowerCase().includes(searchTerm) ||
-        product.brand_name?.toLowerCase().includes(searchTerm)
+        product.brand_name?.toLowerCase().includes(searchTerm) ||
+        product.key_ingredients?.toLowerCase().includes(searchTerm) ||
+        product.strength?.toLowerCase().includes(searchTerm)
       );
     }
 
@@ -99,50 +125,69 @@ const [categorySearch, setCategorySearch] = useState('');
       );
     }
 
-    // Category filter
+    // Category filter - using category field (string) instead of main_category_id
     if (filters.categoryId) {
-      filtered = filtered.filter(product => 
-        product.main_category_id?.toString() === filters.categoryId
-      );
+      const selectedCategory = categories.find(c => c.id.toString() === filters.categoryId);
+      if (selectedCategory) {
+        filtered = filtered.filter(product => 
+          product.category?.toLowerCase() === selectedCategory.name?.toLowerCase()
+        );
+      }
     }
 
-    // Disease filter
+    // Disease filter - search in product name, description, and key ingredients
     if (filters.diseaseId) {
-      filtered = filtered.filter(product => 
-        product.disease_id?.toString() === filters.diseaseId
-      );
+      const selectedDisease = diseases.find(d => d.id.toString() === filters.diseaseId);
+      if (selectedDisease) {
+        const diseaseTerm = selectedDisease.name?.toLowerCase();
+        filtered = filtered.filter(product => 
+          product.name?.toLowerCase().includes(diseaseTerm) ||
+          product.description?.toLowerCase().includes(diseaseTerm) ||
+          product.key_ingredients?.toLowerCase().includes(diseaseTerm) ||
+          product.key?.toLowerCase().includes(diseaseTerm)
+        );
+      }
     }
 
-    // Medicine type filter
+    // Medicine type filter - handle different type formats
     if (filters.medicine_type) {
-      filtered = filtered.filter(product => 
-        product.medicine_type === filters.medicine_type
-      );
+      filtered = filtered.filter(product => {
+        const productType = product.medicine_type?.toLowerCase();
+        const filterType = filters.medicine_type.toLowerCase();
+        
+        // Handle different naming conventions
+        if (filterType === 'tablet' && (productType === 'tablet' || productType === null)) return true;
+        if (filterType === 'capsule' && productType === 'capsule') return true;
+        if (filterType === 'liquid' && (productType === 'syrup' || productType === 'liquid')) return true;
+        if (filterType === 'gram' && (productType === 'powder' || productType === 'gram')) return true;
+        
+        return productType === filterType;
+      });
     }
 
-    // Boolean filters
+    // Boolean filters - handle null values properly
     if (filters.seasonal_medicine === 'true') {
-      filtered = filtered.filter(product => product.seasonal_medicine);
+      filtered = filtered.filter(product => product.seasonal_medicine === true);
     } else if (filters.seasonal_medicine === 'false') {
-      filtered = filtered.filter(product => !product.seasonal_medicine);
+      filtered = filtered.filter(product => product.seasonal_medicine === false || product.seasonal_medicine === null);
     }
 
     if (filters.frequently_bought === 'true') {
-      filtered = filtered.filter(product => product.frequently_bought);
+      filtered = filtered.filter(product => product.frequently_bought === true);
     } else if (filters.frequently_bought === 'false') {
-      filtered = filtered.filter(product => !product.frequently_bought);
+      filtered = filtered.filter(product => product.frequently_bought === false || product.frequently_bought === null);
     }
 
     if (filters.top_products === 'true') {
-      filtered = filtered.filter(product => product.top_products);
+      filtered = filtered.filter(product => product.top_products === true);
     } else if (filters.top_products === 'false') {
-      filtered = filtered.filter(product => !product.top_products);
+      filtered = filtered.filter(product => product.top_products === false || product.top_products === null);
     }
 
     if (filters.people_preferred === 'true') {
-      filtered = filtered.filter(product => product.people_preferred);
+      filtered = filtered.filter(product => product.people_preferred === true);
     } else if (filters.people_preferred === 'false') {
-      filtered = filtered.filter(product => !product.people_preferred);
+      filtered = filtered.filter(product => product.people_preferred === false || product.people_preferred === null);
     }
 
     setFilteredProducts(filtered);
@@ -232,7 +277,9 @@ const [categorySearch, setCategorySearch] = useState('');
 
           {/* Brand Filter */}
       <div>
-  <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Brand ({brands.length} available)
+  </label>
   <Select
     options={brands.map(brand => ({
       value: brand.id,
@@ -246,9 +293,10 @@ const [categorySearch, setCategorySearch] = useState('');
       handleFilterChange('brandId', selectedOption ? selectedOption.value.toString() : '')
     }
     isClearable
-    placeholder="Select brand..."
+    placeholder={brands.length === 0 ? "Loading brands..." : "Select brand..."}
     className="react-select-container"
     classNamePrefix="react-select"
+    isDisabled={brands.length === 0}
   />
 </div>
 
@@ -256,7 +304,9 @@ const [categorySearch, setCategorySearch] = useState('');
 
           {/* Category Filter */}
          <div>
-  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Category ({categories.length} available)
+  </label>
   <Select
     options={categories.map(category => ({
       value: category.id,
@@ -270,11 +320,37 @@ const [categorySearch, setCategorySearch] = useState('');
       handleFilterChange('categoryId', selectedOption ? selectedOption.value.toString() : '')
     }
     isClearable
-    placeholder="Select category..."
+    placeholder={categories.length === 0 ? "Loading categories..." : "Select category..."}
     className="react-select-container"
     classNamePrefix="react-select"
+    isDisabled={categories.length === 0}
   />
 </div>
+
+          {/* Disease Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Disease ({diseases.length} available)
+            </label>
+            <Select
+              options={diseases.map(disease => ({
+                value: disease.id,
+                label: disease.name
+              }))}
+              value={filters.diseaseId ? {
+                value: filters.diseaseId,
+                label: diseases.find(d => d.id === parseInt(filters.diseaseId))?.name
+              } : null}
+              onChange={(selectedOption) =>
+                handleFilterChange('diseaseId', selectedOption ? selectedOption.value.toString() : '')
+              }
+              isClearable
+              placeholder={diseases.length === 0 ? "Loading diseases..." : "Select disease..."}
+              className="react-select-container"
+              classNamePrefix="react-select"
+              isDisabled={diseases.length === 0}
+            />
+          </div>
 
 
 
@@ -289,10 +365,10 @@ const [categorySearch, setCategorySearch] = useState('');
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Types</option>
-              <option value="Tablet">Tablet</option>
-              <option value="Capsule">Capsule</option>
-              <option value="Liquid">Liquid</option>
-              <option value="Gram">Gram</option>
+              <option value="tablet">Tablet</option>
+              <option value="capsule">Capsule</option>
+              <option value="syrup">Syrup/Liquid</option>
+              <option value="powder">Powder/Gram</option>
             </select>
           </div>
 
@@ -359,12 +435,26 @@ const [categorySearch, setCategorySearch] = useState('');
         </div>
 
         <div className="mt-4 flex justify-between items-center">
-          <button
-            onClick={clearFilters}
-            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
-          >
-            Clear Filters
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={clearFilters}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
+            >
+              Clear Filters
+            </button>
+            <button
+              onClick={() => {
+                console.log('Debug - Current state:');
+                console.log('Brands:', brands);
+                console.log('Categories:', categories);
+                console.log('Diseases:', diseases);
+                fetchFilterOptions();
+              }}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+            >
+              Debug Filters
+            </button>
+          </div>
           <div className="text-sm text-gray-600">
             Showing {filteredProducts.length} of {products.length} products
           </div>

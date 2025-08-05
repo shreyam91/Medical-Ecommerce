@@ -27,7 +27,7 @@ const EDITOR_JS_TOOLS = {
           });
           const formData = new FormData();
           formData.append('image', compressed);
-          const response = await fetch('http://localhost:3001/api/upload', {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload?type=blog`, {
             method: 'POST',
             body: formData,
           });
@@ -99,7 +99,7 @@ const BlogEditor = ({ blog = {}, onSave, onCancel }) => {
     const formData = new FormData();
     formData.append('image', compressed);
 
-    const response = await fetch('http://localhost:3001/api/upload', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload?type=blog`, {
       method: 'POST',
       body: formData,
     });

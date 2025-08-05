@@ -45,7 +45,7 @@ const BannerManager = () => {
   const cleanupUploadedImage = async (imageUrl) => {
     if (!imageUrl) return;
     try {
-      const baseApiUrl = (process.env.REACT_APP_API_URL?.replace('/banner', '') || 'http://localhost:3001/api');
+      const baseApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
       await fetch(`${baseApiUrl}/upload/delete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,8 +78,8 @@ const BannerManager = () => {
       const formData = new FormData();
       formData.append("image", file);
 
-      const baseApiUrl = (import.meta.env.VITE_API_URL?.replace('/banner', '') || 'http://localhost:3001/api');
-      const uploadRes = await fetch(`${baseApiUrl}/upload`, {
+      const baseApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const uploadRes = await fetch(`${baseApiUrl}/upload?type=banner`, {
         method: "POST",
         body: formData,
       });
