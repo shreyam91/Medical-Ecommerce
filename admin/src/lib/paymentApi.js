@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:3001/api/payment';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const PAYMENT_ENDPOINT = `${API_URL}/payments`;
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');

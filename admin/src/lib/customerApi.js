@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:3001/api/customer';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const CUSTOMER_ENDPOINT = `${API_URL}/customers`;
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
@@ -9,7 +10,7 @@ function getAuthHeaders() {
 }
 
 export async function getCustomers() {
-  const res = await fetch(API_URL, {
+  const res = await fetch(CUSTOMER_ENDPOINT, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to fetch customers');
@@ -17,7 +18,7 @@ export async function getCustomers() {
 }
 
 export async function getCustomer(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${CUSTOMER_ENDPOINT}/${id}`, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to fetch customer');
@@ -25,7 +26,7 @@ export async function getCustomer(id) {
 }
 
 export async function createCustomer(customer) {
-  const res = await fetch(API_URL, {
+  const res = await fetch(CUSTOMER_ENDPOINT, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(customer),
@@ -35,7 +36,7 @@ export async function createCustomer(customer) {
 }
 
 export async function updateCustomer(id, customer) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${CUSTOMER_ENDPOINT}/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(customer),
@@ -45,7 +46,7 @@ export async function updateCustomer(id, customer) {
 }
 
 export async function deleteCustomer(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${CUSTOMER_ENDPOINT}/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });

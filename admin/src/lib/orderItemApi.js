@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:3001/api/order_item';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const ORDER_ITEM_ENDPOINT = `${API_URL}/order-items`;
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');

@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:3001/api/main_category';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const MAIN_CATEGORY_ENDPOINT = `${API_URL}/main-category`;
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
@@ -9,7 +10,7 @@ function getAuthHeaders() {
 }
 
 export const getMainCategories = async () => {
-  const res = await fetch(API_URL, {
+  const res = await fetch(MAIN_CATEGORY_ENDPOINT, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to fetch main categories');
@@ -17,7 +18,7 @@ export const getMainCategories = async () => {
 };
 
 export const createMainCategory = async (data) => {
-  const res = await fetch(API_URL, {
+  const res = await fetch(MAIN_CATEGORY_ENDPOINT, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -27,7 +28,7 @@ export const createMainCategory = async (data) => {
 };
 
 export const updateMainCategory = async (id, data) => {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${MAIN_CATEGORY_ENDPOINT}/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -37,7 +38,7 @@ export const updateMainCategory = async (id, data) => {
 };
 
 export const deleteMainCategory = async (id) => {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${MAIN_CATEGORY_ENDPOINT}/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });

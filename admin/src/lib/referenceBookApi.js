@@ -14,7 +14,7 @@ const getAuthHeaders = () => {
 // Get all reference books
 export const getReferenceBooks = async () => {
   try {
-    const response = await fetch(`${API_BASE}/reference_book`);
+    const response = await fetch(`${API_BASE}/reference-books`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch reference books: ${response.statusText}`);
@@ -30,7 +30,7 @@ export const getReferenceBooks = async () => {
 // Get reference book by ID
 export const getReferenceBook = async (id) => {
   try {
-    const response = await fetch(`${API_BASE}/reference-book/${id}`);
+    const response = await fetch(`${API_BASE}/reference-books/${id}`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch reference book: ${response.statusText}`);
@@ -46,7 +46,7 @@ export const getReferenceBook = async (id) => {
 // Create reference book
 export const createReferenceBook = async (bookData) => {
   try {
-    const response = await fetch(`${API_BASE}/reference-book`, {
+    const response = await fetch(`${API_BASE}/reference-books`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(bookData),
@@ -67,7 +67,7 @@ export const createReferenceBook = async (bookData) => {
 // Update reference book
 export const updateReferenceBook = async (id, bookData) => {
   try {
-    const response = await fetch(`${API_BASE}/reference-book/${id}`, {
+    const response = await fetch(`${API_BASE}/reference-books/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(bookData),
@@ -88,7 +88,7 @@ export const updateReferenceBook = async (id, bookData) => {
 // Delete reference book
 export const deleteReferenceBook = async (id) => {
   try {
-    const response = await fetch(`${API_BASE}/reference-book/${id}`, {
+    const response = await fetch(`${API_BASE}/reference-books/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });

@@ -14,7 +14,7 @@ const getAuthHeaders = () => {
 // Main Categories
 export const getMainCategories = async () => {
   try {
-    const response = await fetch(`${API_BASE}/main_category`);
+    const response = await fetch(`${API_BASE}/main-category`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch main categories: ${response.statusText}`);
@@ -119,7 +119,7 @@ export const deleteMainCategory = async (id) => {
 // Sub Categories
 export const getSubCategories = async () => {
   try {
-    const response = await fetch(`${API_BASE}/sub-category`);
+    const response = await fetch(`${API_BASE}/sub-categories`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch sub categories: ${response.statusText}`);
