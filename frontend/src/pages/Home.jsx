@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import Breadcrumb from "../components/Breadcrumb";
 import Brands, { PopularBrand } from "../components/Brands";
 import Category from "../components/Category";
 import BannerTop, { Banners } from "../components/Banner";
@@ -12,8 +11,6 @@ import ProductSection from "../components/ProductSection";
 import { StyleHome } from "../components/Style";
 import SearchComponent from "../components/SearchComponent";
 
-import leftImage from "/assets/left.svg";
-import rightImage from "/assets/right.svg";
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
@@ -152,18 +149,6 @@ const Home = () => {
   return (
     <>
       <div className="hidden sm:relative sm:bg-gradient-to-tr sm:from-orange-50 sm:via-green-100 sm:to-blue-50 sm:flex sm:flex-col sm:items-center sm:rounded-2xl">
-
-        {/* Images on Left & Right */}
-        {/* <img
-          src={leftImage}
-          alt="Left Decoration"
-          className="absolute top-10 left-4 w-32 opacity-80"
-        />
-        <img
-          src={rightImage}
-          alt="Right Decoration"
-          className="absolute top-10 right-4 w-32 opacity-80"
-        /> */}
         <SearchComponent />
       </div>
       <Type />

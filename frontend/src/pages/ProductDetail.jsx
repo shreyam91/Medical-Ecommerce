@@ -10,6 +10,7 @@ import order from '/assets/order.svg';
 import products from '/assets/products.svg';
 import { ProductCardScrollable } from "../components/ProductCard";
 import { Link } from "react-router-dom";
+import img from '/assets/7694844.jpg'
 
 
 export default function ProductDetails() {
@@ -70,9 +71,9 @@ export default function ProductDetails() {
         return res.json();
       })
       .then((data) => {
-        console.log('Product data:', data);
-        console.log('Dietary info:', data.dietary);
-        console.log('Medicine type:', data.medicine_type);
+        // console.log('Product data:', data);
+        // console.log('Dietary info:', data.dietary);
+        // console.log('Medicine type:', data.medicine_type);
         setProduct(data);
         setSelectedImage(
           (Array.isArray(data.images) ? data.images[0] : null) || null
@@ -89,7 +90,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
     }
   })
   .catch((err) => {
-    console.error("Failed to fetch similar products", err);
+    // console.error("Failed to fetch similar products", err);
     setSimilarProducts([]);
   });
 
@@ -345,7 +346,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
         {/* Product Info */}
         <div className="w-full md:w-1/2 space-y-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">
+          <h1 className="text-lg sm:text-l md:text-xl font-semibold">
             {product.name}
             {product.strength && (
               <span className="text-gray-600 font-normal ml-2">({product.strength})</span>
@@ -356,7 +357,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
           {product.key &&
             Array.isArray(product.key) &&
             product.key.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-wrap gap-2">
                 {product.key.map((tag, i) => (
                   <span
                     key={i}
@@ -370,7 +371,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
           {product.key &&
             typeof product.key === "string" &&
             product.key.trim() && (
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-wrap gap-2">
                 {product.key.split(",").map((tag, i) => (
                   <span
                     key={i}
@@ -417,7 +418,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-1 border rounded ${
+                      className={`px-2 py-1 border rounded ${
                         selectedSize === size
                           ? "bg-blue-500 text-white"
                           : "border-gray-400"
@@ -431,14 +432,14 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
             </div>
           )
           : (
-            <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+            <div className="mb-4 p-2 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
               No sizes available. PriceMap: {JSON.stringify(priceMap)}
             </div>
           )
           }
 
           {/* Quantity Selector */}
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-2 ">
             <span className="font-medium">Quantity:</span>
             <button
               className="px-2 py-1 border rounded text-lg"
@@ -459,7 +460,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
           {/* Prescription Required */}
 {product.prescription_required && (
-  <div className="mt-4 border p-4 rounded bg-gray-50">
+  <div className="mt-2 border p-2 rounded bg-gray-50">
     <label className="block font-medium text-red-600 mb-2">
       * Prescription required
     </label>
@@ -470,16 +471,16 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
       className="block w-full text-sm text-gray-700 border rounded p-2 mb-2 bg-white"
     />
     {prescriptionFile && (
-      <div className="flex items-center gap-4 mt-2">
+      <div className="flex items-center gap-2 mt-2">
         {/* Preview */}
         {prescriptionFile.type.startsWith("image/") ? (
           <img
             src={URL.createObjectURL(prescriptionFile)}
             alt="Preview"
-            className="w-24 h-24 object-contain border rounded shadow"
+            className="w-18 h-18 object-contain border rounded shadow"
           />
         ) : (
-          <div className="w-24 h-24 border rounded flex items-center justify-center text-gray-500 bg-white shadow">
+          <div className="w-20 h-20 border rounded flex items-center justify-center text-gray-500 bg-white shadow">
             📄 PDF
           </div>
         )}
@@ -520,7 +521,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
             <div className="text-sm text-gray-500">Inclusive of all taxes</div>
 
              <button
-            className="bg-green-600 text-white w-full mt-4 py-2 rounded disabled:opacity-60 cursor-pointer"
+            className="bg-green-600 text-white w-full mt-2 py-2 rounded disabled:opacity-60 cursor-pointer" 
             disabled={
               (product.prescription_required && !prescriptionFile) ||
               !selectedSize
@@ -669,7 +670,16 @@ if (prescriptionFile) {
             Add to Cart
           </button> */}
 
-          <div> banner </div>
+          <div
+      className="relative w-[50vh] h-[20vh] md:h-[20vh] mt-2 rounded-2xl overflow-hidden"
+      role="banner"
+    >
+      <img
+        src={img}
+        alt="Banner"
+        className=" object-cover"
+      />
+    </div>
         </div>
       </div>
 

@@ -324,12 +324,12 @@ function CustomerRow({ serial, customer, onDeactivate, onDelete, onManageAddress
       </td>
 
       <td className="p-2 border space-x-2 text-sm">
-        <button 
+        {/* <button 
           className="text-blue-600 hover:underline mr-2" 
           onClick={onManageAddresses}
         >
           Addresses
-        </button>
+        </button> */}
         <button className="text-red-600 hover:underline" onClick={onDelete}>
           Delete
         </button>
@@ -360,33 +360,33 @@ function Pagination({ currentPage, pageCount, onPageChange }) {
   );
 }
 
-function ConfirmModal({ title, children, confirmLabel, onConfirm, onCancel }) {
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4"
-      onClick={(e) => e.target === e.currentTarget && onCancel()}
-    >
-      <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-        <div className="mb-4">{children}</div>
-        <div className="flex justify-end space-x-2">
-          <button onClick={onCancel} className="px-4 py-2 border rounded">
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className={`px-4 py-2 rounded ${
-              confirmLabel === "Delete"
-                ? "bg-red-600 text-white"
-                : "bg-yellow-500 text-white"
-            }`}
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// function ConfirmModal({ title, children, confirmLabel, onConfirm, onCancel }) {
+//   return (
+//     <div
+//       role="dialog"
+//       aria-modal="true"
+//       className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4"
+//       onClick={(e) => e.target === e.currentTarget && onCancel()}
+//     >
+//       <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+//         <h2 className="text-xl font-semibold mb-4">{title}</h2>
+//         <div className="mb-4">{children}</div>
+//         <div className="flex justify-end space-x-2">
+//           <button onClick={onCancel} className="px-4 py-2 border rounded">
+//             Cancel
+//           </button>
+//           <button
+//             onClick={onConfirm}
+//             className={`px-4 py-2 rounded ${
+//               confirmLabel === "Delete"
+//                 ? "bg-red-600 text-white"
+//                 : "bg-yellow-500 text-white"
+//             }`}
+//           >
+//             {confirmLabel}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }

@@ -370,7 +370,7 @@ export default function HomeoPathic (){
       <div className=' flex gap-2 '>
 
       <Link to='/'>
-      <button className='p-1 bg-green-600 rounded-xl text-white text-xl cursor-pointer p-3'>
+      <button className='bg-green-600 rounded-xl text-white text-xl cursor-pointer p-3'>
             Go back home 
       </button>
       </Link>

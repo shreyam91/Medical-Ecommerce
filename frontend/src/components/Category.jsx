@@ -67,7 +67,7 @@ export default function Category() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3001/api/category");
+      const response = await fetch("http://localhost:3001/api/main_category");
       const data = await response.json();
 
       if (response.ok && Array.isArray(data) && data.length > 0) {
