@@ -354,7 +354,7 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function HomeoPathic (){
 
   return (
-    <div className="flex flex-col items-center justify-center bg-white text-center">
+    <div className="flex flex-col items-center justify-center text-center">
       <img
         src={img}
         alt="Coming Soon Illustration"
@@ -364,13 +364,13 @@ export default function HomeoPathic (){
         Coming Soon
       </h1>
       <p className="text-gray-600 text-lg max-w-xl">
-        We're working hard to bring these medicine as soon as possible. Stay tuned for updates!
+        We're working hard behind the scenes to make these medicines available soon. Thanks for your patience—stay tuned for updates!
       </p>
 
       <div className=' flex gap-2 '>
 
       <Link to='/'>
-      <button className='p-1 bg-green-600 rounded-xl text-white text-xl cursor-pointer'>
+      <button className='p-1 bg-green-600 rounded-xl text-white text-xl cursor-pointer p-3'>
             Go back home 
       </button>
       </Link>

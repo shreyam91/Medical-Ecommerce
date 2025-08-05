@@ -375,7 +375,7 @@ export default function SearchComponent() {
                       <div className="flex-1">
                         <div className="text-gray-700">{item.query}</div>
                         <div className="text-xs text-gray-400">
-                          {new Date(item.timestamp).toLocaleDateString()}
+                          {/* {new Date(item.timestamp).toLocaleDateString()} */}
                         </div>
                       </div>
                     </div>
@@ -430,7 +430,7 @@ export default function SearchComponent() {
             )}
 
             {/* Search Action */}
-            {query.trim() !== '' && (
+            {/* {query.trim() !== '' && (
               <div className="px-4 py-3 border-t bg-gray-50">
                 <button
                   onClick={handleSearchSubmit}
@@ -442,7 +442,7 @@ export default function SearchComponent() {
                   }
                 </button>
               </div>
-            )}
+            )} */}
           </div>
         )}
       </div>
