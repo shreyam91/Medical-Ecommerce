@@ -1,6 +1,3 @@
-// Utility functions for slug generation and handling
-// backend/utils/slugUtils.js
-
 /**
  * Generate a URL-friendly slug from a name
  * @param {string} name - The name to convert to slug
@@ -10,7 +7,9 @@ function generateSlug(name) {
   if (!name) return '';
   
   return name
+    .toString()
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
@@ -55,21 +54,3 @@ module.exports = {
   isSlugFormat,
   isNumericId
 };
-
-// utils/slugUtils.js
-
-function generateSlug(text) {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')        // Replace spaces with -
-    .replace(/[^\w\-]+/g, '')    // Remove all non-word chars
-    .replace(/\-\-+/g, '-');     // Replace multiple - with single -
-}
-
-function isNumericId(id) {
-  return /^\d+$/.test(id);
-}
-
-module.exports = { generateSlug, isNumericId };
