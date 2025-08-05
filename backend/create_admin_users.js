@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const postgres = require('postgres');
 
 // Use your actual connection string or set DATABASE_URL in your .env
-const sql = postgres(process.env.DATABASE_URL || 'postgresql://postgres.beztwsdalpogqwhcblyd:Supabase@DB1@aws-0-ap-south-1.pooler.supabase.com:6543/postgres');
+const sql = postgres(process.env.DATABASE_URL || 'postgresql://postgres.iaasozzirskirzepbfia:Supabase@DB1@aws-0-ap-south-1.pooler.supabase.com:6543/postgres');
 
 async function createUsers() {
   const users = [
@@ -23,17 +23,23 @@ async function createUsers() {
   for (const user of users) {
     const hash = await bcrypt.hash(user.password, 10);
     try {
-      const [created] = await sql`
-        INSERT INTO "user" (username, email, password_hash, role)
-        VALUES (${user.username}, ${user.email}, ${hash}, ${user.role})
-        ON CONFLICT (email) DO NOTHING
-        RETURNING id, username, email, role
+      // Check if user already exists
+      const [existing] = await sql`
+        SELECT id, name, email, role FROM "users" WHERE email = ${user.email}
       `;
-      if (created) {
-        console.log(`Created user: ${created.username} (${created.role})`);
-      } else {
-        console.log(`User already exists: ${user.email}`);
+      
+      if (existing) {
+        console.log(`User already exists: ${user.email} (${existing.role})`);
+        continue;
       }
+
+      const [created] = await sql`
+        INSERT INTO "users" (name, email, password_hash, role)
+        VALUES (${user.username}, ${user.email}, ${hash}, ${user.role})
+        RETURNING id, name, email, role
+      `;
+      
+      console.log(`Created user: ${created.name} (${created.role})`);
     } catch (err) {
       console.error(`Error creating user ${user.email}:`, err.message);
     }

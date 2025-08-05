@@ -9,7 +9,7 @@ async function login(req, res) {
   }
   try {
     const [user] = await sql`
-      SELECT * FROM "user" WHERE ${username ? sql`username = ${username}` : sql`email = ${email}`}
+      SELECT * FROM "users" WHERE ${username ? sql`name = ${username}` : sql`email = ${email}`}
     `;
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     if (!['admin', 'limited_admin'].includes(user.role)) {
@@ -29,7 +29,7 @@ async function login(req, res) {
       token: session_token,
       user: {
         id: user.id,
-        username: user.username,
+        username: user.name,
         email: user.email,
         role: user.role,
       },

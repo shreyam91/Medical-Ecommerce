@@ -40,19 +40,32 @@ exports.getByIdentifier = async (req, res) => {
 // Create brand
 exports.create = async (req, res) => {
   const { name, slug, logo_url, banner_url, is_top_brand = false } = req.body;
+  
+  if (!name) {
+    return res.status(400).json({ error: 'Name is required' });
+  }
+  
   try {
     const finalSlug = slug || generateSlug(name);
+    
+    // Handle potential duplicates
+    let uniqueSlug = finalSlug;
+    let counter = 1;
+    while (true) {
+      const existing = await sql`SELECT id FROM brand WHERE slug = ${uniqueSlug}`;
+      if (existing.length === 0) break;
+      uniqueSlug = `${finalSlug}-${counter}`;
+      counter++;
+    }
+    
     const [brand] = await sql`
       INSERT INTO brand (name, slug, logo_url, banner_url, is_top_brand)
-      VALUES (${name}, ${finalSlug}, ${logo_url}, ${banner_url}, ${is_top_brand})
+      VALUES (${name}, ${uniqueSlug}, ${logo_url || null}, ${banner_url || null}, ${is_top_brand})
       RETURNING *`;
     res.status(201).json(brand);
   } catch (err) {
-    if (err.message.includes('duplicate key value') && err.message.includes('slug')) {
-      res.status(400).json({ error: 'A brand with this slug already exists.' });
-    } else {
-      res.status(500).json({ error: err.message });
-    }
+    console.error('Brand creation error:', err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -67,8 +80,8 @@ exports.update = async (req, res) => {
       : sql`slug = ${identifier}`;
 
     const [brand] = await sql`
-      UPDATE brand SET name=${name}, slug=${finalSlug}, logo_url=${logo_url},
-      banner_url=${banner_url}, is_top_brand=${is_top_brand}, updated_at=NOW()
+      UPDATE brand SET name=${name}, slug=${finalSlug}, logo_url=${logo_url || null},
+      banner_url=${banner_url || null}, is_top_brand=${is_top_brand}, updated_at=NOW()
       WHERE ${whereClause} RETURNING *`;
 
     if (!brand) return res.status(404).json({ error: 'Brand not found' });

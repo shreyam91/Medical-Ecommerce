@@ -27,10 +27,27 @@ exports.getBannerById = async (req, res) => {
 exports.createBanner = async (req, res) => {
   const { image_url, type, title, link, product_id } = req.body;
   const status = req.body.status || 'active';
+  
+  if (!image_url || !type) {
+    return res.status(400).json({ error: 'Image URL and type are required' });
+  }
+  
   try {
+    // Convert product_id to integer if it exists and is not empty
+    const productIdValue = product_id && product_id !== '' ? parseInt(product_id, 10) : null;
+    
+    console.log('Banner creation data:', {
+      image_url,
+      type,
+      title: title || null,
+      link: link || null,
+      status,
+      product_id: productIdValue
+    });
+    
     const [banner] = await sql`
       INSERT INTO banner (image_url, type, title, link, status, product_id)
-      VALUES (${image_url}, ${type}, ${title}, ${link}, ${status}, ${product_id})
+      VALUES (${image_url}, ${type}, ${title || null}, ${link || null}, ${status}, ${productIdValue})
       RETURNING *`;
     res.status(201).json(banner);
   } catch (err) {
@@ -43,13 +60,22 @@ exports.createBanner = async (req, res) => {
 exports.updateBanner = async (req, res) => {
   const { image_url, type, title, link, product_id } = req.body;
   const status = req.body.status || 'active';
+  
+  if (!image_url || !type) {
+    return res.status(400).json({ error: 'Image URL and type are required' });
+  }
+  
   try {
+    // Convert product_id to integer if it exists and is not empty
+    const productIdValue = product_id && product_id !== '' ? parseInt(product_id, 10) : null;
+    
     const [banner] = await sql`
-      UPDATE banner SET image_url=${image_url}, type=${type}, title=${title}, link=${link}, status=${status}, product_id=${product_id}, updated_at=NOW()
+      UPDATE banner SET image_url=${image_url}, type=${type}, title=${title || null}, link=${link || null}, status=${status}, product_id=${productIdValue}, updated_at=NOW()
       WHERE id=${req.params.id} RETURNING *`;
     if (!banner) return res.status(404).json({ error: 'Not found' });
     res.json(banner);
   } catch (err) {
+    console.error('Error updating banner:', err);
     res.status(500).json({ error: err.message });
   }
 };

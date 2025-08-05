@@ -8,6 +8,7 @@ const blogRoutes = require('./routes/blogRoutes');
 const referenceBookRoutes = require('./routes/referenceBookRoutes');
 const brandRoutes = require('./routes/brandRoutes');
 const customerRoutes = require('./routes/customerRoutes');
+const addressRoutes = require('./routes/addressRoutes');
 const googleSheetsRoutes = require('./routes/googleSheetsRoutes');
 
 const deliveryStatusRoutes = require('./routes/deliveryStatus');
@@ -42,14 +43,14 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/reference-books', referenceBookRoutes);
 app.use('/api/brand', brandRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/addresses', addressRoutes);
 app.use('/api', googleSheetsRoutes);
 app.use('/api/delivery_status', deliveryStatusRoutes);
 app.use('/api/disease', diseaseRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/images', imageRouter);
 app.use('/api', locationRoutes);
-app.use('/api/login', authRoutes);
-app.use('/api/auth', authRoutes); // For frontend compatibility
+app.use('/api', authRoutes); // This will make /api/login and /api/logout available
 app.use('/api/main-category', mainCategoryRouter);
 app.use('/api/category', mainCategoryRouter); // Also mount as /category for compatibility
 app.use('/api/order-items', orderItemRoutes);
