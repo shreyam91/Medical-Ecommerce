@@ -127,8 +127,8 @@ const Home = () => {
         console.error("Network error (people preferred):", err);
       });
 
-    // Fetch maximum discount products (>20% discount)
-    fetch("http://localhost:3001/api/product?discount_percent=20")
+    // Fetch maximum discount products
+    fetch("http://localhost:3001/api/product?maximum_discount=true")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -194,7 +194,7 @@ const Home = () => {
       <ProductSection
         title="Maximum Discount Products"
         products={maxDiscountProducts}
-        viewAllLink="/products?discount_percent=20"
+        viewAllLink="/products?maximum_discount=true"
         emptyStateIcon="💰"
         emptyStateTitle="No Discount Products Available"
         emptyStateMessage="We're preparing amazing discounts for you. Check back soon for great deals!"

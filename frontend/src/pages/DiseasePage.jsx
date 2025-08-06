@@ -44,11 +44,8 @@ function DiseasePage() {
       const diseaseName = slugToText(diseaseSlug.replace(`-${diseaseId}`, ''));
       
       let url = 'http://localhost:3001/api/product';
-      if (diseaseId) {
-        url += `?diseaseId=${diseaseId}`;
-      } else {
-        url += `?disease=${encodeURIComponent(diseaseName)}`;
-      }
+      // Use main category slug since these are actually main categories, not diseases
+      url += `?mainCategorySlug=${diseaseSlug}`;
 
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch products');
@@ -65,26 +62,17 @@ function DiseasePage() {
 
   const fetchDiseaseInfo = async () => {
     try {
-      const diseaseId = extractIdFromSlug(diseaseSlug);
-      if (diseaseId) {
-        const response = await fetch(`http://localhost:3001/api/disease/${diseaseId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setDisease(data);
-        }
+      // Fetch main category info since these are actually main categories
+      const response = await fetch(`http://localhost:3001/api/main-category/${diseaseSlug}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDisease(data);
       } else {
-        // Try to fetch by slug
-        const response = await fetch(`http://localhost:3001/api/disease/slug/${diseaseSlug}`);
-        if (response.ok) {
-          const data = await response.json();
-          setDisease(data);
-        } else {
-          // Create a mock disease object from slug
-          setDisease({
-            name: slugToText(diseaseSlug),
-            slug: diseaseSlug
-          });
-        }
+        // Create a mock disease object from slug
+        setDisease({
+          name: slugToText(diseaseSlug),
+          slug: diseaseSlug
+        });
       }
     } catch (err) {
       console.error('Error fetching disease info:', err);
@@ -193,7 +181,7 @@ function DiseasePage() {
     return disease?.name || slugToText(diseaseSlug);
   };
 
-  const breadcrumbItems = createBreadcrumb('disease', diseaseSlug, getDiseaseTitle());
+  const breadcrumbItems = createBreadcrumb('main_category', diseaseSlug, getDiseaseTitle());
 
   if (loading) {
     return (
