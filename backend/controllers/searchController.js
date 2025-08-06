@@ -229,29 +229,44 @@ exports.suggestions = async (req, res) => {
 
 exports.popular = async (req, res) => {
   try {
+    // Get popular products with full data
     const popularProducts = await sql`
-      SELECT name, 'product' AS type
+      SELECT id, name, slug, 'product' AS type
       FROM product
-      WHERE top_products = true OR frequently_bought = true
+      WHERE top_products = true OR frequently_bought = true OR people_preferred = true
       ORDER BY RANDOM()
-      LIMIT 10
+      LIMIT 3
     `;
 
+    // Get popular brands with full data
     const popularBrands = await sql`
-      SELECT name, 'brand' AS type
+      SELECT id, name, slug, 'brand' AS type
       FROM brand
-      WHERE is_top_brand = true
       ORDER BY RANDOM()
-      LIMIT 5
+      LIMIT 2
+    `;
+
+    // Get popular diseases with full data
+    const popularDiseases = await sql`
+      SELECT id, name, slug, 'disease' AS type
+      FROM disease
+      ORDER BY RANDOM()
+      LIMIT 2
+    `;
+
+    // Get popular main categories with full data
+    const popularMainCategories = await sql`
+      SELECT id, name, slug, 'main_category' AS type
+      FROM main_category
+      ORDER BY RANDOM()
+      LIMIT 2
     `;
 
     const popular = [
       ...popularProducts,
       ...popularBrands,
-      { name: 'Ayurvedic', type: 'category' },
-      { name: 'Homeopathic', type: 'category' },
-      { name: 'Diabetes', type: 'disease' },
-      { name: 'Hypertension', type: 'disease' }
+      ...popularDiseases,
+      ...popularMainCategories
     ];
 
     res.json({ popular });

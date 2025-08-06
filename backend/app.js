@@ -28,6 +28,8 @@ const productRoutes = require('./routes/product');
 const searchRoutes = require('./routes/search');
 const subCategoryRoutes = require('./routes/subCategory');
 const uploadRoutes = require('./routes/upload');
+const migrationRoutes = require('./routes/migration');
+const productDiseaseRoutes = require('./routes/productDisease');
 
 
 
@@ -60,6 +62,8 @@ app.use('/api/product_price', productPriceRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/sub-categories', subCategoryRoutes);
 app.use('/api', uploadRoutes);
+app.use('/api/migration', migrationRoutes);
+app.use('/api/product-disease', productDiseaseRoutes);
 
 // Test route to verify Postgres connection
 const sql = require('./config/supabase').default || require('./config/supabase');

@@ -5,7 +5,11 @@ const extractImageKitFileId = require('../utils/extractImageKitFileId');
 // Get all banners
 exports.getAllBanners = async (req, res) => {
   try {
-    const banners = await sql`SELECT * FROM banner ORDER BY id DESC`;
+    const banners = await sql`
+      SELECT b.*, p.slug as product_slug 
+      FROM banner b 
+      LEFT JOIN product p ON b.product_id = p.id 
+      ORDER BY b.id DESC`;
     res.json(banners);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -15,7 +19,11 @@ exports.getAllBanners = async (req, res) => {
 // Get banner by ID
 exports.getBannerById = async (req, res) => {
   try {
-    const [banner] = await sql`SELECT * FROM banner WHERE id = ${req.params.id}`;
+    const [banner] = await sql`
+      SELECT b.*, p.slug as product_slug 
+      FROM banner b 
+      LEFT JOIN product p ON b.product_id = p.id 
+      WHERE b.id = ${req.params.id}`;
     if (!banner) return res.status(404).json({ error: 'Not found' });
     res.json(banner);
   } catch (err) {
