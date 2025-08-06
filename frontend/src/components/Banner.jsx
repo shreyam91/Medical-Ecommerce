@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
+import { generateProductUrl } from '../utils/productUtils';
 
 // export default function Banner() {
 //   const [banners, setBanners] = useState([]);
@@ -209,7 +210,9 @@ export function Banners({ banners }) {
   // If product_id exists, link to product page; else, use link or just show image
   const handleClick = () => {
     if (bannerData.product_id) {
-      navigate(`/product/${bannerData.product_id}`);
+      // Use product slug if available, otherwise fallback to ID
+      const productUrl = bannerData.product_slug ? `/product/${bannerData.product_slug}` : `/product/${bannerData.product_id}`;
+      navigate(productUrl);
     } else if (bannerData.link) {
       window.open(bannerData.link, '_blank', 'noopener');
     }
@@ -447,7 +450,9 @@ export default function BannerTop ({ banners }) {
           const handleClick = () => {
             // console.log('Clicked banner:', banner); // Debug: log click event
             if (banner.product_id) {
-              navigate(`/product/${banner.product_id}`);
+              // Use product slug if available, otherwise fallback to ID
+              const productUrl = banner.product_slug ? `/product/${banner.product_slug}` : `/product/${banner.product_id}`;
+              navigate(productUrl);
             } else if (banner.link) {
               window.open(banner.link, '_blank', 'noopener');
             }

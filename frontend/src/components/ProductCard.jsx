@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import toast, { Toaster } from "react-hot-toast";
+import { generateProductUrl } from '../utils/productUtils';
 
 const ProductCard = ({ product }) => {
   const { images, name, actual_price, selling_price } = product;
@@ -34,7 +35,7 @@ const ProductCard = ({ product }) => {
   return (
     <>
       <Toaster position="top-right" />
-      <Link to={`/product/${product.id}`} className="block">
+      <Link to={generateProductUrl(product)} className="block">
         <div className="relative overflow-hidden 
           w-[calc(33.333vw-16px)] sm:w-48 md:w-56 lg:w-[200px]
           h-[200px] sm:h-[300px] md:h-[320px]
@@ -115,12 +116,13 @@ export const ProductCardScrollable = ({ id, image, name, actualPrice, sellingPri
   };
 
   const handleCardClick = () => {
+    // For ProductCardScrollable, we only have id, so use the simple product route
     navigate(`/product/${id}`);
   };
 
   return (
     <div 
-      className="w-[calc(33.333vw-16px)] sm:w-48 md:w-56 lg:w-50  flex-shrink-0 cursor-pointer flex flex-col h-[200px] sm:h-[300px] md:h-[320px]"
+      className="w-[calc(33.333vw-16px)] sm:w-48 md:w-56 lg:w-50  flex-shrink-0 cursor-pointer flex flex-col h-[200px] sm:h-[300px] md:h-[300px]"
       onClick={handleCardClick}
     >
       <img src={image} alt={name} className="h-24 sm:h-32 md:h-40 w-auto object-cover rounded-md mb-3 sm:mb-4" />

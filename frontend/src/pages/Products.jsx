@@ -30,7 +30,7 @@
 //   const isSeasonalMedicine = searchParams.get('seasonal_medicine') === 'true';
 //   const isTopProducts = searchParams.get('top_products') === 'true';
 //   const isPeoplePreferred = searchParams.get('people_preferred') === 'true';
-//   const isMaxDiscount = searchParams.get('discount_percent') === '20';
+//   const isMaxDiscount = searchParams.get('maximum_discount') === 'true';
 //   const initialCategory = searchParams.get('category') || '';
 //   const initialDisease = searchParams.get('disease') || '';
 
@@ -61,7 +61,7 @@
 //         params.append('people_preferred', 'true');
 //       }
 //       if (isMaxDiscount) {
-//         params.append('discount_percent', '20');
+//         params.append('maximum_discount', 'true');
 //       }
       
 //       if (params.toString()) {
@@ -188,7 +188,7 @@
 //       newParams.set('people_preferred', 'true');
 //     }
 //     if (isMaxDiscount) {
-//       newParams.set('discount_percent', '20');
+//       newParams.set('maximum_discount', 'true');
 //     }
 //     navigate(`/products?${newParams.toString()}`);
 //   };
@@ -343,7 +343,7 @@ const Products = () => {
   const isSeasonalMedicine = searchParams.get('seasonal_medicine') === 'true';
   const isTopProducts = searchParams.get('top_products') === 'true';
   const isPeoplePreferred = searchParams.get('people_preferred') === 'true';
-  const isMaxDiscount = searchParams.get('discount_percent') === '20';
+  const isMaxDiscount = searchParams.get('maximum_discount') === 'true';
   const isFrequentlyBought = searchParams.get('frequently_bought') === 'true';
   const initialBrand = searchParams.get('brand') || '';
   const initialDisease = searchParams.get('disease') || '';
@@ -375,7 +375,7 @@ const Products = () => {
       if (isSeasonalMedicine) params.append('seasonal_medicine', 'true');
       if (isTopProducts) params.append('top_products', 'true');
       if (isPeoplePreferred) params.append('people_preferred', 'true');
-      if (isMaxDiscount) params.append('discount_percent', '20');
+      if (isMaxDiscount) params.append('maximum_discount', 'true');
       if (isFrequentlyBought) params.append('frequently_bought', 'true');
 
       // Add additional filters from URL
@@ -564,7 +564,7 @@ const Products = () => {
     if (isSeasonalMedicine) newParams.set('seasonal_medicine', 'true');
     if (isTopProducts) newParams.set('top_products', 'true');
     if (isPeoplePreferred) newParams.set('people_preferred', 'true');
-    if (isMaxDiscount) newParams.set('discount_percent', '20');
+    if (isMaxDiscount) newParams.set('maximum_discount', 'true');
     if (isFrequentlyBought) newParams.set('frequently_bought', 'true');
 
     navigate(`/products?${newParams.toString()}`);

@@ -40,7 +40,7 @@ const ProductSection = ({
           {products.map((product) => (
             <Link
               key={product.id}
-              to={`/product/${product.id}`}
+              to={product.slug ? `/product/${product.slug}` : `/product/${product.id}`}
               style={{ textDecoration: "none" }}
             >
               <ProductCardScrollable
