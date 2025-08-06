@@ -168,6 +168,12 @@ export const createBreadcrumb = (type, slug, name) => {
         { label: name, path: `/disease/${slug}` }
       );
       break;
+    case 'main_category':
+      breadcrumbs.push(
+        { label: 'Health Concerns', path: '/health-concerns' },
+        { label: name, path: `/health-concern/${slug}` }
+      );
+      break;
     case 'product':
       breadcrumbs.push(
         { label: 'Products', path: '/products' },

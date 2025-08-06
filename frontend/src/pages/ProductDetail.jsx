@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import Style from "../components/Style";
+import { generateProductBreadcrumbs, generateProductUrl } from "../utils/productUtils";
+import Breadcrumb from "../components/Breadcrumb";
 
 import badges from '/assets/badges.svg';
 import brands from '/assets/brands.svg';
@@ -14,7 +16,9 @@ import img from '/assets/7694844.jpg'
 
 
 export default function ProductDetails() {
-  const { id } = useParams();
+  const { slug, productSlug } = useParams();
+  // Use productSlug if available (from hierarchical routes), otherwise use slug
+  const productIdentifier = productSlug || slug;
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
@@ -65,7 +69,7 @@ export default function ProductDetails() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:3001/api/product/${id}`)
+    fetch(`http://localhost:3001/api/product/${productIdentifier}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch product");
         return res.json();
@@ -187,7 +191,7 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
         setError(err.message);
         setLoading(false);
       });
-  }, [id]);
+  }, [productIdentifier]);
 
   if (loading)
     return <div className="p-10 text-center">Loading product...</div>;
@@ -276,10 +280,13 @@ fetch(`http://localhost:3001/api/product?category=${encodeURIComponent(data.cate
 
   const { addToCart } = useCart();
 
+  const breadcrumbItems = generateProductBreadcrumbs(product);
+
   return (
     <>
     <div className=" max-w-6xl mx-auto">
       <Toaster position="top-right" />
+      <Breadcrumb items={breadcrumbItems} />
       {/* Responsive Images Section */}
       <div className="flex flex-col md:flex-row gap-6">
         {/* Mobile view: main image + thumbnails below */}
@@ -773,7 +780,7 @@ if (prescriptionFile) {
         }
       `}</style>
       {similarProducts.map((item) => (
-        <Link to={`/product/${item.id}`} key={item.id}>
+        <Link to={generateProductUrl(item)} key={item.id}>
           <ProductCardScrollable
             id={item.id}
             name={item.name}
@@ -819,7 +826,7 @@ if (prescriptionFile) {
           {peoplePreferredProducts.map((product) => (
             <Link
         key={product.id}
-        to={`/product/${product.id}`}
+        to={generateProductUrl(product)}
         style={{ textDecoration: 'none' }} 
       >
             <ProductCardScrollable
@@ -829,6 +836,9 @@ if (prescriptionFile) {
               name={product.name}
               actualPrice={product.actual_price}
               sellingPrice={product.selling_price}
+              emptyStateIcon="👥"
+        emptyStateTitle="No People Preferred Products Available"
+        emptyStateMessage="We're gathering customer favorites. Check back soon for popular choices!"
             />
             </Link>
           ))}
