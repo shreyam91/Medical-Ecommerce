@@ -52,7 +52,10 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Products />} />
-      <Route path="/product/:id" element={<ProductDetail />} />
+      <Route path="/product/:slug" element={<ProductDetail />} />
+      <Route path="/category/:categorySlug/product/:productSlug" element={<ProductDetail />} />
+      <Route path="/brand/:brandSlug/product/:productSlug" element={<ProductDetail />} />
+      <Route path="/health-concern/:diseaseSlug/product/:productSlug" element={<ProductDetail />} />
       {/* <Route path="/product/:id" element={<ProductDetailPage />} /> */}
 
 

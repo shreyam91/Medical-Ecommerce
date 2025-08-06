@@ -195,19 +195,24 @@ export default function SearchComponent() {
     
     // Handle navigation based on item type and availability of ID
     if (itemType === 'products' || itemType === 'product') {
-      if (item.id) {
-        console.log('🚀 Navigating to product:', item.id);
+      if (item.slug) {
+        console.log('🚀 Navigating to product:', item.slug);
+        navigate(`/product/${item.slug}`);
+      } else if (item.id) {
+        console.log('🚀 Navigating to product by ID:', item.id);
         navigate(`/product/${item.id}`);
       } else {
-        // No ID available, try to find the product by searching
-        console.log('🔍 No product ID found, searching for:', searchQuery);
+        // No slug or ID available, try to find the product by searching
+        console.log('🔍 No product identifier found, searching for:', searchQuery);
         try {
           const response = await fetch(`http://localhost:3001/api/product?search=${encodeURIComponent(searchQuery)}`);
           if (response.ok) {
             const products = await response.json();
             if (products && products.length > 0) {
-              console.log('✅ Found product, navigating to:', products[0].id);
-              navigate(`/product/${products[0].id}`);
+              const product = products[0];
+              const productUrl = product.slug ? `/product/${product.slug}` : `/product/${product.id}`;
+              console.log('✅ Found product, navigating to:', productUrl);
+              navigate(productUrl);
               return;
             }
           }
@@ -219,23 +224,32 @@ export default function SearchComponent() {
         navigate(`/search?q=${encodeURIComponent(searchQuery)}&type=products`);
       }
     } else if (itemType === 'brands' || itemType === 'brand') {
-      if (item.id) {
-        console.log('🚀 Navigating to brand:', item.id);
+      if (item.slug) {
+        console.log('🚀 Navigating to brand by slug:', item.slug);
+        navigate(`/brand/${item.slug}`);
+      } else if (item.id) {
+        console.log('🚀 Navigating to brand by ID:', item.id);
         navigate(`/brand/${item.id}`);
       } else {
         // Try brand slug approach
-        console.log('🔍 No brand ID found, using slug approach for:', searchQuery);
+        console.log('🔍 No brand identifier found, using generated slug for:', searchQuery);
         const brandSlug = searchQuery.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         navigate(`/brand/${brandSlug}`);
       }
     } else if (itemType === 'diseases' || itemType === 'disease') {
       console.log('🚀 Navigating to disease/health concern:', searchQuery);
-      const diseaseSlug = searchQuery.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      // Use slug if available, otherwise generate from name
+      const diseaseSlug = item.slug || searchQuery.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       navigate(`/health-concern/${diseaseSlug}`);
     } else if (itemType === 'categories' || itemType === 'category') {
       console.log('🚀 Navigating to category:', searchQuery);
       const categorySlug = searchQuery.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       navigate(`/category/${categorySlug}`);
+    } else if (itemType === 'main_category' || itemType === 'main_categories') {
+      console.log('🚀 Navigating to main category/health concern:', searchQuery);
+      // Use slug if available, otherwise generate from name
+      const mainCategorySlug = item.slug || searchQuery.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      navigate(`/health-concern/${mainCategorySlug}`);
     } else {
       console.log('🚀 Default navigation to search');
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
@@ -271,6 +285,86 @@ export default function SearchComponent() {
     setIsFocused(true);
     setShowDropdown(true);
     loadRecentSearches(); // Refresh recent searches
+  };
+
+  const handleRecentSearchClick = async (recentItem) => {
+    const searchQuery = recentItem.query;
+    setQuery(searchQuery);
+    setShowDropdown(false);
+    setIsFocused(false);
+
+    // Try to find a matching item in the current search results or popular searches
+    let matchedItem = null;
+
+    // First, check if it matches any popular search items
+    const popularMatch = popularSearches.find(item => 
+      item.name.toLowerCase() === searchQuery.toLowerCase()
+    );
+    
+    if (popularMatch) {
+      matchedItem = popularMatch;
+    } else {
+      // Try to search for the item to determine its type
+      try {
+        const response = await fetch(`http://localhost:3001/api/search?q=${encodeURIComponent(searchQuery)}&limit=1`);
+        if (response.ok) {
+          const data = await response.json();
+          const results = data.results;
+          
+          // Check each result type for exact matches (prioritize exact matches)
+          if (results.products && results.products.length > 0) {
+            const exactMatch = results.products.find(p => p.name.toLowerCase() === searchQuery.toLowerCase());
+            if (exactMatch) {
+              matchedItem = { ...exactMatch, type: 'product' };
+            } else {
+              // If no exact match, use the first result if it's close
+              const firstResult = results.products[0];
+              if (firstResult.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+                matchedItem = { ...firstResult, type: 'product' };
+              }
+            }
+          }
+          
+          if (!matchedItem && results.brands && results.brands.length > 0) {
+            const exactMatch = results.brands.find(b => b.name.toLowerCase() === searchQuery.toLowerCase());
+            if (exactMatch) {
+              matchedItem = { ...exactMatch, type: 'brand' };
+            } else {
+              // If no exact match, use the first result if it's close
+              const firstResult = results.brands[0];
+              if (firstResult.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+                matchedItem = { ...firstResult, type: 'brand' };
+              }
+            }
+          }
+          
+          if (!matchedItem && results.diseases && results.diseases.length > 0) {
+            const exactMatch = results.diseases.find(d => d.name.toLowerCase() === searchQuery.toLowerCase());
+            if (exactMatch) {
+              matchedItem = { ...exactMatch, type: 'disease' };
+            } else {
+              // If no exact match, use the first result if it's close
+              const firstResult = results.diseases[0];
+              if (firstResult.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+                matchedItem = { ...firstResult, type: 'disease' };
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error searching for recent item:', error);
+      }
+    }
+
+    // If we found a matching item, use proper navigation
+    if (matchedItem) {
+      console.log('🎯 Found matching item for recent search:', matchedItem);
+      await handleSearchSelect(matchedItem);
+    } else {
+      // Fallback to search page
+      console.log('🔍 No exact match found, navigating to search page');
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
   return (
@@ -363,12 +457,7 @@ export default function SearchComponent() {
                   <div
                     key={`recent-${index}`}
                     className="px-4 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-b-0 transition-colors"
-                    onClick={() => {
-                      setQuery(item.query);
-                      navigate(`/search?q=${encodeURIComponent(item.query)}`);
-                      setShowDropdown(false);
-                      setIsFocused(false);
-                    }}
+                    onClick={() => handleRecentSearchClick(item)}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-gray-400">🕒</span>
@@ -394,12 +483,7 @@ export default function SearchComponent() {
                   <div
                     key={`popular-${index}`}
                     className="px-4 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-b-0 transition-colors"
-                    onClick={() => {
-                      setQuery(item.name);
-                      navigate(`/search?q=${encodeURIComponent(item.name)}`);
-                      setShowDropdown(false);
-                      setIsFocused(false);
-                    }}
+                    onClick={() => handleSearchSelect(item)}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-lg">{getSearchIcon(item.type + 's')}</span>
