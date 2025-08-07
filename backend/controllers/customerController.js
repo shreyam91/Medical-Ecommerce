@@ -154,7 +154,15 @@ exports.createCustomerPublic = async (req, res) => {
       console.log('Customer ID column not available, skipping...');
     }
 
-    // Skip Google Sheets for public creation
+    // Try Google Sheets integration for public creation too
+    try {
+      await appendCustomer(customer);
+      console.log('✅ Public customer added to Google Sheets successfully');
+    } catch (sheetsErr) {
+      console.error('❌ Google Sheets integration failed for public customer:', sheetsErr.message);
+      console.log('Customer created in database but not in Google Sheets');
+    }
+    
     res.status(201).json(customer);
   } catch (err) {
     console.error('Public customer creation error:', err);
@@ -228,8 +236,10 @@ exports.createCustomer = async (req, res) => {
     // Try Google Sheets integration, but don't fail if it doesn't work
     try {
       await appendCustomer(customer);
+      console.log('✅ Customer added to Google Sheets successfully');
     } catch (sheetsErr) {
-      console.log('Google Sheets integration failed, continuing without it...');
+      console.error('❌ Google Sheets integration failed:', sheetsErr.message);
+      console.log('Customer created in database but not in Google Sheets');
     }
     
     res.status(201).json(customer);
@@ -240,7 +250,7 @@ exports.createCustomer = async (req, res) => {
 };
 
 exports.updateCustomer = async (req, res) => {
-  const { name, email, mobile, active } = req.body;
+  const { name, email, mobile, active, address } = req.body;
   
   if (!name || !email || !mobile) {
     return res.status(400).json({ error: 'Name, email, and mobile are required' });
@@ -254,7 +264,24 @@ exports.updateCustomer = async (req, res) => {
 
     if (!customer) return res.status(404).json({ error: 'Not found' });
 
-    // 
+    // Add address to customer object for Google Sheets
+    if (address) {
+      customer.address = address;
+    }
+
+    // Try Google Sheets integration for updates
+    try {
+      const rowIndex = await findCustomerRowIndex(customer.customer_id);
+      if (rowIndex > 0) {
+        await updateCustomer(customer, rowIndex);
+        console.log('✅ Customer updated in Google Sheets successfully');
+      } else {
+        console.log('⚠️ Customer not found in Google Sheets, skipping update');
+      }
+    } catch (sheetsErr) {
+      console.error('❌ Google Sheets update failed:', sheetsErr.message);
+      console.log('Customer updated in database but not in Google Sheets');
+    }
 
     res.json(customer);
   } catch (err) {
