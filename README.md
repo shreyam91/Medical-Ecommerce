@@ -17,10 +17,10 @@ The **Online Medical Store** is a full-featured e-commerce platform designed for
 
 ## Technologies Used
 
-- **Frontend**: HTML, CSS, JavaScript, React.js (optional)
-- **Backend**: Node.js, Express.js / Django / Laravel (choose based on stack)
-- **Database**: MongoDB / MySQL / PostgreSQL
+- **Frontend**: React.js 
+- **Backend**: Node.js, Express.js
+- **Database**: PostgreSQL
 - **Authentication**: JWT / OAuth
-- **Payment Gateway**: Stripe / Razorpay / PayPal
-- **Hosting**: AWS / Heroku / Vercel
+- **Payment Gateway**: Phonepe
+- **Hosting**: Vercel
 
