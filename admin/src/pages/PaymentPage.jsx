@@ -88,8 +88,8 @@ const PaymentTable = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-6 ">
-      <div className="w-full max-w-7xl bg-white p-6 rounded-lg ">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Payment History</h2>
+      <div className="w-full max-w-7xl bg-white rounded-lg ">
+        {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">Payment History</h2> */}
 
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">

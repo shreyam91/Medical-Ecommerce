@@ -110,6 +110,30 @@ const EnhancedDashboard = () => {
     fetchDashboardData();
   }, []);
 
+  const testGoogleSheets = async () => {
+    try {
+      const response = await fetch('/api/migration/test-google-sheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('✅ Google Sheets test successful! Check your spreadsheet for test data.');
+        console.log('Google Sheets test result:', result);
+      } else {
+        alert('❌ Google Sheets test failed: ' + result.error);
+        console.error('Google Sheets test error:', result);
+      }
+    } catch (error) {
+      alert('❌ Failed to test Google Sheets: ' + error.message);
+      console.error('Google Sheets test error:', error);
+    }
+  };
+
   const fetchDashboardData = async () => {
     setLoading(true);
     
@@ -403,9 +427,9 @@ const EnhancedDashboard = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="py-2">
+            {/* <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1> */}
+            <p className=" text-lg text-gray-500">
               Welcome to HerbalMG Admin Panel
             </p>
           </div>
@@ -445,20 +469,14 @@ const EnhancedDashboard = () => {
               </div>
             </div>
             
-            {/* <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
-                onClick={() => exportToExcel(filteredOrders, 'Orders')}
-                className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition-colors"
+                onClick={testGoogleSheets}
+                className="bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition-colors"
               >
-                Export Orders
+                🧪 Test Google Sheets
               </button>
-              <button
-                onClick={() => exportToExcel(filteredCustomers, 'Customers')}
-                className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition-colors"
-              >
-                Export Customers
-              </button>
-            </div> */}
+            </div>
           </div>
         </div>
 

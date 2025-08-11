@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getProducts, updateProduct } from '../lib/productApi';
 import { getBrands } from '../lib/brandApi';
 import Select from 'react-select';
@@ -132,7 +132,7 @@ const InventoryPage = () => {
 
   return (
     <div className="p-6 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Medical Inventory</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">Medical Inventory</h1> */}
 
       {/* Filters and Pagination Settings */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
@@ -172,7 +172,7 @@ const InventoryPage = () => {
   <div className="flex items-center gap-2">
     <label className="text-sm">Category:</label>
     <select
-      className="border rounded px-2 py-1"
+      className="border rounded px-2 py-2"
       value={categoryFilter}
       onChange={(e) => {
         setCategoryFilter(e.target.value);
@@ -281,20 +281,52 @@ const InventoryPage = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center mt-6 gap-2">
-        {Array.from({ length: totalPages }, (_, i) => (
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+        <div className="text-sm text-gray-600">
+          Showing {displayedItems.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+          {Math.min(currentPage * itemsPerPage, sortedProducts.length)} of{" "}
+          {sortedProducts.length} entries
+        </div>
+        
+        <div className="flex items-center gap-2">
           <button
-            key={i + 1}
-            onClick={() => setCurrentPage(i + 1)}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
             className={`px-3 py-1 rounded border ${
-              currentPage === i + 1
-                ? "bg-blue-500 text-white"
-                : "bg-white text-gray-700"
+              currentPage === 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
-            {i + 1}
+            Previous
           </button>
-        ))}
+          
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 rounded border ${
+                currentPage === i + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded border ${
+              currentPage === totalPages
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Edit Modal */}
