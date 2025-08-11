@@ -2,6 +2,11 @@ const sql = require('../config/supabase');
 const imagekit = require('../config/imagekit');
 const extractImageKitFileId = require('../utils/extractImageKitFileId');
 const { generateSlug, isNumericId } = require('../utils/slugUtils');
+const {
+  appendInventoryItem,
+  findInventoryRowIndex,
+  updateInventoryItem,
+} = require('../utils/googleSheets');
 
 function safe(val) {
   return typeof val === 'undefined' ? null : val;
@@ -222,6 +227,32 @@ exports.createProduct = async (req, res) => {
         )
         RETURNING *`;
     }
+
+    // Try Google Sheets integration for inventory
+    try {
+      // Get brand name for the sheet
+      let brandName = 'Unknown Brand';
+      if (product.brand_id) {
+        const [brand] = await sql`SELECT name FROM brand WHERE id = ${product.brand_id}`;
+        brandName = brand?.name || 'Unknown Brand';
+      }
+
+      const inventoryData = {
+        name: product.name,
+        total_quantity: product.total_quantity || 0,
+        status: product.total_quantity > 0 ? (product.total_quantity < 50 ? 'Low Stock' : 'In Stock') : 'Out of Stock',
+        category: product.category || '',
+        brand: brandName,
+        price: product.selling_price || 0,
+        created_at: product.created_at
+      };
+      
+      await appendInventoryItem(inventoryData);
+      console.log('✅ Product added to Google Sheets inventory successfully');
+    } catch (sheetsErr) {
+      console.error('❌ Google Sheets integration failed for product:', sheetsErr.message);
+      console.log('Product created in database but not in Google Sheets');
+    }
     
     res.status(201).json(product);
   } catch (err) {
@@ -306,6 +337,40 @@ exports.updateProduct = async (req, res) => {
     }
 
     if (!updated) return res.status(404).json({ error: 'Product not found' });
+
+    // Try Google Sheets integration for inventory updates
+    try {
+      // Get brand name for the sheet
+      let brandName = 'Unknown Brand';
+      if (updated.brand_id) {
+        const [brand] = await sql`SELECT name FROM brand WHERE id = ${updated.brand_id}`;
+        brandName = brand?.name || 'Unknown Brand';
+      }
+
+      const inventoryData = {
+        name: updated.name,
+        total_quantity: updated.total_quantity || 0,
+        status: updated.total_quantity > 0 ? (updated.total_quantity < 50 ? 'Low Stock' : 'In Stock') : 'Out of Stock',
+        category: updated.category || '',
+        brand: brandName,
+        price: updated.selling_price || 0,
+        updated_at: updated.updated_at
+      };
+      
+      const rowIndex = await findInventoryRowIndex(updated.name);
+      if (rowIndex > 0) {
+        await updateInventoryItem(inventoryData, rowIndex);
+        console.log('✅ Product updated in Google Sheets inventory successfully');
+      } else {
+        // If not found in sheets, add it
+        await appendInventoryItem(inventoryData);
+        console.log('✅ Product added to Google Sheets inventory (was missing)');
+      }
+    } catch (sheetsErr) {
+      console.error('❌ Google Sheets update failed for product:', sheetsErr.message);
+      console.log('Product updated in database but not in Google Sheets');
+    }
+
     res.json(updated);
   } catch (err) {
     if (err.message.includes('duplicate') && err.message.includes('slug')) {
