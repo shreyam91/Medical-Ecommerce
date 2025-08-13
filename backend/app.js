@@ -76,4 +76,16 @@ app.get('/api/postgres-test', async (req, res) => {
   }
 });
 
+// Test route for payment integration
+app.get('/api/payment-test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Payment API is working',
+    phonepe_config: {
+      merchant_id: process.env.PHONEPE_MERCHANT_ID || 'Not configured',
+      base_url: process.env.PHONEPE_BASE_URL || 'Not configured'
+    }
+  });
+});
+
 module.exports = app;
