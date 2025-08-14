@@ -5,6 +5,7 @@ import Home from '../pages/Home';
 import ProductDetail from '../pages/ProductDetail'
 import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
+import PaymentCallback from '../components/Payment/PaymentCallback'
 import Login from '../pages/Login/Login'
 import OrderSuccess from '../pages/OrderSuccess'
 import OrderHistory from '../pages/OrderHistory'
@@ -32,6 +33,7 @@ import CategoriesPage from '../pages/CategoriesPage';
 import DiseasePage from '../pages/DiseasePage';
 import BrandsPage from '../pages/BrandsPage';
 import Products from '../pages/Products';
+import TestPayment from '../pages/TestPayment';
 import { useState } from 'react';
 
 const AppRoutes = () => {
@@ -62,6 +64,7 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/login" element={<Login />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/payment/callback" element={<PaymentCallback />} />
       <Route path="/order-success" element={<OrderSuccess />} />
       <Route path="/order-history" element={<OrderHistory />} />
       <Route path="/about-us" element={<About />} />
@@ -93,6 +96,7 @@ const AppRoutes = () => {
 
       <Route path="/search" element={<Search />} />
       <Route path="/request-product" element={<RequestProduct />} />
+      <Route path="/test-payment" element={<TestPayment />} />
 
 
       {/* Protected Routes (require login) */}
