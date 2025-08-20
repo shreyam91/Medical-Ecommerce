@@ -13,7 +13,21 @@ const Footer = () => {
 
         {/* Row 1: Logo and Description side by side */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">HerbalMG</h2>
+          {/* <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">HerbalMG</h2> */}
+<Link
+      to="/"
+      className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
+    >
+      <img
+        src="H.png"
+        alt="logo"
+        width={30}
+        height={30}
+      />
+    <img src="logo.png" alt="" width={90} height={90} />
+    </Link>
+           
+          {/* <img src="start-logo.png" alt="" width={80} height={80}/> */}
           <p className="text-sm sm:text-base text-gray-900 max-w-3xl">
             HerbalMG brings together trusted Ayurvedic brands on one reliable platform.
 Our service is rooted in authenticity, accessibility, and care.

@@ -36,15 +36,15 @@ function App() {
   if (loading) {
     return (
       
-      <div className="fixed inset-0 flex flex-col items-center justify-center z-50">
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-9">
         <img
-          src="/logo.png"
+          src="/start-logo.png"
           alt="Logo"
-          className="h-16 w-16 mb-4 animate-bounce"
+          className="h-30 w-35 mb-4 "
         />
-        <h1 className="text-2xl font-bold text-blue-600 tracking-wide">
+        {/* <h1 className="text-2xl font-bold text-blue-600 tracking-wide">
           HerbalMG
-        </h1>
+        </h1> */}
       </div>
     );
   }
