@@ -33,7 +33,6 @@ const Checkout = () => {
   const deliveryCharges = {
     standard: 0,
     express: 50,
-    same_day: 100
   };
 
   useEffect(() => {
@@ -122,8 +121,8 @@ const Checkout = () => {
   const handlePrescriptionUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast.error('File size should be less than 5MB');
+      if (file.size > 3 * 1024 * 1024) { // 5MB limit
+        toast.error('File size should be less than 3MB');
         return;
       }
       setPrescriptionFile(file);
@@ -144,7 +143,7 @@ const Checkout = () => {
 
   if (!cartItems.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="mb-6">
             <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,15 +170,15 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-2 sm:py-4 lg:py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
+          <div className="flex items-center justify-center overflow-x-auto">
             {[1, 2, 3, 4].map((step) => (
-              <div key={step} className="flex items-center">
+              <div key={step} className="flex items-center flex-shrink-0">
                 <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                  w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium
                   ${activeStep >= step 
                     ? 'bg-green-600 text-white' 
                     : 'bg-gray-200 text-gray-600'
@@ -189,7 +188,7 @@ const Checkout = () => {
                 </div>
                 {step < 4 && (
                   <div className={`
-                    w-16 h-1 mx-2
+                    w-8 sm:w-12 lg:w-16 h-0.5 sm:h-1 mx-1 sm:mx-2
                     ${activeStep > step ? 'bg-green-600' : 'bg-gray-200'}
                   `}></div>
                 )}
@@ -197,7 +196,7 @@ const Checkout = () => {
             ))}
           </div>
           <div className="flex justify-center mt-2">
-            <div className="text-sm text-gray-600 text-center">
+            <div className="text-xs sm:text-sm text-gray-600 text-center px-2">
               {activeStep === 1 && 'Review Cart'}
               {activeStep === 2 && 'Shipping Address'}
               {activeStep === 3 && 'Delivery Options'}
@@ -206,41 +205,43 @@ const Checkout = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6">
               
               {/* Step 1: Cart Review */}
               {activeStep === 1 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-6">Review Your Order</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Review Your Order</h2>
                   <div className="space-y-4">
                     {cartItems.map((item, index) => (
-                      <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div key={index} className="flex flex-row items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg">
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-16 h-16 object-cover rounded"
+                          className="w-16 h-16 sm:w-24 sm:h-24 object-cover rounded"
                         />
                         <div className="flex-grow">
-                          <h3 className="font-medium text-gray-800">{item.name}</h3>
-                          <div className="text-sm text-gray-600 flex items-center gap-2">
+                          <h3 className="text-sm sm:text-base">{item.name}</h3>
+                          <div className="text-gray-600 text-xs sm:text-sm flex items-center gap-2">
                             <span className="font-bold text-gray-900">₹{Number(item.price).toFixed(2)}</span>
                             {item.actual_price && Number(item.actual_price) > Number(item.price) && (
                               <>
-                                <span className="line-through text-gray-400">₹{Number(item.actual_price).toFixed(2)}</span>
-                                <span className="text-green-600 font-semibold">
+                                <span className="line-through text-gray-400 text-xs">₹{Number(item.actual_price).toFixed(2)}</span>
+                                <span className="text-green-600 text-xs font-semibold ml-1">
                                   -{Math.round(((Number(item.actual_price) - Number(item.price)) / Number(item.actual_price)) * 100)}%
                                 </span>
                               </>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                          {item.size && <p className="text-sm text-gray-600">Size: {item.size}</p>}
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs sm:text-sm text-gray-600">Qty: {item.quantity}</span>
+                            {item.size && <span className="text-xs sm:text-sm text-gray-600">• Size: {item.size}</span>}
+                          </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-gray-800">
+                          <p className="font-semibold text-gray-800 text-sm sm:text-base">
                             ₹{(item.price * item.quantity).toFixed(2)}
                           </p>
                         </div>
@@ -253,100 +254,100 @@ const Checkout = () => {
               {/* Step 2: Shipping Address */}
               {activeStep === 2 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-6">Shipping Address</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Shipping Address</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         Full Name *
                       </label>
                       <input
                         type="text"
                         value={shippingAddress.fullName}
                         onChange={(e) => handleAddressChange('fullName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         Phone Number *
                       </label>
                       <input
                         type="tel"
                         value={shippingAddress.phone}
                         onChange={(e) => handleAddressChange('phone', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         required
                       />
                     </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         Email Address
                       </label>
                       <input
                         type="email"
                         value={shippingAddress.email}
                         onChange={(e) => handleAddressChange('email', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
                     </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         Address *
                       </label>
                       <textarea
                         value={shippingAddress.address}
                         onChange={(e) => handleAddressChange('address', e.target.value)}
                         rows="3"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         City *
                       </label>
                       <input
                         type="text"
                         value={shippingAddress.city}
                         onChange={(e) => handleAddressChange('city', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         State *
                       </label>
                       <input
                         type="text"
                         value={shippingAddress.state}
                         onChange={(e) => handleAddressChange('state', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         Pincode *
                       </label>
                       <input
                         type="text"
                         value={shippingAddress.pincode}
                         onChange={(e) => handleAddressChange('pincode', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                         Landmark
                       </label>
                       <input
                         type="text"
                         value={shippingAddress.landmark}
                         onChange={(e) => handleAddressChange('landmark', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
                     </div>
                   </div>
@@ -356,14 +357,13 @@ const Checkout = () => {
               {/* Step 3: Delivery Options */}
               {activeStep === 3 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-6">Delivery Options</h2>
-                  <div className="space-y-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Delivery Options</h2>
+                  <div className="space-y-3 sm:space-y-4">
                     {[
                       { id: 'standard', name: 'Standard Delivery', time: '5-7 business days', price: 0 },
                       { id: 'express', name: 'Express Delivery', time: '2-3 business days', price: 50 },
-                      { id: 'same_day', name: 'Same Day Delivery', time: 'Within 24 hours', price: 100 }
                     ].map((option) => (
-                      <div key={option.id} className="border rounded-lg p-4">
+                      <div key={option.id} className="border rounded-lg p-3 sm:p-4">
                         <label className="flex items-center cursor-pointer">
                           <input
                             type="radio"
@@ -371,16 +371,16 @@ const Checkout = () => {
                             value={option.id}
                             checked={deliveryOption === option.id}
                             onChange={(e) => setDeliveryOption(e.target.value)}
-                            className="mr-3"
+                            className="mr-2 sm:mr-3"
                           />
                           <div className="flex-grow">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h3 className="font-medium text-gray-800">{option.name}</h3>
-                                <p className="text-sm text-gray-600">{option.time}</p>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                              <div className="mb-2 sm:mb-0">
+                                <h3 className="font-medium text-gray-800 text-sm sm:text-base">{option.name}</h3>
+                                <p className="text-xs sm:text-sm text-gray-600">{option.time}</p>
                               </div>
-                              <div className="text-right">
-                                <p className="font-semibold text-gray-800">
+                              <div className="text-left sm:text-right">
+                                <p className="font-semibold text-gray-800 text-sm sm:text-base">
                                   {option.price === 0 ? 'Free' : `₹${option.price}`}
                                 </p>
                               </div>
@@ -392,27 +392,27 @@ const Checkout = () => {
                   </div>
 
                   {/* Prescription Upload */}
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="font-medium text-gray-800 mb-2">Upload Prescription (Optional)</h3>
-                    <p className="text-sm text-gray-600 mb-3">
+                  <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="font-medium text-gray-800 mb-2 text-sm sm:text-base">Upload Prescription (Optional)</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-3">
                       If you're ordering prescription medicines, please upload your prescription
                     </p>
                     <input
                       type="file"
                       accept="image/*,.pdf"
                       onChange={handlePrescriptionUpload}
-                      className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      className="w-full text-xs sm:text-sm text-gray-600 file:mr-2 sm:file:mr-4 file:py-1 sm:file:py-2 file:px-2 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs sm:file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                     {prescriptionFile && (
-                      <p className="text-sm text-green-600 mt-2">
+                      <p className="text-xs sm:text-sm text-green-600 mt-2">
                         ✓ {prescriptionFile.name} uploaded
                       </p>
                     )}
                   </div>
 
                   {/* Order Notes */}
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="mt-4 sm:mt-6">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       Order Notes (Optional)
                     </label>
                     <textarea
@@ -420,7 +420,7 @@ const Checkout = () => {
                       onChange={(e) => setOrderNotes(e.target.value)}
                       rows="3"
                       placeholder="Any special instructions for delivery..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     />
                   </div>
                 </div>
@@ -429,10 +429,10 @@ const Checkout = () => {
               {/* Step 4: Payment */}
               {activeStep === 4 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-6">Payment Method</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Payment Method</h2>
                   
-                  <div className="space-y-4 mb-6">
-                    <div className="border rounded-lg p-4">
+                  <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+                    <div className="border rounded-lg p-3 sm:p-4">
                       <label className="flex items-center cursor-pointer">
                         <input
                           type="radio"
@@ -440,48 +440,48 @@ const Checkout = () => {
                           value="phonepe"
                           checked={paymentMethod === 'phonepe'}
                           onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="mr-3"
+                          className="mr-2 sm:mr-3"
                         />
                         <div className="flex items-center">
                           <img 
                             src="https://logoeps.com/wp-content/uploads/2013/03/phonepe-vector-logo.png" 
                             alt="PhonePe" 
-                            className="h-8 w-8 mr-3"
+                            className="h-6 w-6 sm:h-8 sm:w-8 mr-2 sm:mr-3"
                           />
                           <div>
-                            <h3 className="font-medium text-gray-800">PhonePe</h3>
-                            <p className="text-sm text-gray-600">Pay securely with PhonePe</p>
+                            <h3 className="font-medium text-gray-800 text-sm sm:text-base">PhonePe</h3>
+                            <p className="text-xs sm:text-sm text-gray-600">Pay securely with PhonePe</p>
                           </div>
                         </div>
                       </label>
                     </div>
 
-                    <div className="border rounded-lg p-4 opacity-50">
+                    <div className="border rounded-lg p-3 sm:p-4 opacity-50">
                       <label className="flex items-center cursor-not-allowed">
                         <input
                           type="radio"
                           name="payment"
                           value="cod"
                           disabled
-                          className="mr-3"
+                          className="mr-2 sm:mr-3"
                         />
                         <div>
-                          <h3 className="font-medium text-gray-800">Cash on Delivery</h3>
-                          <p className="text-sm text-gray-600">Pay when you receive (Coming Soon)</p>
+                          <h3 className="font-medium text-gray-800 text-sm sm:text-base">Cash on Delivery</h3>
+                          <p className="text-xs sm:text-sm text-gray-600">Pay when you receive (Coming Soon)</p>
                         </div>
                       </label>
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <label className="flex items-center">
+                  <div className="mb-4 sm:mb-6">
+                    <label className="flex items-start sm:items-center">
                       <input
                         type="checkbox"
                         checked={agreeToTerms}
                         onChange={(e) => setAgreeToTerms(e.target.checked)}
-                        className="mr-2"
+                        className="mr-2 mt-1 sm:mt-0"
                       />
-                      <span className="text-sm text-gray-600">
+                      <span className="text-xs sm:text-sm text-gray-600">
                         I agree to the{' '}
                         <a href="/terms-and-conditions" className="text-green-600 hover:underline">
                           Terms and Conditions
@@ -541,10 +541,10 @@ const Checkout = () => {
                   <span>₹{getSubtotal().toFixed(2)}</span>
                 </div>
                 
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span>Delivery Charges</span>
                   <span>{getDeliveryCharge() === 0 ? 'Free' : `₹${getDeliveryCharge()}`}</span>
-                </div>
+                </div> */}
                 
                 {cartItems.some(item => item.actual_price && Number(item.actual_price) > Number(item.price)) && (
                   <div className="flex justify-between text-green-600">

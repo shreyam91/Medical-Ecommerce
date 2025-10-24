@@ -10,7 +10,7 @@ function getAuthHeaders() {
 }
 
 export async function getPayments() {
-  const res = await fetch(API_URL, {
+  const res = await fetch(PAYMENT_ENDPOINT, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to fetch payments');
@@ -18,7 +18,7 @@ export async function getPayments() {
 }
 
 export async function getPayment(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${PAYMENT_ENDPOINT}/${id}`, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to fetch payment');
@@ -26,7 +26,7 @@ export async function getPayment(id) {
 }
 
 export async function createPayment(payment) {
-  const res = await fetch(API_URL, {
+  const res = await fetch(PAYMENT_ENDPOINT, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(payment),
@@ -36,7 +36,7 @@ export async function createPayment(payment) {
 }
 
 export async function updatePayment(id, payment) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${PAYMENT_ENDPOINT}/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(payment),
@@ -46,10 +46,29 @@ export async function updatePayment(id, payment) {
 }
 
 export async function deletePayment(id) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${PAYMENT_ENDPOINT}/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to delete payment');
+  return res.json();
+}
+
+// PhonePe specific functions
+export async function initiatePhonePePayment(paymentData) {
+  const res = await fetch(`${PAYMENT_ENDPOINT}/phonepe/initiate`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(paymentData),
+  });
+  if (!res.ok) throw new Error('Failed to initiate PhonePe payment');
+  return res.json();
+}
+
+export async function checkPhonePeStatus(merchantTransactionId) {
+  const res = await fetch(`${PAYMENT_ENDPOINT}/phonepe/status/${merchantTransactionId}`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to check PhonePe payment status');
   return res.json();
 } 

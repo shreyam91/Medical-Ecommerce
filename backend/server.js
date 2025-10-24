@@ -1,21 +1,41 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const uploadRoutes = require('./routes/upload');
-const supabase = require('./config/supabase');
-const sql = require('./config/supabase').default || require('./config/supabase');
-require('dotenv').config(); 
-const imagekit = require("./config/imagekit");
+require('dotenv').config();
 
-const PORT = 3001;
+const app = express();
+const PORT = process.env.PORT || 3001;
 
-const app = require('./app');
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Middleware is now handled in app.js
+// Routes
+app.use('/api/auth', require('./routes/auth'));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
-// Test routes are now handled in app.js
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong!'
+  });
+});
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Backend server running at http://localhost:${PORT}`);
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
 });

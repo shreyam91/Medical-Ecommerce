@@ -175,13 +175,13 @@ export const NavbarLogo = () => {
       to="/"
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
-      <img
+      {/* <img
         src="H.png"
         alt="logo"
         width={30}
         height={30}
-      />
-    <img src="logo.png" alt="" width={90} height={90} />
+      /> */}
+    <img src="logo-2.png" alt="" width={90} height={90} />
     </Link>
   );
 };
